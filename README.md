@@ -26,21 +26,20 @@ is in that repo.
 
 ## Experiments
 
-- `b300_capability_run/`: how large a volume can a 7B DINOv3 fine-tune on, on 8 B300 nodes?
-- `banis_parity/`: can a DINOv3 ViT reach the published BANIS baselines on NISB `base`?
-- `data_scaling/`: how much of NISB `base` does a model actually need?
-- `gary_comparison/`: our models against a colleague's, on his volume and his split (hemibrain Ellipsoid Body).
-- `init_comparison/`: does pretraining help on NISB, and do EM augmentations?
-- `large_inputs/`: how large an input can a model train on per B300 node, and at what throughput?
-- `large_inputs_nisb/`: does labelled-data scaling on NISB pay off at a larger window?
-- `lm_zebrafish_cell_instance/`: an affinity model for mia-evals' `lm_zebrafish_cell_instance` task.
-- `lmd_ssl_v1/`: does SSL on the lmd corpus beat a pretrained checkpoint?
-- `lora_vs_fullft/`: can a 3.4%-trainable fine-tune match a full one on NISB?
-- `lsd_aux_v1/`: do local shape descriptors help the affinity head?
-- `new_ssl_recipe/`: does a two-phase SSL recipe beat plain joint SSL, and does either beat no SSL at all?
-- `promptable_seg_v1/`: promptable ("segment this") instance segmentation, v1.
-- `pseudo_labeling/`: NoisyStudent-style pseudo-labelling from five labelled NISB cubes to a hundred unlabelled ones.
-- `sam_lmd_v1/`: does a Segment-Anything model beat affinity prediction on the lmd eval set, and can it use the
-  unlabeled corpus?
-- `simmim_vs_direct/`: does SSL pretraining on NISB help downstream instance segmentation?
-- `subpixel_decoder/`: is the trilinear head what limits boundary sharpness?
+- [`b300_capability_run/`](b300_capability_run/): how large a volume can a 7B DINOv3 fine-tune on, on 8 B300 nodes?
+- [`banis_parity/`](banis_parity/): can a DINOv3 ViT reach the published BANIS baselines on NISB `base`?
+- [`data_scaling/`](data_scaling/): how much of NISB `base` does a model actually need?
+- [`gary_comparison/`](gary_comparison/): our models against a colleague's, on his volume and his split (hemibrain Ellipsoid Body).
+- [`init_comparison/`](init_comparison/): does pretraining help on NISB, and do EM augmentations?
+- [`large_inputs/`](large_inputs/): how large an input can a model train on per B300 node, and at what throughput?
+- [`large_inputs_nisb/`](large_inputs_nisb/): does labelled-data scaling on NISB pay off at a larger window?
+- [`lm_zebrafish_cell_instance/`](lm_zebrafish_cell_instance/): an affinity model for mia-evals' `lm_zebrafish_cell_instance` task.
+- [`lmd_ssl_v1/`](lmd_ssl_v1/): does SSL on the lmd corpus beat a pretrained checkpoint?
+- [`lora_vs_fullft/`](lora_vs_fullft/): can a 3.4%-trainable fine-tune match a full one on NISB?
+- [`lsd_aux_v1/`](lsd_aux_v1/): do local shape descriptors help the affinity head?
+- [`new_ssl_recipe/`](new_ssl_recipe/): does a two-phase SSL recipe beat plain joint SSL, and does either beat no SSL at all?
+- [`promptable_seg_v1/`](promptable_seg_v1/): promptable ("segment this") instance segmentation, v1.
+- [`pseudo_labeling/`](pseudo_labeling/): NoisyStudent-style pseudo-labelling from five labelled NISB cubes to a hundred unlabelled ones.
+- [`sam_lmd_v1/`](sam_lmd_v1/): does a Segment-Anything model beat affinity prediction on the lmd eval set, and can it use the unlabeled corpus?
+- [`simmim_vs_direct/`](simmim_vs_direct/): does SSL pretraining on NISB help downstream instance segmentation?
+- [`subpixel_decoder/`](subpixel_decoder/): is the trilinear head what limits boundary sharpness?
