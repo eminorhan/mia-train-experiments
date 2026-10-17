@@ -1,6 +1,6 @@
 # large_inputs -- a training volume big enough for 2k^3 crops: the FlyEM hemibrain LMD crop-003.
 #
-# Copied 2026-09-29 from experiments/gary_comparison/data/hemibrain_eb_train.yaml and adapted: the
+# Copied 2026-09-29 from gary_comparison/data/hemibrain_eb_train.yaml and adapted: the
 # volume is crop-003 (10000^3 at x8000 y17000 z11000 in neuPrint voxels, 8 nm isotropic, OME-Zarr
 # 0.5 / zarr v3, axes x,y,z) instead of the ellipsoid-body crop, with no bounding box, and the patch
 # is 2048^3. Labels: the proofread FlyEM hemibrain v1.2 neuron segmentation (uint64), same shape,

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # large_inputs_nisb: submit arms to gpu_b300, one full node each, each gated on a 20-step smoke run.
 #
-#   bash experiments/large_inputs_nisb/submit.sh w256_1cube w256_3cube w256_5cube   # smoke, then the real run on done(smoke)
-#   bash experiments/large_inputs_nisb/submit.sh --dry-run w256_1cube               # write the job scripts, print the bsub lines
-#   bash experiments/large_inputs_nisb/submit.sh --smoke w512_5cube                 # smoke only
-#   bash experiments/large_inputs_nisb/submit.sh --no-smoke w256_1cube              # real run only; after a wall-time kill this
+#   bash large_inputs_nisb/submit.sh w256_1cube w256_3cube w256_5cube   # smoke, then the real run on done(smoke)
+#   bash large_inputs_nisb/submit.sh --dry-run w256_1cube               # write the job scripts, print the bsub lines
+#   bash large_inputs_nisb/submit.sh --smoke w512_5cube                 # smoke only
+#   bash large_inputs_nisb/submit.sh --no-smoke w256_1cube              # real run only; after a wall-time kill this
 #                                                                                   # continues from the last checkpoint (--resume)
 #
 # gary_comparison/submit.sh, with several arms per call and the wall time set by the window.
@@ -13,7 +13,7 @@
 # runs/smoke/. If a smoke fails, its real job stays PEND forever: `bkill` it.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/large_inputs_nisb   # this experiment's home on /nrs
@@ -64,7 +64,7 @@ write_cmd () {
     echo "$THREADS"
     echo "$COMPILE_ENV"
     echo "export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
-    printf 'cd %q\n' "$REPO"
+    printf 'cd %q\n' "$MIA_TRAIN"
     printf '%s --standalone --nproc_per_node=%s src/train.py --config %q %s\n' \
       "$VENV/bin/torchrun" "$procs" "$cfg" "$*"
   } > "$cmd"
@@ -76,7 +76,7 @@ write_cmd () {
 submit () {
   local logdir=$1 tag=$2 cmd=$3 procs=$4 slots=$5 wall=$6 dep=${7:-}
   local args=(-P "$PROJECT" -q "$QUEUE" -gpu "num=$procs" -n "$slots" -W "$wall" -r
-              -J "linisb_$tag" -cwd "$REPO" -o "$logdir/linisb_${tag}_%J.log" -e "$logdir/linisb_${tag}_%J.err")
+              -J "linisb_$tag" -cwd "$MIA_TRAIN" -o "$logdir/linisb_${tag}_%J.log" -e "$logdir/linisb_${tag}_%J.err")
   [[ -n "$dep" && "$dep" != DRYRUN ]] && args+=(-w "done($dep)")
   if [[ $DRY -eq 1 ]]; then
     printf 'bsub %s bash %q\n' "${args[*]}" "$cmd" >&2; echo DRYRUN

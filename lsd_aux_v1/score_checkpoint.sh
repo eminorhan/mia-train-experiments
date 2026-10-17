@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Predict, score and visualise one checkpoint of one arm of this experiment.
 #
-#   bash experiments/lsd_aux_v1/score_checkpoint.sh 15000 mtlsd_s80
-#   bash experiments/lsd_aux_v1/score_checkpoint.sh 15000 mtlsd_s80 --reuse --no-score
+#   bash lsd_aux_v1/score_checkpoint.sh 15000 mtlsd_s80
+#   bash lsd_aux_v1/score_checkpoint.sh 15000 mtlsd_s80 --reuse --no-score
 #
-# A wrapper over experiments/banis_parity/score_checkpoint.sh, exactly as the control's
-# experiments/subpixel_decoder/score_checkpoint.sh is: it resolves the arm's newest run directory
+# A wrapper over banis_parity/score_checkpoint.sh, exactly as the control's
+# subpixel_decoder/score_checkpoint.sh is: it resolves the arm's newest run directory
 # and a tag that keeps its artifacts from colliding with the control's, and passes every other
 # option through (run the shared script with no arguments for the list).
 #

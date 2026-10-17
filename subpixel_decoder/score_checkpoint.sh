@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Predict, score and visualise one checkpoint of *this* experiment.
 #
-#   bash experiments/subpixel_decoder/score_checkpoint.sh 15000
-#   bash experiments/subpixel_decoder/score_checkpoint.sh 15000 --reuse --no-score
+#   bash subpixel_decoder/score_checkpoint.sh 15000
+#   bash subpixel_decoder/score_checkpoint.sh 15000 --reuse --no-score
 #
 # A wrapper, not a copy. The work is `banis_parity/score_checkpoint.sh`, which was written to take
 # `--run` and `--tag` precisely so a second experiment could reuse it; all this adds is resolving

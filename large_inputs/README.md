@@ -70,7 +70,7 @@ readout 16, `vitl_tp8` 512³ 1.09 s / 1024³ 10.2 s / 1536³ 111.6 s per step, `
 ## Results
 
 2026-09-29, after the halo crop, readout 16, one B300 node per arm (`jobs/<arm>.jsonl`; regenerate
-the full tables with `python experiments/large_inputs/table.py .../jobs/*.jsonl`). Mvoxel/s is per
+the full tables with `python large_inputs/table.py .../jobs/*.jsonl`). Mvoxel/s is per
 node. Each arm stopped on a CUDA out-of-memory at the next size.
 
 | crop | `vitl_dp` (8 crops/node) | `vitl_dp_compile` | `vitl_tp8` (1 crop/node) |

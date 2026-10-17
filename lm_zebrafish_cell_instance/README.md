@@ -67,9 +67,9 @@ the frame through miao.
 
 ## Running it
 
-    bash experiments/lm_zebrafish_cell_instance/submit.sh w496_em w496_noem w288_em w288_noem
-    bash experiments/lm_zebrafish_cell_instance/submit.sh --dry-run <arm> ...    # print the bsub lines
-    bash experiments/lm_zebrafish_cell_instance/tensorboard.sh                   # the four arms
+    bash lm_zebrafish_cell_instance/submit.sh w496_em w496_noem w288_em w288_noem
+    bash lm_zebrafish_cell_instance/submit.sh --dry-run <arm> ...    # print the bsub lines
+    bash lm_zebrafish_cell_instance/tensorboard.sh                   # the four arms
 
 Each arm gets one full B300 node, and each real run waits on a 20-step, one-GPU smoke run. Outputs
 go to `/nrs/scicompsoft/orhane/mia-train-experiments/lm_zebrafish_cell_instance/` (`runs/`, `jobs/`,

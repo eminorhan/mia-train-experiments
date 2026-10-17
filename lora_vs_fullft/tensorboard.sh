@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Serve both arms of this experiment in one TensorBoard.
 #
-#   bash experiments/lora_vs_fullft/tensorboard.sh [port]
-#   bash experiments/lora_vs_fullft/tensorboard.sh 6008 --smoke   # the 20-step check instead
+#   bash lora_vs_fullft/tensorboard.sh [port]
+#   bash lora_vs_fullft/tensorboard.sh 6008 --smoke   # the 20-step check instead
 #
 # Rebuilds the symlink tree each run, so the second stage of each arm -- 1b waits on 1a, 2b on 2a --
 # appears as soon as it exists.

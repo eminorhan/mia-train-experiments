@@ -70,7 +70,7 @@ split_disconnected = true
 # z < 3000 of the crop, 75 G voxels, 8 nm, patch 256. The box, axes and resolution are pinned in
 # the YAML; verified 2026-09-16 (README.md, "Verification").
 name = "miao_volumes"
-config_path = "experiments/gary_comparison/data/hemibrain_eb_train.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/gary_comparison/data/hemibrain_eb_train.yaml"
 samples_per_epoch = 100000  # 12.5k steps per epoch at 8 ranks x batch 1: 40 worker respawns in 500k steps
 defer_image_ops = true
 
@@ -78,7 +78,7 @@ defer_image_ops = true
 # 3000 <= z < 4000. The only place model selection or post-processing thresholds may be fitted;
 # the test corner is scored once.
 name = "miao_volumes"
-config_path = "experiments/gary_comparison/data/hemibrain_eb_val.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/gary_comparison/data/hemibrain_eb_val.yaml"
 samples_per_epoch = 32
 defer_image_ops = true
 

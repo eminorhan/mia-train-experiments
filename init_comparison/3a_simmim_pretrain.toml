@@ -27,12 +27,12 @@ norm_pix_loss = false
 
 [data]
 name = "miao_volumes"
-config_path = "experiments/init_comparison/nisb_base_256_aug.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/init_comparison/nisb_base_256_aug.yaml"
 samples_per_epoch = 1000
 
 [val_data]
 name = "miao_volumes"
-config_path = "experiments/init_comparison/nisb_base_256_aug.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/init_comparison/nisb_base_256_aug.yaml"
 samples_per_epoch = 32
 
 [trainer]

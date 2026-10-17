@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Submit the sub-pixel decoder arm.
 #
-#   bash experiments/subpixel_decoder/submit.sh              # the run
-#   bash experiments/subpixel_decoder/submit.sh --smoke      # 20 steps, 1 GPU, 30 min
+#   bash subpixel_decoder/submit.sh              # the run
+#   bash subpixel_decoder/submit.sh --smoke      # 20 steps, 1 GPU, 30 min
 #
 # `--smoke` exists because the two things most likely to be wrong here fail at startup, not at
 # convergence: the warm start matching no parameter, and a crop the sub-pixel head cannot cover.
@@ -10,7 +10,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/subpixel_decoder   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
@@ -38,7 +38,7 @@ if [[ "${1:-}" == "--smoke" ]]; then
       "$HERE/subpixel_256.toml" > "$SMOKE/subpixel_smoke.toml"
 
   bsub -P "$PROJECT" -q gpu_h100 -gpu "num=1" -n 12 -W 0:30 \
-       -J subpixel_smoke -cwd "$REPO" \
+       -J subpixel_smoke -cwd "$MIA_TRAIN" \
        -o "$LOGS/subpixel_smoke_%J.log" -e "$LOGS/subpixel_smoke_%J.err" \
        "$THREADS \
         $VENV/bin/torchrun --standalone --nproc_per_node=1 src/train.py \
@@ -49,7 +49,7 @@ fi
 # `--resume` makes this idempotent: first launch starts the run, a resubmission after the
 # wall-time limit continues the newest run of this experiment.
 bsub -P "$PROJECT" -q gpu_h100 -gpu "num=8" -n 96 -W 48:00 -r \
-     -J subpixel_decoder -cwd "$REPO" \
+     -J subpixel_decoder -cwd "$MIA_TRAIN" \
      -o "$LOGS/subpixel_decoder_%J.log" -e "$LOGS/subpixel_decoder_%J.err" \
      "$THREADS \
       $VENV/bin/torchrun --standalone --nproc_per_node=8 src/train.py \

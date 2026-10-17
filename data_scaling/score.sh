@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Score the arms on nERL over a WHOLE NISB validation cube.
 #
-#   bash experiments/data_scaling/score.sh                              # base, final stage-B ckpt
-#   bash experiments/data_scaling/score.sh --subset slice_perturbed     # the robustness probe
-#   bash experiments/data_scaling/score.sh --stage a                    # stage A instead
-#   bash experiments/data_scaling/score.sh --step 50000 1 5             # specific step / arms
+#   bash data_scaling/score.sh                              # base, final stage-B ckpt
+#   bash data_scaling/score.sh --subset slice_perturbed     # the robustness probe
+#   bash data_scaling/score.sh --stage a                    # stage A instead
+#   bash data_scaling/score.sh --step 50000 1 5             # specific step / arms
 #
 # Whole cube, not a block: every arm is then measured over the same extent, which is all the
 # comparison needs. (nERL is *not* comparable across extents -- the same model scored 0.3045 whole
@@ -28,7 +28,7 @@
 # exists. Deletion is in the scoring job, so it only happens after a successful score.
 set -euo pipefail
 
-REPO=/groups/scicompsoft/home/orhane/projects/mia-train
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 BANIS=/groups/scicompsoft/home/orhane/projects/banis
 TRAINVENV=/groups/scicompsoft/home/orhane/myvenv     # torch + mia-train, for prediction
 SCOREVENV=/groups/scicompsoft/home/orhane/banisvenv  # numba + the BANIS metrics, for scoring
@@ -75,7 +75,7 @@ for arm in "${ARMS[@]}"; do
   tag="ds_${name}_step${step}_$SUBSET"
   aff="$OUT/${tag}_aff.zarr"
 
-  p=$(bsub -P "$PROJECT" -q gpu_h100 -gpu "num=1" -n 12 -W 12:00 -J "sc_${tag}_p" -cwd "$REPO" \
+  p=$(bsub -P "$PROJECT" -q gpu_h100 -gpu "num=1" -n 12 -W 12:00 -J "sc_${tag}_p" -cwd "$MIA_TRAIN" \
         -o "$LOGS/sc_${tag}_p_%J.log" -e "$LOGS/sc_${tag}_p_%J.err" \
         "export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True; \
          $TRAINVENV/bin/python $BANIS/mia_predict.py '$run' --step $step \
@@ -83,7 +83,7 @@ for arm in "${ARMS[@]}"; do
 
   # 24 slots x 15 GB = 360 GB. The whole-cube segmentation alone is ~49 GB as uint32, and the
   # metrics hold more than one array of that size at once.
-  s=$(bsub -P "$PROJECT" -q local -n 24 -W 8:00 -w "done($p)" -J "sc_${tag}_s" -cwd "$REPO" \
+  s=$(bsub -P "$PROJECT" -q local -n 24 -W 8:00 -w "done($p)" -J "sc_${tag}_s" -cwd "$MIA_TRAIN" \
         -o "$LOGS/sc_${tag}_s_%J.log" -e "$LOGS/sc_${tag}_s_%J.err" \
         "export OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 NUMBA_NUM_THREADS=8; \
          $SCOREVENV/bin/python $BANIS/mia_score.py '$aff' --skeleton '$SKEL' \

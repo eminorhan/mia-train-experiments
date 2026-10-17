@@ -1,6 +1,6 @@
 """How big is a neurite compared with the encoder's token? Pictures and numbers, per volume.
 
-    python experiments/sam_lmd_v1/figures/token_scale.py --out <dir>
+    python sam_lmd_v1/figures/token_scale.py --out <dir>
 
 Reads the single-tile diagnostic block (256^3 at 8 nm) of each finetune volume through the same
 `VolumeGrid` the labeller uses, and produces:
@@ -32,8 +32,8 @@ from pathlib import Path
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[2]
-sys.path.insert(0, str(REPO / "src"))
+MIA_TRAIN = Path("/groups/scicompsoft/home/orhane/projects/mia-train")
+sys.path.insert(0, str(MIA_TRAIN / "src"))
 sys.path.insert(0, str(HERE.parent))
 
 VOLUMES = ["hemibrain_ellipsoid_body", "liconn_mouse_dg", "kasthuri15_ac3",

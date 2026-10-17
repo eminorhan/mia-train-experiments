@@ -20,7 +20,7 @@
 #     "export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4; \
 #      export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True; \
 #      /groups/scicompsoft/home/orhane/myvenv/bin/torchrun --standalone --nproc_per_node=8 \
-#        src/train.py --config experiments/new_ssl_recipe/2a_ssl_twophase.toml --resume"
+#        src/train.py --config /groups/scicompsoft/home/orhane/projects/mia-train-experiments/new_ssl_recipe/2a_ssl_twophase.toml --resume"
 #
 # The wall clock is submit.sh's, which derives it from a measured 0.17 s/step at this size: about
 # 9.4 h for 200k, requested with margin; `-r` with `--resume` make an overrun a requeue rather
@@ -74,7 +74,7 @@ name = "miao_volumes"
 # to init_comparison's copy, and shared by all eight stages here -- SSL and supervised alike see
 # exactly the same crops, so the arms differ in what they do with the data and not in which data
 # they get. The labels the config carries are simply unread here; SimMIM's target is the image.
-config_path = "experiments/new_ssl_recipe/nisb_base_256_aug.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/new_ssl_recipe/nisb_base_256_aug.yaml"
 samples_per_epoch = 1000  # bookkeeping only; `max_steps` is what ends the run
 
 [val_data]
@@ -84,7 +84,7 @@ name = "miao_volumes"
 # and it exists to show the pretext task is being learned at all. It is not comparable with the
 # affinity losses of the stages that follow, and it selects nothing -- what the SSL stage was
 # worth is read off the fine-tuned checkpoints, three stages later.
-config_path = "experiments/new_ssl_recipe/nisb_base_256_aug.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/new_ssl_recipe/nisb_base_256_aug.yaml"
 samples_per_epoch = 32
 
 [trainer]

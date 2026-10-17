@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Submit the arms of init_comparison. Each arm is a chain of stages, held one behind the next.
 #
-#   bash experiments/init_comparison/submit.sh              # every arm
-#   bash experiments/init_comparison/submit.sh 2 4          # just those arms
-#   bash experiments/init_comparison/submit.sh --smoke 1    # 20 steps of arm 1's stages, one GPU
-#   bash experiments/init_comparison/submit.sh --stage 2b_dinov3_subpixel   # one stage, see below
+#   bash init_comparison/submit.sh              # every arm
+#   bash init_comparison/submit.sh 2 4          # just those arms
+#   bash init_comparison/submit.sh --smoke 1    # 20 steps of arm 1's stages, one GPU
+#   bash init_comparison/submit.sh --stage 2b_dinov3_subpixel   # one stage, see below
 #
 #   1  scratch : interpolating 150k -> sub-pixel 100k
 #   2  dinov3  : interpolating 150k -> sub-pixel 100k
@@ -28,7 +28,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/init_comparison   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
@@ -119,7 +119,7 @@ sed \"s|PREV_CHECKPOINT|\${RUN}checkpoints/step_\$STEP|\" '$cfg' > '$resolved'"
   local ids=() q id
   for q in "${QUEUES[@]}"; do
     id=$(bsub -P "$PROJECT" -q "$q" -gpu "num=$procs" -n "$slots" -W "$wall" -r \
-      ${dep:+-w "$dep"} -J "init_$name" -cwd "$REPO" \
+      ${dep:+-w "$dep"} -J "init_$name" -cwd "$MIA_TRAIN" \
       -o "$LOGS/init_${name}_%J.log" -e "$LOGS/init_${name}_%J.err" \
       "bash '$CLAIM' '$STAGE/locks/$name' '$cmd'" | jobid)
     ids+=("$id")

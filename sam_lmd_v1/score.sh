@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Score one SAM arm's round on the lmd_ssl_v1_neuron_instance leaderboard, beside the MWS rows.
 #
-#   bash experiments/sam_lmd_v1/score.sh base 2 [--step N]
+#   bash sam_lmd_v1/score.sh base 2 [--step N]
 #
 # The artifacts are `instances`, so they go through mia-evals' `identity_size_filter` route
 # (`configs/lmd_ssl_v1_neuron_instance/identity_size_filter.toml`): the same size filter, and the

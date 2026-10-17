@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Segment-everything one SAM arm's round over the eight instance-segmentation eval volumes.
 #
-#   bash experiments/sam_lmd_v1/predict_eval.sh base 2                    # both halves, arm `base` round 2
-#   bash experiments/sam_lmd_v1/predict_eval.sh stride2 0 --half test     # the reported half only
-#   bash experiments/sam_lmd_v1/predict_eval.sh base 2 --volume kasthuri15_ac4
-#   bash experiments/sam_lmd_v1/predict_eval.sh base 2 --dry-run
+#   bash sam_lmd_v1/predict_eval.sh base 2                    # both halves, arm `base` round 2
+#   bash sam_lmd_v1/predict_eval.sh stride2 0 --half test     # the reported half only
+#   bash sam_lmd_v1/predict_eval.sh base 2 --volume kasthuri15_ac4
+#   bash sam_lmd_v1/predict_eval.sh base 2 --dry-run
 #
 # Writes `instances` artifacts plus the co-registered ground truth beside each, on the same lattice
 # the affinity arms were predicted on (same YAMLs, same `predict.py`, same patch), so the SAM rows
@@ -35,7 +35,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/sam_lmd_v1   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
 RUNS=$EXP/runs
@@ -75,7 +75,7 @@ case "$stride" in 1) batch=8; mem_scale=3 ;; 2) batch=32; mem_scale=2 ;; *) batc
 # a string value must survive that second parse, so they are escaped (`\"consensus\"`). A run was
 # once lost to the shell stripping them and predict.py refusing the bare word. The knobs come from
 # the labeller's LABEL_AMG so the two passes cannot drift apart; points_per_batch is overridden last.
-OVERRIDES=$("$VENV/bin/python" - "$REPO/experiments/sam_lmd_v1" <<'PY'
+OVERRIDES=$("$VENV/bin/python" - "$HERE" <<'PY'
 import sys
 sys.path.insert(0, sys.argv[1])
 from pseudolabel import LABEL_AMG
@@ -122,12 +122,12 @@ jobid () { sed -n 's/^Job <\([0-9]*\)>.*/\1/p'; }
 
 for half in "${HALVES[@]}"; do
   case "$half" in                        # the same YAMLs mia-evals' two task halves read
-    test)     config="$REPO/experiments/lmd_ssl_v1/lmd_val_singlescale.yaml" ;;
-    finetune) config="$REPO/experiments/lmd_ssl_v1/lmd_finetune_singlescale.yaml" ;;
+    test)     config="$HERE/../lmd_ssl_v1/lmd_val_singlescale.yaml" ;;
+    finetune) config="$HERE/../lmd_ssl_v1/lmd_finetune_singlescale.yaml" ;;
     *) echo "--half must be test or finetune, got $half" >&2; exit 2 ;;
   esac
   if [[ "$CROP" != 256 ]]; then                  # the split copy with this window's patch_size
-    config="$REPO/experiments/sam_lmd_v1/data/lmd_${half/test/val}_singlescale_crop${CROP}.yaml"
+    config="$HERE/data/lmd_${half/test/val}_singlescale_crop${CROP}.yaml"
     [[ -f "$config" ]] || { echo "missing $config: run make_configs.py" >&2; exit 1; }
   fi
   out="$STAGE/eval/${ARM}_r${ROUND}/$half"
@@ -138,14 +138,14 @@ for half in "${HALVES[@]}"; do
     n=$SLOTS; w=$(wall_for "$volume")
     tag="${ARM}_r${ROUND}_${half}_${volume}"
     cmd="export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 \
-PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$REPO/src; \
-$VENV/bin/python $REPO/src/predict.py '$run' --data-config '$config' \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$MIA_TRAIN/src; \
+$VENV/bin/python $MIA_TRAIN/src/predict.py '$run' --data-config '$config' \
 --volume '$volume' --step $STEP --out '$out' $OVERRIDES"
     if (( DRY )); then
       printf 'bsub -P %s -q %s -gpu "num=1" -n %s -W %s -J p_%s\n   %s\n' "$PROJECT" "$QUEUE" "$n" "$w" "$tag" "$cmd"
       continue
     fi
-    id=$(bsub -P "$PROJECT" -q "$QUEUE" -gpu "num=1" -n "$n" -W "$w" -J "p_$tag" -cwd "$REPO" \
+    id=$(bsub -P "$PROJECT" -q "$QUEUE" -gpu "num=1" -n "$n" -W "$w" -J "p_$tag" -cwd "$MIA_TRAIN" \
       -o "$LOGS/p_${tag}_%J.log" -e "$LOGS/p_${tag}_%J.err" "$cmd" | jobid)
     printf '  %-28s %-9s slots=%-2s wall=%-6s job=%s\n' "$volume" "$half" "$n" "$w" "$id"
   done
@@ -153,4 +153,4 @@ done
 
 echo
 echo "artifacts land in $STAGE/eval/${ARM}_r${ROUND}/{test,finetune}/<volume>{,.gt}.zarr"
-echo "then:  bash experiments/sam_lmd_v1/score.sh $ARM $ROUND"
+echo "then:  bash $HERE/score.sh $ARM $ROUND"

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Serve the gary_comparison arms in one TensorBoard.
 #
-#   bash experiments/gary_comparison/tensorboard.sh [port]
-#   bash experiments/gary_comparison/tensorboard.sh 6008 --smoke     # the 20-step smoke runs instead
-#   bash experiments/gary_comparison/tensorboard.sh 6006 --list      # rebuild the tree, print, do not serve
+#   bash gary_comparison/tensorboard.sh [port]
+#   bash gary_comparison/tensorboard.sh 6008 --smoke     # the 20-step smoke runs instead
+#   bash gary_comparison/tensorboard.sh 6006 --list      # rebuild the tree, print, do not serve
 #
 # Rebuilds the symlink tree each time, so an arm appears as soon as its run directory exists (the
 # newest run of an arm wins if it was rerun). The tree is `tensorboard/` in this experiment's /nrs

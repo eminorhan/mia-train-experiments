@@ -1,9 +1,9 @@
 """A teacher's pseudo-labels beside the ground truth, on the blocks the tables scored.
 
-    python experiments/sam_lmd_v1/figures/labelling_gallery.py label <run_dir> --step N \\
+    python sam_lmd_v1/figures/labelling_gallery.py label <run_dir> --step N \\
         --volume V --out <dir> [--gt-config ...] [--block 1024] [--min-mask-voxels 4096] \\
         [--min-truth-voxels 4096]
-    python experiments/sam_lmd_v1/figures/labelling_gallery.py render <dir> [--volume V ...]
+    python sam_lmd_v1/figures/labelling_gallery.py render <dir> [--volume V ...]
 
 `label` runs the labeller exactly as `pseudolabel.py diagnose` does (same block partition, same
 generator settings, `tile_merge = consensus`) on the first block of the volume, and saves what the
@@ -38,8 +38,8 @@ from typing import Any
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[2]
-sys.path.insert(0, str(REPO / "src"))
+MIA_TRAIN = Path("/groups/scicompsoft/home/orhane/projects/mia-train")
+sys.path.insert(0, str(MIA_TRAIN / "src"))
 sys.path.insert(0, str(HERE.parent))
 
 SHORT = {"hemibrain_ellipsoid_body": "hemibrain", "liconn_mouse_dg": "liconn",
@@ -592,7 +592,7 @@ def main() -> None:
     label.add_argument("--out", type=Path, required=True)
     label.add_argument(
         "--gt-config", type=Path,
-        default=REPO / "experiments/sam_lmd_v1/data/lmd_finetune_singlescale_4nm.yaml",
+        default=HERE.parent / "data/lmd_finetune_singlescale_4nm.yaml",
     )
     label.add_argument("--block", type=int, default=1024, help="block edge in lattice voxels")
     label.add_argument("--min-mask-voxels", type=int, default=4096)
@@ -607,7 +607,7 @@ def main() -> None:
     oracle.add_argument("--volume", required=True)
     oracle.add_argument("--out", type=Path, required=True)
     oracle.add_argument("--gt-config", type=Path,
-                        default=REPO / "experiments/lmd_ssl_v1/lmd_finetune_singlescale.yaml")
+                        default=HERE.parents[1] / "lmd_ssl_v1/lmd_finetune_singlescale.yaml")
     oracle.add_argument("--block", type=int, default=512, help="block edge in lattice voxels")
     oracle.add_argument("--patch", type=int, default=256, help="window edge in lattice voxels")
     oracle.add_argument("--mask-stride", type=int, default=4)

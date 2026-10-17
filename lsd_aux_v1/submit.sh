@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Submit one arm of lsd_aux_v1.
 #
-#   bash experiments/lsd_aux_v1/submit.sh mtlsd_s80                 # the run: 8 GPUs, resumable
-#   bash experiments/lsd_aux_v1/submit.sh mtlsd_s80_bgzero
-#   bash experiments/lsd_aux_v1/submit.sh mtlsd_s80 --smoke         # 20 steps, 1 GPU, 30 min
-#   QUEUE=gpu_b300 bash experiments/lsd_aux_v1/submit.sh mtlsd_s80  # another queue (see README)
+#   bash lsd_aux_v1/submit.sh mtlsd_s80                 # the run: 8 GPUs, resumable
+#   bash lsd_aux_v1/submit.sh mtlsd_s80_bgzero
+#   bash lsd_aux_v1/submit.sh mtlsd_s80 --smoke         # 20 steps, 1 GPU, 30 min
+#   QUEUE=gpu_b300 bash lsd_aux_v1/submit.sh mtlsd_s80  # another queue (see README)
 #
-# Mirrors experiments/subpixel_decoder/submit.sh, whose run is this experiment's control, so the
+# Mirrors subpixel_decoder/submit.sh, whose run is this experiment's control, so the
 # two are launched the same way: same queue by default, same slots per GPU, `--resume` so a
 # resubmission after the wall-time limit continues the newest run of the arm.
 set -euo pipefail
@@ -17,7 +17,7 @@ if [[ -z "$ARM" || "$ARM" == -* ]]; then
   exit 2
 fi
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 CONFIG="$HERE/$ARM.toml"
 [[ -f "$CONFIG" ]] || { echo "no such arm: $CONFIG" >&2; exit 2; }
 
@@ -46,7 +46,7 @@ if [[ "${2:-}" == "--smoke" ]]; then
       "$CONFIG" > "$LOGS/smoke/$ARM.toml"
   set -x
   bsub -P "$PROJECT" -q "$QUEUE" -gpu "num=1" -n 12 -W 0:30 \
-       -J "lsd_smoke_$ARM" -cwd "$REPO" \
+       -J "lsd_smoke_$ARM" -cwd "$MIA_TRAIN" \
        -o "$LOGS/smoke/${ARM}_%J.log" -e "$LOGS/smoke/${ARM}_%J.err" \
        "$THREADS \
         $VENV/bin/torchrun --standalone --nproc_per_node=1 src/train.py \
@@ -56,7 +56,7 @@ fi
 
 set -x
 bsub -P "$PROJECT" -q "$QUEUE" -gpu "num=8" -n 96 -W 48:00 -r \
-     -J "lsd_$ARM" -cwd "$REPO" \
+     -J "lsd_$ARM" -cwd "$MIA_TRAIN" \
      -o "$LOGS/${ARM}_%J.log" -e "$LOGS/${ARM}_%J.err" \
      "$THREADS \
       $VENV/bin/torchrun --standalone --nproc_per_node=8 src/train.py \

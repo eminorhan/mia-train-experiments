@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Serve both arms of the pseudo-labelling bootstrap in one TensorBoard.
 #
-#   bash experiments/pseudo_labeling/tensorboard.sh [port]
-#   bash experiments/pseudo_labeling/tensorboard.sh 6008 --smoke   # the 20-step check instead
+#   bash pseudo_labeling/tensorboard.sh [port]
+#   bash pseudo_labeling/tensorboard.sh 6008 --smoke   # the 20-step check instead
 #
 # Rebuilds the symlink tree each run, so round 2 of each arm appears as soon as it exists -- both
 # round-2 stages wait on a *labelling* job, not just a checkpoint, so they show up later than the

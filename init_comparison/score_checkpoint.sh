@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Predict, score and visualise one checkpoint of one arm of this experiment.
 #
-#   bash experiments/init_comparison_comparison/score_checkpoint.sh 2_dinov3 100000
-#   bash experiments/init_comparison_comparison/score_checkpoint.sh 1_scratch 50000 --reuse --no-score
+#   bash init_comparison/score_checkpoint.sh 2_dinov3 100000
+#   bash init_comparison/score_checkpoint.sh 1_scratch 50000 --reuse --no-score
 #
 # A wrapper over banis_parity/score_checkpoint.sh, which takes --run/--tag for exactly this. The
 # arm name selects the run directory and the artifact tag, so arms cannot overwrite each other's

@@ -14,7 +14,7 @@ case predict the source onto the other's box instead. (Keeping the leading voxel
 used to, scored arm 9 on regions overlapping the common one by 79.5-96.7%. Its `origin` check could
 not catch that: predict.py writes origin 0 on every artifact.)
 
-    python experiments/sam_lmd_v1/crop_artifacts.py --src eval/arm9_r0/test --like eval/arm8_r0/test --dst eval/arm9_r0_lattice256/test
+    python sam_lmd_v1/crop_artifacts.py --src eval/arm9_r0/test --like eval/arm8_r0/test --dst eval/arm9_r0_lattice256/test
 """
 from __future__ import annotations
 

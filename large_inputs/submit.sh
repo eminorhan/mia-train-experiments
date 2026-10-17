@@ -2,12 +2,12 @@
 # Submit large_inputs capability sweeps: the largest crop, and the throughput at each crop, that a
 # model trains on per B300 node. One arm = one config = one job on one node.
 #
-#   bash experiments/large_inputs/submit.sh vitl_tp8_ro8 vitl_dp       # arms, default sizes
-#   SIZES="512 1024" bash experiments/large_inputs/submit.sh vitl_dp_compile
-#   SMOKE=1 SIZES=256 STEPS=1 WARMUP=1 bash experiments/large_inputs/submit.sh vitl_dp vitl_tp8
-#   PROBE=profile_1024 PROFILE=1 SIZES=1024 WARMUP=1 STEPS=2 bash experiments/large_inputs/submit.sh vitl_dp_win16_g4p4
+#   bash large_inputs/submit.sh vitl_tp8_ro8 vitl_dp       # arms, default sizes
+#   SIZES="512 1024" bash large_inputs/submit.sh vitl_dp_compile
+#   SMOKE=1 SIZES=256 STEPS=1 WARMUP=1 bash large_inputs/submit.sh vitl_dp vitl_tp8
+#   PROBE=profile_1024 PROFILE=1 SIZES=1024 WARMUP=1 STEPS=2 bash large_inputs/submit.sh vitl_dp_win16_g4p4
 #
-# Adapted 2026-09-29 from experiments/b300_capability_run/submit.sh (the 7B run): single node by
+# Adapted 2026-09-29 from b300_capability_run/submit.sh (the 7B run): single node by
 # default (a ViT-L needs no more than one node to hold a crop, and one node per arm lets several arms
 # run at once), `--decode-chunks auto` by default, results under this experiment's /nrs home, and
 # SMOKE=1 putting everything a smoke run writes under jobs/smoke/.
@@ -20,7 +20,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/large_inputs   # runs/ jobs/ probes/ (nrs layout of 2026-09-16)
@@ -50,12 +50,12 @@ for arm in "${ARMS[@]}"; do
     echo "set -uo pipefail"
     echo "export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4"
     echo "export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
-    echo "cd $REPO"
+    echo "cd $MIA_TRAIN"
     echo "for size in $SIZES; do"
     echo "  echo \"=== $arm \${size}^3 ===\""
     echo "  before=\$(wc -l < $results 2>/dev/null || echo 0)"
     echo "  $VENV/bin/torchrun --standalone --nproc_per_node=$GPUS \\"
-    echo "    experiments/large_inputs/capability_sweep.py \\"
+    echo "    $HERE/capability_sweep.py \\"
     echo "    --config $cfg --size \$size --results $results \\"
     echo "    --warmup $WARMUP --steps $STEPS ${CHUNKS:+--decode-chunks $CHUNKS} ${DIMS:+--dims $DIMS} ${PROFILE:+--profile} ${FLOPS:+--measure-flops}"
     echo "  after=\$(wc -l < $results 2>/dev/null || echo 0)"
@@ -67,7 +67,7 @@ for arm in "${ARMS[@]}"; do
   } > "$cmd"
 
   bsub -P "$PROJECT" -q gpu_b300 -gpu "num=$GPUS" -n "$SLOTS" -W "$WALL" \
-    -J "largein_${SMOKE:+smoke_}$arm" -cwd "$REPO" \
+    -J "largein_${SMOKE:+smoke_}$arm" -cwd "$MIA_TRAIN" \
     -o "$STAGE/${arm}_%J.log" -e "$STAGE/${arm}_%J.err" \
     "bash '$cmd'"
   echo "  arm $arm: sizes $SIZES -> $results"

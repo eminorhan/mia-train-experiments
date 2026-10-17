@@ -27,8 +27,8 @@ of the final number is attributable to pretraining at all.
 ## Running it
 
 ```bash
-bash experiments/simmim_vs_direct/submit.sh          # every arm
-bash experiments/simmim_vs_direct/submit.sh D        # just one, once the others have run
+bash simmim_vs_direct/submit.sh          # every arm
+bash simmim_vs_direct/submit.sh D        # just one, once the others have run
 ```
 
 `bsub -w` makes arm A's fine-tune wait on its pretraining; the rest start immediately.
@@ -36,7 +36,7 @@ bash experiments/simmim_vs_direct/submit.sh D        # just one, once the others
 To watch them together — including arms that started later:
 
 ```bash
-bash experiments/simmim_vs_direct/tensorboard.sh     # then open localhost:6006
+bash simmim_vs_direct/tensorboard.sh     # then open localhost:6006
 ```
 
 ## Reading the result

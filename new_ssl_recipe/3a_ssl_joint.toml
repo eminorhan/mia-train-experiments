@@ -23,7 +23,7 @@
 #     "export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4; \
 #      export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True; \
 #      /groups/scicompsoft/home/orhane/myvenv/bin/torchrun --standalone --nproc_per_node=8 \
-#        src/train.py --config experiments/new_ssl_recipe/3a_ssl_joint.toml --resume"
+#        src/train.py --config /groups/scicompsoft/home/orhane/projects/mia-train-experiments/new_ssl_recipe/3a_ssl_joint.toml --resume"
 #
 # The wall clock is the same as 2a's, and not by copy-paste: a freeze does not shorten a step, so
 # the two arms cost the same. `-r` with `--resume` make an overrun a requeue rather than a loss.
@@ -77,7 +77,7 @@ name = "miao_volumes"
 # to init_comparison's copy, and shared by all eight stages here -- SSL and supervised alike see
 # exactly the same crops, so the arms differ in what they do with the data and not in which data
 # they get. The labels the config carries are simply unread here; SimMIM's target is the image.
-config_path = "experiments/new_ssl_recipe/nisb_base_256_aug.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/new_ssl_recipe/nisb_base_256_aug.yaml"
 samples_per_epoch = 1000  # bookkeeping only; `max_steps` is what ends the run
 
 [val_data]
@@ -91,7 +91,7 @@ name = "miao_volumes"
 # Nor is it the place to read 2a against 3a. A frozen encoder makes the head's job easier before
 # it makes it harder, so the early curves diverge for reasons that say nothing about the features;
 # the comparison that counts is 2c against 3c.
-config_path = "experiments/new_ssl_recipe/nisb_base_256_aug.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/new_ssl_recipe/nisb_base_256_aug.yaml"
 samples_per_epoch = 32
 
 [trainer]

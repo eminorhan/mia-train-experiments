@@ -11,7 +11,7 @@
 # The SSL stage ONLY. To score it: arm 3c = 3b_simmim85_axial_subpixel.toml with [init] path pointing at
 # this run's final checkpoint (and its experiment_name) -- written once the run directory exists.
 # 2b measured 369 samples/s on one B300 node, i.e. ~48 h for the 64M samples of 500k steps.
-# Launch:  WALL=336:00 bash experiments/gary_comparison/submit.sh 2c_simmim_hemibrain_mask90
+# Launch:  WALL=336:00 bash gary_comparison/submit.sh 2c_simmim_hemibrain_mask90
 #
 # What follows is 2b's own header, true of this arm except where the lines above say otherwise.
 #
@@ -44,7 +44,7 @@
 # representation, which only the fine-tuned score can judge. Read val/loss smoothed over >= 5 points, and never
 # compare 2a with 2b on it: a harder mask has a higher L1 by construction.
 #
-# Launch (not yet):  WALL=336:00 bash experiments/gary_comparison/submit.sh 2b_simmim_lmd_mask85
+# Launch (not yet):  WALL=336:00 bash gary_comparison/submit.sh 2b_simmim_lmd_mask85
 # submit.sh exports TORCHINDUCTOR_LAYOUT_OPTIMIZATION=0 (compile + cuDNN SDPA) and runs a 20-step smoke first.
 # Estimate: 64M samples at 170-230 samples/s (B300 compiled 8-rank SimMIM measured 188.7 ms/step at 4/rank
 # = 170 samples/s; batch 16 amortises the launch-bound part) is 3.2-4.4 days, IF the loader keeps up -- 21.3 MB
@@ -99,7 +99,7 @@ name = "miao_volumes"
 # Ellipsoid Body crop -- this experiment's volume -- WHOLE, test corner included, at 0.79% of an epoch. About
 # 0.9% of that volume's 256^3 crops touch the [4000, 5000)^3 corner, so ~0.007% of all samples (~4.5k of 64M) show
 # test-corner voxels, unlabelled. README, "SSL arms", for the strict alternative.
-config_path = "experiments/gary_comparison/data/hemibrain_ssl_crop002_crop003.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/gary_comparison/data/hemibrain_ssl_crop002_crop003.yaml"
 # An epoch boundary respawns every loader worker (~4 s). 1M samples = 7,812 steps per epoch at global batch 128,
 # 64 boundaries in the run, <0.1% of wall. Sampling is with replacement, so the value changes nothing else.
 samples_per_epoch = 1000000
@@ -111,7 +111,7 @@ name = "miao_volumes"
 # the corpus: a fixed distribution every 10k steps, readable across a run. A progress readout, not a selection
 # signal (there is nothing to select; the fine-tune decides), and NOT the place to read 2a against 2b, whose
 # masked L1 differ by construction. The slab also lies inside the pretraining volume above, so it is not held out.
-config_path = "experiments/gary_comparison/data/hemibrain_eb_val.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/gary_comparison/data/hemibrain_eb_val.yaml"
 # At least the global batch: the val loader uses the per-rank training batch with drop_last, so fewer than 16
 # samples per rank would drop everything and log a bare `[val]` line with no metrics (lmd_ssl_v1/make_configs.py).
 samples_per_epoch = 128

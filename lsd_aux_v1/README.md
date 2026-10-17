@@ -16,7 +16,7 @@ affinity-segmentation number.
 
 | arm | config | differs from the control by |
 |---|---|---|
-| control | `experiments/subpixel_decoder/subpixel_256.toml`, already trained (`subpixel_decoder__subpixel_256_20260811_143947`, checkpoints to 95k) and scored | -- |
+| control | `subpixel_decoder/subpixel_256.toml`, already trained (`subpixel_decoder__subpixel_256_20260811_143947`, checkpoints to 95k) and scored | -- |
 | `mtlsd_s80` | `mtlsd_s80.toml` | `lsd_sigma = 80.0` nm, the paper's FIB-25 window: (8.9, 8.9, 4.0) voxels on 9x9x20 nm |
 | `mtlsd_s80_bgzero` | `mtlsd_s80_bgzero.toml` | as above, plus `lsd_background = "zero"`: background voxels are supervised towards the all-zero descriptor instead of being left out of the loss |
 
@@ -26,7 +26,7 @@ encoder, warm start from the banis_parity encoder at 200k, sub-pixel head, data,
 schedule, global batch 8 -- is the control's, and the two configs are generated from the control's
 file so they cannot drift from it:
 
-    diff experiments/subpixel_decoder/subpixel_256.toml experiments/lsd_aux_v1/mtlsd_s80.toml
+    diff subpixel_decoder/subpixel_256.toml lsd_aux_v1/mtlsd_s80.toml
 
 The second arm exists because of where the control's errors are: predicted boundaries are 8-16
 voxels wide against a 1-2 voxel truth and splits outnumber mergers 10:1. Under the reference's
@@ -35,9 +35,9 @@ target that changes abruptly across it.
 
 ## Running and scoring
 
-    bash experiments/lsd_aux_v1/submit.sh mtlsd_s80 --smoke     # 20 steps, 1 GPU
-    bash experiments/lsd_aux_v1/submit.sh mtlsd_s80             # 8 GPUs, resumable
-    bash experiments/lsd_aux_v1/score_checkpoint.sh 50000 mtlsd_s80
+    bash lsd_aux_v1/submit.sh mtlsd_s80 --smoke     # 20 steps, 1 GPU
+    bash lsd_aux_v1/submit.sh mtlsd_s80             # 8 GPUs, resumable
+    bash lsd_aux_v1/score_checkpoint.sh 50000 mtlsd_s80
 
 Runs, job logs and evaluations live under `/nrs/scicompsoft/orhane/mia-train-experiments/lsd_aux_v1/`.
 Scoring is the control's path (`banis_parity/score_checkpoint.sh`: predict on one GPU, BANIS

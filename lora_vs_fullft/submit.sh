@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Submit the arms of lora_vs_fullft. Each arm is two stages, the second held behind the first.
 #
-#   bash experiments/lora_vs_fullft/submit.sh              # both arms
-#   bash experiments/lora_vs_fullft/submit.sh 2            # just the control
-#   bash experiments/lora_vs_fullft/submit.sh --smoke 1    # 20 steps of arm 1's stages, one GPU
-#   bash experiments/lora_vs_fullft/submit.sh --stage 1b_lora_subpixel   # one stage, see below
+#   bash lora_vs_fullft/submit.sh              # both arms
+#   bash lora_vs_fullft/submit.sh 2            # just the control
+#   bash lora_vs_fullft/submit.sh --smoke 1    # 20 steps of arm 1's stages, one GPU
+#   bash lora_vs_fullft/submit.sh --stage 1b_lora_subpixel   # one stage, see below
 #
 #   1  LoRA : DINOv3 ViT-L/16 -> interpolating 50k -> sub-pixel 50k, encoder adapted at rank 16
 #   2  full : DINOv3 ViT-L/16 -> interpolating 50k -> sub-pixel 50k, all 306.6M params trained
@@ -31,7 +31,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/lora_vs_fullft   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
@@ -143,7 +143,7 @@ sed \"s|PREV_CHECKPOINT|\${RUN}checkpoints/step_\$STEP|\" '$cfg' > '$resolved'"
   local ids=() q id
   for q in "${QUEUES[@]}"; do
     id=$(bsub -P "$PROJECT" -q "$q" -gpu "num=$procs" -n "$slots" -W "$wall" -r \
-      ${dep:+-w "$dep"} -J "lvf_$tag" -cwd "$REPO" \
+      ${dep:+-w "$dep"} -J "lvf_$tag" -cwd "$MIA_TRAIN" \
       -o "$LOGS/lvf_${tag}_%J.log" -e "$LOGS/lvf_${tag}_%J.err" \
       "bash '$CLAIM' '$STAGE/locks/$tag' '$cmd'" | jobid)
     ids+=("$id")

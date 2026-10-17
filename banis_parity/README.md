@@ -51,7 +51,7 @@ swapping those axes produces an object shape that never occurs, and relabels a 2
 relationship as a 9 nm one. `"inplane"` draws from the 16 transforms that never exchange z with x
 or y (8 flips × the x↔y swap), which *is* a genuine symmetry since x and y share a voxel size.
 Implemented in miao on `feature/aug-rot-anisotropic` at the time; it lives in this repo now
-([`src/data/augment.py`](../../src/data/augment.py)), since that branch never merged.
+([`src/data/augment.py`](https://github.com/AI-HHMI/mia-train/blob/master/src/data/augment.py)), since that branch never merged.
 
 The three are changed **together**, deliberately. At 300k steps on 5 cubes, augmentation is not a
 confound to isolate — it is what makes the longer run a fair test rather than an overfitting
@@ -66,7 +66,7 @@ same evaluation. So this is head-to-head with the published `base` numbers.
 ## A dependency this run has that the run record does not capture
 
 In-plane rotation is `[augment] rotate = "inplane"` in the .toml, implemented in
-[`src/data/augment.py`](../../src/data/augment.py). It used to be miao's per-volume
+[`src/data/augment.py`](https://github.com/AI-HHMI/mia-train/blob/master/src/data/augment.py). It used to be miao's per-volume
 `aug_rot`, which needed commit 8d41638 on `feature/aug-rot-anisotropic`; no miao pin is
 required now.
 miao is installed **editable**, so a run reads whatever branch is checked out in `~/projects/miao`
@@ -81,8 +81,8 @@ Merging the branch (or pinning miao non-editably) removes the hazard.
 ## Running it
 
 ```bash
-bash experiments/banis_parity/submit.sh      # idempotent: resubmit to continue
-bash experiments/banis_parity/tensorboard.sh # then open localhost:6006
+bash banis_parity/submit.sh      # idempotent: resubmit to continue
+bash banis_parity/tensorboard.sh # then open localhost:6006
 ```
 
 `submit.sh` passes `--resume` and `bsub -r`, because 300k steps will not fit one wall-time window.
@@ -94,7 +94,7 @@ target, so a field that predicts 0.7 everywhere scores well and is useless to co
 Use the real metrics:
 
 ```bash
-bash experiments/banis_parity/score_checkpoint.sh 160000
+bash banis_parity/score_checkpoint.sh 160000
 ```
 
 That submits three chained jobs — affinities over the whole val cube (1 H100, ~35 min), then

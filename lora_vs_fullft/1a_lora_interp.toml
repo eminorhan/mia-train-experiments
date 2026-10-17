@@ -82,7 +82,7 @@ decoder_hidden_dim = 64
 name = "miao_volumes"
 # The five NISB `base` training cubes at 256^3 with the 16 in-plane rotations/flips. Byte-identical
 # to new_ssl_recipe's and init_comparison's copies, so numbers here sit beside theirs.
-config_path = "experiments/lora_vs_fullft/nisb_base_256_aug.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lora_vs_fullft/nisb_base_256_aug.yaml"
 samples_per_epoch = 1000  # bookkeeping only; `max_steps` is what ends the run
 
 [val_data]

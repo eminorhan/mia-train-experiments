@@ -425,22 +425,22 @@ imbalance.
 
 ```bash
 # both arms, 8 nodes each
-bash experiments/b300_capability_run/submit.sh
+bash b300_capability_run/submit.sh
 
 # single-node smoke test of the whole path, ~4 minutes
 NODES=1 SIZES="128 256" DIMS=2,4,1 WALL=1:00 WARMUP=2 STEPS=4 \
-  bash experiments/b300_capability_run/submit.sh hsdp
+  bash b300_capability_run/submit.sh hsdp
 
 # regenerate the tables above
-python experiments/b300_capability_run/table.py \
+python b300_capability_run/table.py \
   /nrs/scicompsoft/orhane/mia-train-experiments/b300_capability_run/jobs/*.jsonl
 
 # the overlap measurement: profile one step, export rank 0's timeline, intersect the streams
 STAGE=/nrs/scicompsoft/orhane/mia-train-experiments/b300_capability_run/jobs
 NODES=8 SIZES=1024 WARMUP=1 STEPS=1 WALL=1:30 PROFILE=1 \
   TRACE=$STAGE/overlap_1024_tp8.json RESULTS=$STAGE/overlap_probe.jsonl \
-  bash experiments/b300_capability_run/submit.sh fsdp_tp8_chunked
-python experiments/b300_capability_run/overlap.py $STAGE/overlap_1024_tp8.json
+  bash b300_capability_run/submit.sh fsdp_tp8_chunked
+python b300_capability_run/overlap.py $STAGE/overlap_1024_tp8.json
 ```
 
 `FLOPS=1` adds `--measure-flops`, which counts the step's real arithmetic — affinity head and

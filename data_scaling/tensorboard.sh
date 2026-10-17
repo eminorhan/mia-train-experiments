@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Serve all six stages of the data-scaling experiment in one TensorBoard.
 #
-#   bash experiments/data_scaling/tensorboard.sh [port]
-#   bash experiments/data_scaling/tensorboard.sh 6008 --smoke   # the 20-step check instead
+#   bash data_scaling/tensorboard.sh [port]
+#   bash data_scaling/tensorboard.sh 6008 --smoke   # the 20-step check instead
 #
 # Rebuilds the symlink tree each run, so a stage appears as soon as its run directory exists. Stage
 # B of each arm shows up ~23 h after stage A starts, because it is held on `done(A)`.

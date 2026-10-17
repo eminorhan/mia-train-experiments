@@ -2,15 +2,15 @@
 """Segment-everything a promptable model over blocks of unlabeled volumes -> instance pseudo-labels.
 
     # label K blocks of one unlabeled volume into a sidecar container (GPU)
-    python experiments/sam_lmd_v1/pseudolabel.py label <run_dir> --volume <name> \\
+    python sam_lmd_v1/pseudolabel.py label <run_dir> --volume <name> \\
         --out <sidecar root> --label-name sam_r1 --blocks 1 [--step N] [--block 512]
 
     # the same pass over blocks of a GROUND-TRUTH volume, scored against its labels (GPU)
-    python experiments/sam_lmd_v1/pseudolabel.py diagnose <run_dir> --volume kasthuri15_ac3 \\
+    python sam_lmd_v1/pseudolabel.py diagnose <run_dir> --volume kasthuri15_ac3 \\
         --out <dir>/kasthuri15_ac3.json --blocks 1
 
     # one table over a directory of diagnose outputs (CPU)
-    python experiments/sam_lmd_v1/pseudolabel.py summarize <dir> [--out summary.json]
+    python sam_lmd_v1/pseudolabel.py summarize <dir> [--out summary.json]
 
 This is the fully automatic stage of the Segment Anything data engine, with the model standing in
 for the annotators: a grid of clicks per tile, the IoU head and the stability score deciding which
@@ -44,8 +44,8 @@ import numpy as np
 import torch
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[1]
-sys.path.insert(0, str(REPO / "src"))
+MIA_TRAIN = Path("/groups/scicompsoft/home/orhane/projects/mia-train")
+sys.path.insert(0, str(MIA_TRAIN / "src"))
 sys.path.insert(0, str(HERE))
 
 from blocks import (  # noqa: E402
@@ -61,7 +61,7 @@ from blocks import (  # noqa: E402
 )
 
 CORPUS = HERE / "unlabeled_corpus.yaml"
-GT_CONFIG = REPO / "experiments" / "lmd_ssl_v1" / "lmd_finetune_singlescale.yaml"
+GT_CONFIG = HERE.parent / "lmd_ssl_v1" / "lmd_finetune_singlescale.yaml"
 
 #: Mask-generator settings for LABELLING, applied over the run's own with `--override` semantics.
 #: Stricter than the eval settings on the two confidence gates, because a training target is

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Serve every arm of this experiment in one TensorBoard, under short readable names.
 #
-#   bash experiments/banis_parity/tensorboard.sh [port]
+#   bash banis_parity/tensorboard.sh [port]
 #
 # Rebuilds the symlink tree each time it runs, so arms that started later -- A2 waits on A1 --
 # appear as soon as they exist. Re-run it once A2 has started to pick that arm up.

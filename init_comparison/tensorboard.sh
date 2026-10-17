@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Serve every arm of this experiment in one TensorBoard.
 #
-#   bash experiments/init_comparison_comparison/tensorboard.sh [port]
+#   bash init_comparison/tensorboard.sh [port]
 #
 # Rebuilds the symlink tree each run, so arms that start later -- 3b waits on 3a -- appear as soon
 # as they exist. `boundary_accuracy` is the panel to read: pooled `affinity_accuracy` sits near the

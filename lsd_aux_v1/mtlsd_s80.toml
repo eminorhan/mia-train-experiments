@@ -1,12 +1,12 @@
 # lsd_aux_v1, arm `mtlsd_s80`: the sub-pixel control plus local shape descriptors as an auxiliary
 # target -- the MTLSD network of Sheridan et al. (2023).
 #
-# Derived from experiments/subpixel_decoder/subpixel_256.toml by experiments/lsd_aux_v1's README
+# Derived from subpixel_decoder/subpixel_256.toml by lsd_aux_v1's README
 # recipe; the only differences are `lsd_sigma` in [algorithm] and `defer_image_ops` in the two
 # data sections (a placement of the resampling and augmentation, not a change of what they
 # compute). Verify with
 #
-#   diff experiments/subpixel_decoder/subpixel_256.toml experiments/lsd_aux_v1/mtlsd_s80.toml
+#   diff subpixel_decoder/subpixel_256.toml lsd_aux_v1/mtlsd_s80.toml
 #
 experiment_name = "lsd_aux_v1__mtlsd_s80"
 
@@ -57,13 +57,13 @@ split_disconnected = true
 # paper's FIB-25 value, which on 9x9x20 nm voxels is a window of (8.9, 8.9, 4.0) voxels. The
 # other descriptor settings stay at their defaults: `lsd_weight = 1.0` (the reference sums the two
 # losses unweighted), `lsd_downsample = 2` (the reference's setting; 40-75 ms per 256^3 sample on
-# a B300, see mia-train-experiments/lsd_aux_v1/probes/lsd_target_cost), `lsd_background =
+# a B300, see /nrs/scicompsoft/orhane/mia-train-experiments/lsd_aux_v1/probes/lsd_target_cost), `lsd_background =
 # "ignore"` (background voxels are not in the descriptor loss, as in the reference).
 lsd_sigma = 80.0
 
 [data]
 name = "miao_volumes"
-config_path = "experiments/subpixel_decoder/nisb_base_256_aug.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/subpixel_decoder/nisb_base_256_aug.yaml"
 samples_per_epoch = 1000
 defer_image_ops = true
 

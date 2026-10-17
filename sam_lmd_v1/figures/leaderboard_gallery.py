@@ -1,6 +1,6 @@
 """The leaderboard's segmentations side by side: SAM arm, affinity rows, ground truth, per volume.
 
-    python experiments/sam_lmd_v1/figures/leaderboard_gallery.py --out <dir> \\
+    python sam_lmd_v1/figures/leaderboard_gallery.py --out <dir> \\
         --sam arm4=/nrs/.../eval/arm4_8nm_gb16_r0/test:5000 \\
         --mws 1c=/nrs/.../lmd1_neuron_artifacts/arm1/test:50000 \\
         --mws 2c=/nrs/.../mws_artifacts/test:50000 \\
@@ -32,8 +32,8 @@ from pathlib import Path
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[2]
-sys.path.insert(0, str(REPO / "src"))
+MIA_TRAIN = Path("/groups/scicompsoft/home/orhane/projects/mia-train")
+sys.path.insert(0, str(MIA_TRAIN / "src"))
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
 
@@ -109,7 +109,7 @@ def main() -> None:
     parser.add_argument("--sam", required=True, metavar="NAME=DIR:MIN_SIZE")
     parser.add_argument("--mws", action="append", default=[], metavar="NAME=DIR:MIN_SIZE")
     parser.add_argument("--gt-config", type=Path,
-                        default=REPO / "experiments/lmd_ssl_v1/lmd_val_singlescale.yaml")
+                        default=HERE.parents[1] / "lmd_ssl_v1/lmd_val_singlescale.yaml")
     parser.add_argument("--volumes", nargs="+", required=True)
     parser.add_argument("--min-truth", type=int, default=512,
                         help="true objects counted for recall, in lattice voxels")

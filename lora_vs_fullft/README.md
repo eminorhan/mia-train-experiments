@@ -126,11 +126,11 @@ The arms are compared **against each other**, and that comparison is internal an
 
 ```bash
 # both arms, twin-submitted to gpu_h100 and gpu_h200 -- whichever frees first runs each stage
-bash experiments/lora_vs_fullft/submit.sh
+bash lora_vs_fullft/submit.sh
 
-bash experiments/lora_vs_fullft/submit.sh 1          # the LoRA arm only
-bash experiments/lora_vs_fullft/submit.sh --smoke 1  # 20 steps on one GPU, validates the chain
-QUEUE=gpu_h200 bash experiments/lora_vs_fullft/submit.sh   # force one generation
+bash lora_vs_fullft/submit.sh 1          # the LoRA arm only
+bash lora_vs_fullft/submit.sh --smoke 1  # 20 steps on one GPU, validates the chain
+QUEUE=gpu_h200 bash lora_vs_fullft/submit.sh   # force one generation
 ```
 
 Each stage is submitted twice, once per GPU generation; `claim.sh` gives the pair an atomic lock and
@@ -142,8 +142,8 @@ Smoke first if anything in the stack has changed. It exercises the one thing uni
 unit test cannot: the adapter surviving a DCP save and reload across the stage boundary.
 
 ```bash
-bash experiments/lora_vs_fullft/tensorboard.sh          # both arms, stage-paired legend
-bash experiments/lora_vs_fullft/tensorboard.sh 6008 --smoke
+bash lora_vs_fullft/tensorboard.sh          # both arms, stage-paired legend
+bash lora_vs_fullft/tensorboard.sh 6008 --smoke
 ```
 
 ## Scoring
@@ -151,7 +151,7 @@ bash experiments/lora_vs_fullft/tensorboard.sh 6008 --smoke
 `banis_parity/score_checkpoint.sh` takes `--run` and `--tag`, so it needs no copy here:
 
 ```bash
-bash experiments/banis_parity/score_checkpoint.sh 50000 \
+bash banis_parity/score_checkpoint.sh 50000 \
   --run /nrs/scicompsoft/orhane/mia-train-experiments/lora_vs_fullft/runs/lvf__1b_lora_subpixel_<timestamp> \
   --tag lvf1b
 ```

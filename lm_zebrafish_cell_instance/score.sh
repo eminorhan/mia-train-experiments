@@ -3,11 +3,11 @@
 # fit frames (1 and 25) and the test frame (10), then the task's scoring route, each step its own LSF job chained on
 # the last.
 #
-#   bash experiments/lm_zebrafish_cell_instance/score.sh w288_em 100000
-#   bash experiments/lm_zebrafish_cell_instance/score.sh w288_em 100000 --dry-run
-#   bash experiments/lm_zebrafish_cell_instance/score.sh w288_em 100000 --no-predict    # the affinities exist
-#   bash experiments/lm_zebrafish_cell_instance/score.sh w288_em 100000 --after <job id>  # scoring also waits for it
-#   bash experiments/lm_zebrafish_cell_instance/score.sh w288_em 50000 --leaderboard <dir>  # record into another board
+#   bash lm_zebrafish_cell_instance/score.sh w288_em 100000
+#   bash lm_zebrafish_cell_instance/score.sh w288_em 100000 --dry-run
+#   bash lm_zebrafish_cell_instance/score.sh w288_em 100000 --no-predict    # the affinities exist
+#   bash lm_zebrafish_cell_instance/score.sh w288_em 100000 --after <job id>  # scoring also waits for it
+#   bash lm_zebrafish_cell_instance/score.sh w288_em 50000 --leaderboard <dir>  # record into another board
 #
 # large_inputs_nisb/score.sh without the blocks: a frame is 113 M voxels, so one GPU predicts a split whole. Each
 # split's data config is the task's own (z, y, x order) with patch_size set to the run's window, written next to the
@@ -33,11 +33,11 @@
 # The record is named <run>.step<N>.<route> by mia-evals; nothing here chooses a label.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 EVALS=/groups/scicompsoft/home/orhane/projects/mia-evals
 VENV=/groups/scicompsoft/home/orhane/myvenv
 MIA_EVALS=$VENV/bin/mia-evals
-NUMA_LOCAL=$REPO/experiments/gary_comparison/numa_local.py
+NUMA_LOCAL=$HERE/../gary_comparison/numa_local.py
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/lm_zebrafish_cell_instance
 RUNS=$EXP/runs
@@ -81,7 +81,7 @@ jobid () { grep -o 'Job <[0-9]*>' | head -1 | tr -dc 0-9; }
 submit () {      # submit <name> <log name> <bsub args...> -- <command>   -> job id or DRYRUN
   local name=$1 log=$2; shift 2; local args=(); while [[ $1 != -- ]]; do args+=("$1"); shift; done; shift
   if [[ $DRY -eq 1 ]]; then printf 'bsub -P %s %s -J %s ...\n    %s\n' "$PROJECT" "${args[*]}" "$name" "$1" >&2; echo DRYRUN
-  else bsub -P "$PROJECT" "${args[@]}" -J "$name" -cwd "$REPO" -o "$LOGS/$log.log" -e "$LOGS/$log.err" "$1" | jobid; fi
+  else bsub -P "$PROJECT" "${args[@]}" -J "$name" -cwd "$MIA_TRAIN" -o "$LOGS/$log.log" -e "$LOGS/$log.err" "$1" | jobid; fi
 }
 waits () { local c=() j; for j in "$@"; do c+=("done($j)"); done; local IFS=' '; echo "${c[*]}" | sed 's/) done(/) \&\& done(/g'; }
 CHECK_MIAO="'$VENV/bin/python' -c \"import miao; print('[miao]', miao.__file__, flush=True); assert miao.__file__.startswith('$MIAO_SRC/'), 'not the pinned miao'\""
@@ -92,11 +92,11 @@ if (( PREDICT )); then
   mkdir -p "$ART/data"
   for split in fit test; do
     data=$ART/data/$split.yaml
-    { echo "# Written by mia-train experiments/lm_zebrafish_cell_instance/score.sh: mia-evals configs/$TASK/data/$split.yaml"
+    { echo "# Written by mia-train-experiments/lm_zebrafish_cell_instance/score.sh: mia-evals configs/$TASK/data/$split.yaml"
       echo "# with patch_size set to $RUN_NAME's window (img_size [$X, $Y, $Z], x, y, z)."
       sed "s/^patch_size: .*/patch_size: [$Z, $Y, $X]   # z, y, x: the run's window/" "$EVALS/configs/$TASK/data/$split.yaml"; } > "$data"
-    cmd="export OMP_NUM_THREADS=12 MKL_NUM_THREADS=12 OPENBLAS_NUM_THREADS=12 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$MIAO_SRC:$REPO/src; \
-cd '$REPO' && $CHECK_MIAO && '$VENV/bin/python' src/predict.py '$run' --step $STEP \
+    cmd="export OMP_NUM_THREADS=12 MKL_NUM_THREADS=12 OPENBLAS_NUM_THREADS=12 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$MIAO_SRC:$MIA_TRAIN/src; \
+cd '$MIA_TRAIN' && $CHECK_MIAO && '$VENV/bin/python' src/predict.py '$run' --step $STEP \
 --data-config '$data' --out '$ART/$split' --cover-box"
     name="lmzf_p_${ARM}_${STEP}_${split}"
     id=$(submit "$name" "${name}_%J" -q gpu_b300 -gpu "num=1" -n 12 -W 2:00 -- "$cmd")

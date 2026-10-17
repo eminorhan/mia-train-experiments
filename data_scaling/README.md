@@ -69,10 +69,10 @@ also means it is a confound if tuned per arm, so it is not.
 
 ## Running it
 
-    bash experiments/data_scaling/submit.sh              # all three arms, both stages
-    bash experiments/data_scaling/submit.sh --dry-run    # print the bsub lines, submit nothing
-    bash experiments/data_scaling/submit.sh --smoke      # 20 steps of every stage, one GPU
-    bash experiments/data_scaling/submit.sh 5            # one arm
+    bash data_scaling/submit.sh              # all three arms, both stages
+    bash data_scaling/submit.sh --dry-run    # print the bsub lines, submit nothing
+    bash data_scaling/submit.sh --smoke      # 20 steps of every stage, one GPU
+    bash data_scaling/submit.sh 5            # one arm
 
 One full node per arm, one queue per arm — arms 1 and 3 on `gpu_h100`, arm 5 on `gpu_h200`, which
 is the 2x H100 + 1x H200 that were free at submission. Deliberately *not* the twin-queue pattern
@@ -104,8 +104,8 @@ whole experiment.
 arms is a separate step: `score.sh` predicts affinities over the **whole** `seed100` cube and scores
 nERL through the BANIS path (`mia_predict.py` then `mia_score.py`).
 
-    bash experiments/data_scaling/score.sh              # final stage-B checkpoint of each arm
-    bash experiments/data_scaling/score.sh --stage a    # stage A instead
+    bash data_scaling/score.sh              # final stage-B checkpoint of each arm
+    bash data_scaling/score.sh --stage a    # stage A instead
 
 Whole cube rather than a block, so every arm is measured over the same extent. Two consequences to
 keep straight: nERL is **not** comparable across extents -- the same model scored 0.3045 whole cube

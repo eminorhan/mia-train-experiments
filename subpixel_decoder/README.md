@@ -45,17 +45,17 @@ spatial neighbours.
 ## Running it
 
 ```bash
-bash experiments/subpixel_decoder/submit.sh --smoke   # 20 steps, 1 GPU, ~70 s
-bash experiments/subpixel_decoder/submit.sh           # idempotent: resubmit to continue
-bash experiments/subpixel_decoder/tensorboard.sh      # this arm beside the control
+bash subpixel_decoder/submit.sh --smoke   # 20 steps, 1 GPU, ~70 s
+bash subpixel_decoder/submit.sh           # idempotent: resubmit to continue
+bash subpixel_decoder/tensorboard.sh      # this arm beside the control
 ```
 
 Scoring is a wrapper over the control's tooling, which takes `--run`/`--tag` for exactly this, so
 the two experiments score through one code path:
 
 ```bash
-bash experiments/subpixel_decoder/score_checkpoint.sh 15000          # predict + score + figure
-bash experiments/subpixel_decoder/score_checkpoint.sh 15000 --reuse  # re-score, no GPU
+bash subpixel_decoder/score_checkpoint.sh 15000          # predict + score + figure
+bash subpixel_decoder/score_checkpoint.sh 15000 --reuse  # re-score, no GPU
 ```
 
 Artifacts are tagged `sp_*` against the control's `bp_*`, so they share the eval directory without

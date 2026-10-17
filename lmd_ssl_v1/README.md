@@ -12,9 +12,9 @@ The finetune is the comparison; the arms differ only in what they hand it.
 Arm 2 is the baseline: pretrained checkpoint plus finetuning is what any SSL result has to beat,
 and the NISB work established we had never actually cleared it.
 
-    bash experiments/lmd_ssl_v1/submit.sh            # all three arms, all stages
-    bash experiments/lmd_ssl_v1/submit.sh --dry-run  # print the bsub lines
-    bash experiments/lmd_ssl_v1/submit.sh --smoke    # 20 steps of every stage, one GPU
+    bash lmd_ssl_v1/submit.sh            # all three arms, all stages
+    bash lmd_ssl_v1/submit.sh --dry-run  # print the bsub lines
+    bash lmd_ssl_v1/submit.sh --smoke    # 20 steps of every stage, one GPU
 
 Configs are generated -- `make_configs.py` for the eight TOMLs, `make_splits.py` for the four data
 YAMLs. Edit those, not the outputs.

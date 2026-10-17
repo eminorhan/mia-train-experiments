@@ -2,10 +2,10 @@
 # Score one large_inputs_nisb arm at one checkpoint on mia-evals' nisb_base_neurite_tracing task: predict NISB's
 # base val (fit) and test cubes, then a blockwise mutex watershed route, each step its own LSF job chained on the last.
 #
-#   bash experiments/large_inputs_nisb/score.sh w256_1cube 100000
-#   bash experiments/large_inputs_nisb/score.sh w512_1cube 100000 --dry-run
-#   bash experiments/large_inputs_nisb/score.sh w256_1cube 100000 --after <job id>   # scoring also waits for it
-#   bash experiments/large_inputs_nisb/score.sh w256_1cube 100000 --route mws_blockwise_1024 --no-predict
+#   bash large_inputs_nisb/score.sh w256_1cube 100000
+#   bash large_inputs_nisb/score.sh w512_1cube 100000 --dry-run
+#   bash large_inputs_nisb/score.sh w256_1cube 100000 --after <job id>   # scoring also waits for it
+#   bash large_inputs_nisb/score.sh w256_1cube 100000 --route mws_blockwise_1024 --no-predict
 #
 # Predictions cover each cube whole (predict.py --cover-box), so every row scores the same region, at the arm's own
 # window: each split's data config is the task's own with patch_size set to the window, written next to the
@@ -31,11 +31,11 @@
 # The record is named <run>.step<N>.<route> by mia-evals; nothing here chooses a label.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 EVALS=/groups/scicompsoft/home/orhane/projects/mia-evals
 VENV=/groups/scicompsoft/home/orhane/myvenv
 MIA_EVALS=$VENV/bin/mia-evals
-NUMA_LOCAL=$REPO/experiments/gary_comparison/numa_local.py
+NUMA_LOCAL=$HERE/../gary_comparison/numa_local.py
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/large_inputs_nisb
 RUNS=$EXP/runs
@@ -82,7 +82,7 @@ jobid () { grep -o 'Job <[0-9]*>' | head -1 | tr -dc 0-9; }
 submit () {      # submit <name> <log name> <bsub args...> -- <command>   -> job id or DRYRUN
   local name=$1 log=$2; shift 2; local args=(); while [[ $1 != -- ]]; do args+=("$1"); shift; done; shift
   if [[ $DRY -eq 1 ]]; then printf 'bsub -P %s %s -J %s ...\n    %s\n' "$PROJECT" "${args[*]}" "$name" "$1" >&2; echo DRYRUN
-  else bsub -P "$PROJECT" "${args[@]}" -J "$name" -cwd "$REPO" -o "$LOGS/$log.log" -e "$LOGS/$log.err" "$1" | jobid; fi
+  else bsub -P "$PROJECT" "${args[@]}" -J "$name" -cwd "$MIA_TRAIN" -o "$LOGS/$log.log" -e "$LOGS/$log.err" "$1" | jobid; fi
 }
 waits () { local c=() j; for j in "$@"; do c+=("done($j)"); done; local IFS=' '; echo "${c[*]}" | sed 's/) done(/) \&\& done(/g'; }
 
@@ -92,11 +92,11 @@ if (( PREDICT )); then
   mkdir -p "$ART/data"
   for split in fit test; do
     data=$ART/data/$split.yaml
-    { echo "# Written by mia-train experiments/large_inputs_nisb/score.sh: mia-evals configs/$TASK/data/$split.yaml"
+    { echo "# Written by mia-train-experiments/large_inputs_nisb/score.sh: mia-evals configs/$TASK/data/$split.yaml"
       echo "# with patch_size set to arm $ARM's window."
       sed "s/^patch_size: .*/patch_size: [$WINDOW, $WINDOW, $WINDOW]/" "$EVALS/configs/$TASK/data/$split.yaml"; } > "$data"
-    cmd="export OMP_NUM_THREADS=12 MKL_NUM_THREADS=12 OPENBLAS_NUM_THREADS=12 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$REPO/src; \
-cd '$REPO' && '$VENV/bin/python' src/predict.py '$run' --step $STEP \
+    cmd="export OMP_NUM_THREADS=12 MKL_NUM_THREADS=12 OPENBLAS_NUM_THREADS=12 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$MIA_TRAIN/src; \
+cd '$MIA_TRAIN' && '$VENV/bin/python' src/predict.py '$run' --step $STEP \
 --data-config '$data' --out '$ART/$split' --cover-box --block $BLOCK"
     name="linisb_p_${ARM}_${STEP}_${split}"
     id=$(submit "$name[1-$BLOCKS]" "${name}_%J_%I" -q gpu_b300 -gpu "num=1" -n 12 -W 6:00 -- \

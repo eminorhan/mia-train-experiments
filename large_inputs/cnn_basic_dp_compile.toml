@@ -34,7 +34,7 @@ decode_chunks = 1         # overridden per crop by --decode-chunks auto
 
 [data]
 name = "miao_volumes"
-config_path = "experiments/large_inputs/data/hemibrain_crop003_train.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/large_inputs/data/hemibrain_crop003_train.yaml"
 samples_per_epoch = 100000
 defer_image_ops = true
 

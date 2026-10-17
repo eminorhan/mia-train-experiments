@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Serve every arm of this experiment in one TensorBoard.
 #
-#   bash experiments/new_ssl_recipe/tensorboard.sh [port]
-#   bash experiments/new_ssl_recipe/tensorboard.sh 6007 --smoke   # the 20-step check instead
+#   bash new_ssl_recipe/tensorboard.sh [port]
+#   bash new_ssl_recipe/tensorboard.sh 6007 --smoke   # the 20-step check instead
 #
 # Rebuilds the symlink tree each run, so stages that start later -- 2b waits on 2a, 2c on 2b --
 # appear as soon as they exist.

@@ -93,8 +93,8 @@ each cube's affinities as soon as its labels are built rather than keeping ~136 
 ## Running it
 
 ```bash
-bash experiments/pseudo_labeling/submit.sh --smoke 1   # 20 steps, 4 cubes, one GPU
-bash experiments/pseudo_labeling/submit.sh             # both arms, both rounds
+bash pseudo_labeling/submit.sh --smoke 1   # 20 steps, 4 cubes, one GPU
+bash pseudo_labeling/submit.sh             # both arms, both rounds
 ```
 
 The chain is train → **label** → train, which no other experiment here does: the second training

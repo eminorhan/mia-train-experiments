@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Round-over-round table of pseudo-label quality, from `mia_pseudolabel.py oracle` output.
 
-    python experiments/pseudo_labeling/oracle_table.py /nrs/.../oracle_*.json
+    python pseudo_labeling/oracle_table.py /nrs/.../oracle_*.json
 
 Reads the withheld-ground-truth scores for each round and prints them side by side, because the
 question this experiment exists to answer -- did iterating actually improve the labels, or did the

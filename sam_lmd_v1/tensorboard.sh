@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Serve the five version-4 arms of sam_lmd_v1 in one TensorBoard.
 #
-#   bash experiments/sam_lmd_v1/tensorboard.sh [port]
-#   bash experiments/sam_lmd_v1/tensorboard.sh 6008 --smoke     # the 20-step checks instead
-#   bash experiments/sam_lmd_v1/tensorboard.sh 6006 --list      # rebuild the tree, print, do not serve
+#   bash sam_lmd_v1/tensorboard.sh [port]
+#   bash sam_lmd_v1/tensorboard.sh 6008 --smoke     # the 20-step checks instead
+#   bash sam_lmd_v1/tensorboard.sh 6006 --list      # rebuild the tree, print, do not serve
 #
 # Rebuilds the symlink tree each time, so an arm appears as soon as its run directory exists (the
 # newest run of an arm wins if it was rerun). Only the version-4 arms are served; the version-3

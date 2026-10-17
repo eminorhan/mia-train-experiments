@@ -215,10 +215,10 @@ resolving `[data]` outside a submitted job needs the same pin `submit.sh` export
 once killed four live runs mid-epoch.
 
 ```bash
-bash experiments/new_ssl_recipe/submit.sh              # every arm, every stage
-bash experiments/new_ssl_recipe/submit.sh 2 3          # just the two SSL arms
-bash experiments/new_ssl_recipe/submit.sh --smoke      # 20 steps of all eight stages, one GPU
-QUEUE=gpu_h200 bash experiments/new_ssl_recipe/submit.sh 1   # override the queue choice
+bash new_ssl_recipe/submit.sh              # every arm, every stage
+bash new_ssl_recipe/submit.sh 2 3          # just the two SSL arms
+bash new_ssl_recipe/submit.sh --smoke      # 20 steps of all eight stages, one GPU
+QUEUE=gpu_h200 bash new_ssl_recipe/submit.sh 1   # override the queue choice
 ```
 
 Each arm submits as a chain, every stage held on `done()` of the one before it. A stage cannot name
@@ -239,8 +239,8 @@ that safe: the predecessor has written its step-20 checkpoint before the next st
 start later appear without a restart:
 
 ```bash
-bash experiments/new_ssl_recipe/tensorboard.sh          # all arms, port 6006 (probes past a busy one)
-bash experiments/new_ssl_recipe/tensorboard.sh 6007 --smoke   # the 20-step runs instead
+bash new_ssl_recipe/tensorboard.sh          # all arms, port 6006 (probes past a busy one)
+bash new_ssl_recipe/tensorboard.sh 6007 --smoke   # the 20-step runs instead
 ```
 
 `boundary_accuracy` is the panel to read on the finetune stages — pooled `affinity_accuracy` sits
@@ -256,7 +256,7 @@ cannot overwrite each other's affinities:
 
 ```bash
 RUN=$(ls -dt /nrs/scicompsoft/orhane/mia-train-experiments/new_ssl_recipe/runs/sslrec__2c_ssl_twophase_subpixel_*/ | head -1)
-bash experiments/banis_parity/score_checkpoint.sh 100000 --run "${RUN%/}" --tag sslrec_2c
+bash banis_parity/score_checkpoint.sh 100000 --run "${RUN%/}" --tag sslrec_2c
 ```
 
 After the `experiments/` reorganisation (`fb4afe7`), that script's dead NISB paths were updated: its

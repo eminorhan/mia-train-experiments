@@ -5,7 +5,7 @@ The arms are two windows x the serial-section EM augmentations on or off, and th
 else. So nothing is hand-maintained: every setting is written once below, and an arm is a window from
 WINDOWS plus a setting from AUGMENTS. Regenerate after any edit and read the `git diff`:
 
-    python experiments/lm_zebrafish_cell_instance/make_configs.py
+    python lm_zebrafish_cell_instance/make_configs.py
 
 The claim can be checked directly:
 
@@ -16,7 +16,7 @@ prints the experiment name, the window's lines and the two augmentation probabil
 import pathlib
 
 HERE = pathlib.Path(__file__).parent
-REL = "experiments/lm_zebrafish_cell_instance"
+REL = str(HERE.resolve())  # absolute, so copies of the TOMLs (smoke configs, run dirs) still find the YAMLs
 STORE = (
     "/groups/miaai/miaai/lmd-v0.0.1/data/lm-zebrafish-Betzig-mosaic-example_annotations_Thayer/"
     "crop-001_dsr_timeseries_48t_1c.zarr"

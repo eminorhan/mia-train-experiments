@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Submit the arms of new_ssl_recipe. Each arm is a chain of stages, held one behind the next.
 #
-#   bash experiments/new_ssl_recipe/submit.sh              # every arm
-#   bash experiments/new_ssl_recipe/submit.sh 2 3          # just those arms
-#   bash experiments/new_ssl_recipe/submit.sh --smoke 2    # 20 steps of arm 2's stages, one GPU
-#   bash experiments/new_ssl_recipe/submit.sh --stage 2b_ssl_twophase_interp   # one stage, see below
+#   bash new_ssl_recipe/submit.sh              # every arm
+#   bash new_ssl_recipe/submit.sh 2 3          # just those arms
+#   bash new_ssl_recipe/submit.sh --smoke 2    # 20 steps of arm 2's stages, one GPU
+#   bash new_ssl_recipe/submit.sh --stage 2b_ssl_twophase_interp   # one stage, see below
 #
 #   1  control  : finetune interpolating 100k -> sub-pixel 100k
 #   2  two-phase: SimMIM 200k with a 20k frozen warm-up -> interpolating 100k -> sub-pixel 100k
@@ -38,7 +38,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/new_ssl_recipe   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
@@ -160,7 +160,7 @@ sed \"s|PREV_CHECKPOINT|\${RUN}checkpoints/step_\$STEP|\" '$cfg' > '$resolved'"
       # launch_multinode.sh reads LSB_MCPU_HOSTS itself and blaunches one torchrun per node, so
       # this passes GPUs-per-node rather than a total.
       printf 'MIA_TRAIN=%q VENV=%q %q/deploy/lsf/launch_multinode.sh %s %q %s\n' \
-        "$REPO" "$VENV" "$REPO" "$procs" "$cfg" \
+        "$MIA_TRAIN" "$VENV" "$MIA_TRAIN" "$procs" "$cfg" \
         "$([[ $SMOKE -eq 1 ]] && printf -- "--output-root %q" "$STAGE/smoke" || echo "--output-root $RUNS --resume")"
     else
       printf '%s --standalone --nproc_per_node=%s src/train.py --config %q %s\n' \
@@ -182,7 +182,7 @@ sed \"s|PREV_CHECKPOINT|\${RUN}checkpoints/step_\$STEP|\" '$cfg' > '$resolved'"
   fi
   for q in "${queues[@]}"; do
     id=$(bsub -P "$PROJECT" -q "$q" "${extra[@]}" -n "$slots" -W "$wall" -r \
-      ${dep:+-w "$dep"} -J "sslrec_$tag" -cwd "$REPO" \
+      ${dep:+-w "$dep"} -J "sslrec_$tag" -cwd "$MIA_TRAIN" \
       -o "$LOGS/sslrec_${tag}_%J.log" -e "$LOGS/sslrec_${tag}_%J.err" \
       "bash '$CLAIM' '$STAGE/locks/$tag' '$cmd'" | jobid)
     ids+=("$id")

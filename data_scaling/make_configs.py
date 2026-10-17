@@ -6,14 +6,14 @@ labelled cubes they train on. Hand-maintaining six near-identical TOMLs is how t
 stops being true, so the files are generated: every knob below is written once, and an arm's
 identity is the two substitutions in ARMS. Regenerate with
 
-    python experiments/data_scaling/make_configs.py
+    python data_scaling/make_configs.py
 
 and `git diff` to see what a change actually did.
 """
 import pathlib
 
 HERE = pathlib.Path(__file__).parent
-REL = "experiments/data_scaling"
+REL = str(HERE.resolve())  # absolute, so copies of the TOMLs (smoke configs, run dirs) still find the YAMLs
 
 # The 5 base cubes, taken in seed order so the arms are nested subsets (see the data YAMLs).
 ARMS = [(1, "one"), (3, "three"), (5, "five")]

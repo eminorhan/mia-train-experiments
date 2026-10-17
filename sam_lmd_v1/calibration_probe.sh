@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Per-candidate calibration of one or more teachers on the GT blocks the L1 diagnostic scored.
 #
-#   bash experiments/sam_lmd_v1/calibration_probe.sh deep4 feat64          # newest r0 run of each arm
-#   QUEUE=gpu_b300 bash experiments/sam_lmd_v1/calibration_probe.sh deep4
-#   STEP=100000 bash experiments/sam_lmd_v1/calibration_probe.sh feat64     # an older checkpoint
-#   bash experiments/sam_lmd_v1/calibration_probe.sh deep4 --dry-run
+#   bash sam_lmd_v1/calibration_probe.sh deep4 feat64          # newest r0 run of each arm
+#   QUEUE=gpu_b300 bash sam_lmd_v1/calibration_probe.sh deep4
+#   STEP=100000 bash sam_lmd_v1/calibration_probe.sh feat64     # an older checkpoint
+#   bash sam_lmd_v1/calibration_probe.sh deep4 --dry-run
 #
 # One LSF array element per (arm, GT volume) runs `calibration_probe.py probe` over every tile of
 # the volume's diagnostic block; a CPU job per arm then pools the four records into a table.
@@ -17,7 +17,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/sam_lmd_v1   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
 RUNS=$EXP/runs
@@ -28,10 +28,10 @@ QUEUE=${QUEUE:-gpu_b300}   # the arms train here; H100 was used only while B300 
 ROUND=${ROUND:-0}
 BLOCK=${BLOCK:-512}
 MAX_TILES=${MAX_TILES:-0}
-GT_CONFIG=${GT_CONFIG:-experiments/lmd_ssl_v1/lmd_finetune_singlescale.yaml}
+GT_CONFIG=${GT_CONFIG:-$HERE/../lmd_ssl_v1/lmd_finetune_singlescale.yaml}
 MIN_MASK=${MIN_MASK:-512}     # the gate's size floor in lattice voxels; 4096 for a 4 nm model
 POINTS_PER_BATCH=${POINTS_PER_BATCH:-}   # prompts decoded per batch; a mask-stride-2 arm (arm3_p8) needs 16: the default 64 peaks near 260 GB
-# A 4 nm model: GT_CONFIG=experiments/sam_lmd_v1/data/lmd_finetune_singlescale_4nm.yaml BLOCK=1024 MIN_MASK=4096
+# A 4 nm model: GT_CONFIG=sam_lmd_v1/data/lmd_finetune_singlescale_4nm.yaml BLOCK=1024 MIN_MASK=4096
 GT_VOLUMES=(kasthuri15_ac3 zebrafish_fish2_quadcube1 liconn_mouse_dg hemibrain_ellipsoid_body)
 
 ARMS=(); DRY=0
@@ -57,7 +57,7 @@ for ARM in "${ARMS[@]}"; do
   CROP=$("$VENV/bin/python" -c "import json,sys; print(int(json.load(open(sys.argv[1]))['model']['kwargs'].get('img_size', 256)))" "$run/resolved_config.json")
   ARM_GT=$GT_CONFIG; PPS_FLAG=""
   if [[ "$CROP" != 256 ]]; then
-    ARM_GT="experiments/sam_lmd_v1/data/lmd_finetune_singlescale_crop${CROP}.yaml"
+    ARM_GT="$HERE/data/lmd_finetune_singlescale_crop${CROP}.yaml"
     [[ -f "$ARM_GT" ]] || { echo "missing $ARM_GT: run make_configs.py" >&2; exit 1; }
     PPS_FLAG=" --points-per-side $(( (14 * CROP + 128) / 256 ))"
     echo "window $CROP: GT config $ARM_GT,${PPS_FLAG#* --points-per-side } clicks per side"
@@ -72,17 +72,17 @@ for ARM in "${ARMS[@]}"; do
     echo "export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
     echo "GTS=($(printf '%q ' "${GT_VOLUMES[@]}"))"
     echo "V=\${GTS[\${LSB_JOBINDEX:-1}-1]}"
-    printf 'cd %q\n' "$REPO"
+    printf 'cd %q\n' "$MIA_TRAIN"
     echo "echo \"element \${LSB_JOBINDEX:-1}: volume \$V on \$(hostname)\""
     echo "nvidia-smi --query-gpu=name --format=csv,noheader | head -1"
-    echo "$VENV/bin/python experiments/sam_lmd_v1/calibration_probe.py probe '$run' --step $STEP --volume \"\$V\" \\"
+    echo "$VENV/bin/python $HERE/calibration_probe.py probe '$run' --step $STEP --volume \"\$V\" \\"
     echo "  --out '$OUT'/\"\$V\".npz --block $BLOCK --max-tiles $MAX_TILES --gt-config '$ARM_GT' --min-mask-voxels $MIN_MASK${POINTS_PER_BATCH:+ --points-per-batch $POINTS_PER_BATCH}${PPS_FLAG}"
   } > "$WORKER"
   FINAL="$STAGE/cmd/probe_${ARM}_r${ROUND}_step${STEP}_final.sh"
   { echo "#!/usr/bin/env bash"
     echo "set -euo pipefail"
-    printf 'cd %q\n' "$REPO"
-    echo "$VENV/bin/python experiments/sam_lmd_v1/calibration_probe.py summarize '$OUT' | tee '$OUT/table.txt'"
+    printf 'cd %q\n' "$MIA_TRAIN"
+    echo "$VENV/bin/python $HERE/calibration_probe.py summarize '$OUT' | tee '$OUT/table.txt'"
   } > "$FINAL"
 
   if (( DRY )); then
@@ -90,10 +90,10 @@ for ARM in "${ARMS[@]}"; do
     continue
   fi
   arr=$(bsub -P "$PROJECT" -q "$QUEUE" -gpu "num=1" -n 12 -W 2:00 -J "sam1_probe_${ARM}_${STEP}[1-${#GT_VOLUMES[@]}]" \
-        -cwd "$REPO" -o "$LOGS/sam1_probe_${ARM}_%J_%I.log" -e "$LOGS/sam1_probe_${ARM}_%J_%I.err" \
+        -cwd "$MIA_TRAIN" -o "$LOGS/sam1_probe_${ARM}_%J_%I.log" -e "$LOGS/sam1_probe_${ARM}_%J_%I.err" \
         "bash '$WORKER'" | jobid)
   fin=$(bsub -P "$PROJECT" -q local -n 4 -W 0:30 -J "sam1_probe_${ARM}_${STEP}_final" -w "done($arr)" \
-        -cwd "$REPO" -o "$LOGS/sam1_probe_${ARM}_final_%J.log" -e "$LOGS/sam1_probe_${ARM}_final_%J.err" \
+        -cwd "$MIA_TRAIN" -o "$LOGS/sam1_probe_${ARM}_final_%J.log" -e "$LOGS/sam1_probe_${ARM}_final_%J.err" \
         "bash '$FINAL'" | jobid)
   echo "  array $arr (4 volumes) -> summarize $fin;  table: $OUT/table.txt"
 done

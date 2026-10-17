@@ -4,7 +4,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/simmim_vs_direct   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
@@ -31,7 +31,7 @@ launch () {          # launch <name> <config> <hours> [dependency]
   local wait_arg=()
   [[ -n "$dep" ]] && wait_arg=(-w "ended($dep)")
   bsub -P "$PROJECT" -q "$QUEUE" -gpu "num=$GPUS" -n "$SLOTS" -W "$hours:00" \
-       -J "$name" -cwd "$REPO" \
+       -J "$name" -cwd "$MIA_TRAIN" \
        -o "$LOGS/${name}_%J.log" -e "$LOGS/${name}_%J.err" \
        "${wait_arg[@]}" \
        "export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4; \
@@ -53,7 +53,7 @@ echo "arm A stage 2 -- fine-tune from the SSL checkpoint (waits on A1)"
 A1_STEPS=$(grep -oP 'max_steps = \K\d+' "$HERE/1_simmim_pretrain.toml")
 RESOLVED="$RUNS/2A_resolved.toml"
 bsub -P "$PROJECT" -q "$QUEUE" -gpu "num=$GPUS" -n "$SLOTS" -W 24:00 \
-     -J simmim_A2 -cwd "$REPO" -w "ended(simmim_A1)" \
+     -J simmim_A2 -cwd "$MIA_TRAIN" -w "ended(simmim_A1)" \
      -o "$LOGS/simmim_A2_%J.log" -e "$LOGS/simmim_A2_%J.err" \
      "set -euo pipefail; \
       export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4; \
@@ -82,8 +82,8 @@ fi
 if wanted D; then
 echo "arm D -- arm B at twice the batch, across 2 nodes (16 ranks)"
 bsub -P "$PROJECT" -q gpu_h200_parallel -app parallel-96 -gpu "num=8:mode=shared" \
-     -n 192 -W 24:00 -J simmim_D -cwd "$REPO" \
+     -n 192 -W 24:00 -J simmim_D -cwd "$MIA_TRAIN" \
      -o "$LOGS/simmim_D_%J.log" -e "$LOGS/simmim_D_%J.err" \
-     "MIA_TRAIN='$REPO' VENV='$VENV' \
-      '$REPO/deploy/lsf/launch_multinode.sh' 8 '$HERE/2D_finetune_dinov3_batch16.toml' --output-root '$RUNS'"
+     "MIA_TRAIN='$MIA_TRAIN' VENV='$VENV' \
+      '$MIA_TRAIN/deploy/lsf/launch_multinode.sh' 8 '$HERE/2D_finetune_dinov3_batch16.toml' --output-root '$RUNS'"
 fi

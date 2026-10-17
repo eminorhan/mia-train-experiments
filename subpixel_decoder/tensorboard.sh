@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Serve this arm beside the control it is an ablation of, so the two curves share an axis.
 #
-#   bash experiments/subpixel_decoder/tensorboard.sh [port]
+#   bash subpixel_decoder/tensorboard.sh [port]
 #
 # `boundary_accuracy` is the panel to read. Pooled `affinity_accuracy` is close to useless on this
 # task -- the target is ~83% positive, so a model predicting "same object" everywhere scores 0.83

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # gary_comparison: submit one arm to gpu_b300, gated on a 20-step smoke run.
 #
-#   bash experiments/gary_comparison/submit.sh 1a_dinov3_axial_subpixel             # smoke, then the real run chained on `done(smoke)`
-#   bash experiments/gary_comparison/submit.sh --dry-run 1a_dinov3_axial_subpixel   # write the job scripts, print the bsub lines
-#   bash experiments/gary_comparison/submit.sh --smoke 1a_dinov3_axial_subpixel     # smoke only
-#   bash experiments/gary_comparison/submit.sh --no-smoke 1a_dinov3_axial_subpixel  # real run only; resubmitting after a
+#   bash gary_comparison/submit.sh 1a_dinov3_axial_subpixel             # smoke, then the real run chained on `done(smoke)`
+#   bash gary_comparison/submit.sh --dry-run 1a_dinov3_axial_subpixel   # write the job scripts, print the bsub lines
+#   bash gary_comparison/submit.sh --smoke 1a_dinov3_axial_subpixel     # smoke only
+#   bash gary_comparison/submit.sh --no-smoke 1a_dinov3_axial_subpixel  # real run only; resubmitting after a
 #                                                                                   # wall-time kill continues via --resume
-#   GPUS=2 SMOKE_GPUS=2 WALL=240:00 bash experiments/gary_comparison/submit.sh 5a_dinov3_axial_unetr
+#   GPUS=2 SMOKE_GPUS=2 WALL=240:00 bash gary_comparison/submit.sh 5a_dinov3_axial_unetr
 #                                   # fewer GPUs than a node: GPUS must equal the config's dp_replicate x dp_shard x tp
 #
 # Everything this writes lands in this experiment's directory on /nrs, in the two places the layout
@@ -17,7 +17,7 @@
 # PEND forever: `bkill` it.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/gary_comparison   # this experiment's home on /nrs
@@ -65,7 +65,7 @@ write_cmd () {
     echo "$THREADS"
     echo "$COMPILE_ENV"
     echo "export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
-    printf 'cd %q\n' "$REPO"
+    printf 'cd %q\n' "$MIA_TRAIN"
     printf '%s --standalone --nproc_per_node=%s src/train.py --config %q %s\n' \
       "$VENV/bin/torchrun" "$procs" "$cfg" "$*"
   } > "$cmd"
@@ -77,7 +77,7 @@ write_cmd () {
 submit () {
   local logdir=$1 tag=$2 cmd=$3 procs=$4 slots=$5 wall=$6 dep=${7:-}
   local args=(-P "$PROJECT" -q "$QUEUE" -gpu "num=$procs" -n "$slots" -W "$wall" -r
-              -J "gary_$tag" -cwd "$REPO" -o "$logdir/gary_${tag}_%J.log" -e "$logdir/gary_${tag}_%J.err")
+              -J "gary_$tag" -cwd "$MIA_TRAIN" -o "$logdir/gary_${tag}_%J.log" -e "$logdir/gary_${tag}_%J.err")
   [[ -n "$dep" && "$dep" != DRYRUN ]] && args+=(-w "done($dep)")
   if [[ $DRY -eq 1 ]]; then
     printf 'bsub %s bash %q\n' "${args[*]}" "$cmd" >&2; echo DRYRUN

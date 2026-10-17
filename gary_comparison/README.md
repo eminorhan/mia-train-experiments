@@ -5,7 +5,7 @@ it, so that whatever we train here is trained, selected and scored on the same v
 The point is a like-for-like number, so everything about the data is pinned down in this directory
 and nothing about it is left to a run config.
 
-    experiments/gary_comparison/
+    gary_comparison/
     ├── README.md
     └── data/
         ├── hemibrain_eb_train.yaml   z <  3000
@@ -14,7 +14,7 @@ and nothing about it is left to a run config.
 
 The three YAMLs differ only in `name` and `bounding_box`; verify with
 
-    cd experiments/gary_comparison/data
+    cd gary_comparison/data
     diff <(grep -v '^#' hemibrain_eb_train.yaml) <(grep -v '^#' hemibrain_eb_val.yaml)
 
 ## The volume
@@ -73,19 +73,19 @@ Referenced from a run config as
 
     [data]
     name = "miao_volumes"
-    config_path = "experiments/gary_comparison/data/hemibrain_eb_train.yaml"
+    config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/gary_comparison/data/hemibrain_eb_train.yaml"
     samples_per_epoch = 100000
     defer_image_ops = true
 
     [val_data]
     name = "miao_volumes"
-    config_path = "experiments/gary_comparison/data/hemibrain_eb_val.yaml"
+    config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/gary_comparison/data/hemibrain_eb_val.yaml"
     samples_per_epoch = 32
     defer_image_ops = true
 
 ## Scoring the test corner: a coverage caveat to settle first
 
-`src/predict.py <run_dir> --data-config experiments/gary_comparison/data/hemibrain_eb_test.yaml`
+`src/predict.py <run_dir> --data-config gary_comparison/data/hemibrain_eb_test.yaml`
 writes the prediction and the co-registered ground truth on one lattice, and mia-evals scores them.
 The lattice (`src/prediction/grid.py`) tiles the box with whole windows at a half-window stride,
 drops the tail that does not complete a stride, and centres what remains in the box. At patch 256
@@ -162,9 +162,9 @@ label transform, which nothing in the data path does today.
 | 7a | `7a_dinov3_axial_subpixel_testcrop_50k.toml` | **deliberate test-set leakage control**: arm 1a trained on the TEST corner (`data/hemibrain_eb_test.yaml`) for 50k steps (warmup 5k), checkpointing every 5k; only experiment_name, the training data, max_steps and checkpoint_every differ from 1a. Calibrates what training on the test labels scores against the colleague's row; never rank it with the others. Scored OFF the mia-evals leaderboard, steps 10000, 20000, 30000, 40000 and 50000 (user's choice), mws: `LEADERBOARD=$EXP/probes/testcrop_leakage/leaderboard bash score.sh 7a_dinov3_axial_subpixel_testcrop_50k <step> --routes mws` (record, table and scored labellings under that directory; 10k-40k submitted directly 2026-09-28; 50k by the waiter `probes/testcrop_leakage/score_50k_off_leaderboard.sh`, job 154459216) |
 | 7b | `7b_dinov3_axial_subpixel_testcrop_100k.toml` | **test-set leakage control, longer**: arm 7a run for 100k steps (warmup 5k, linear decay to 100k) with ONE checkpoint, at 100k; only experiment_name, max_steps and checkpoint_every differ from 7a. Requested 2026-09-28 after 7a@50k scored pq 0.221, still rising. Score OFF the leaderboard like 7a (`LEADERBOARD=$EXP/probes/testcrop_leakage/leaderboard`, mws); never rank it. Scored 2026-09-28 (mws, off the leaderboard): pq 0.3178 (SQ 0.808, RQ 0.393, TP 908, FP 904; VOI split 0.761, merge 0.241; ARE 0.172; min_size 5000) -- above the colleague's row on all six numbers, while its held-out fit-block pq (0.152) equals 1a's |
 
-    bash experiments/gary_comparison/submit.sh 1a_dinov3_axial_subpixel            # 20-step smoke on 1 GPU, then the real run chained on done(smoke)
-    bash experiments/gary_comparison/submit.sh --dry-run 1a_dinov3_axial_subpixel  # print the bsub lines, write the job scripts
-    bash experiments/gary_comparison/tensorboard.sh [port] [--smoke] [--list]        # serve the arms' curves; --list only rebuilds the link tree
+    bash gary_comparison/submit.sh 1a_dinov3_axial_subpixel            # 20-step smoke on 1 GPU, then the real run chained on done(smoke)
+    bash gary_comparison/submit.sh --dry-run 1a_dinov3_axial_subpixel  # print the bsub lines, write the job scripts
+    bash gary_comparison/tensorboard.sh [port] [--smoke] [--list]        # serve the arms' curves; --list only rebuilds the link tree
 
 Everything lands under `/nrs/scicompsoft/orhane/mia-train-experiments/gary_comparison/` in the layout's
 own places and nowhere else: run directories in `runs/` (via `--output-root`; bare `--resume` continues the
@@ -316,8 +316,8 @@ H200 run sustained 75-100 samples/s at `data_wait_frac` ~0 without `defer_image_
 finishes through one `--no-smoke` resubmission, which continues via `--resume`. Read `samples_per_s` and
 `data_wait_frac` at the first `[train]` line (step 1k). Checkpoints every 100k steps, 5 x 4.8 GB per arm.
 
-    WALL=336:00 bash experiments/gary_comparison/submit.sh 2a_simmim_lmd_mask60
-    WALL=336:00 bash experiments/gary_comparison/submit.sh 2b_simmim_lmd_mask85
+    WALL=336:00 bash gary_comparison/submit.sh 2a_simmim_lmd_mask60
+    WALL=336:00 bash gary_comparison/submit.sh 2b_simmim_lmd_mask85
 
 Both take a full gpu_b300 node after a 20-step smoke on one GPU; the smoke also exercises stochastic depth's
 `randperm(b)[:k]` path under `compile` (16 samples per rank, so `drop_path_rate = 0.1` is functional here,
@@ -373,8 +373,8 @@ the first few thousand steps (lmd 1a had 48 at step 300 and recovered).
 
 ## Scoring
 
-    bash experiments/gary_comparison/score.sh 1a_dinov3_axial_subpixel 500000          # predict fit + test, then MWS and CC routes
-    bash experiments/gary_comparison/score.sh 1a_dinov3_axial_subpixel 500000 --dry-run
+    bash gary_comparison/score.sh 1a_dinov3_axial_subpixel 500000          # predict fit + test, then MWS and CC routes
+    bash gary_comparison/score.sh 1a_dinov3_axial_subpixel 500000 --dry-run
 
 The task in mia-evals is `gary_comparison_neuron_instance`: the test corner from
 `configs/gary_comparison_neuron_instance/data/test.yaml` (a copy of `data/hemibrain_eb_test.yaml`), scored on its

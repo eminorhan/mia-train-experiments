@@ -86,8 +86,8 @@ would show whether a gap of 0.05 is real.
 
 ## Running it
 
-    bash experiments/large_inputs_nisb/submit.sh w256_1cube w256_3cube w256_5cube w512_1cube w512_3cube w512_5cube
-    bash experiments/large_inputs_nisb/submit.sh --dry-run <arm> ...    # print the bsub lines
+    bash large_inputs_nisb/submit.sh w256_1cube w256_3cube w256_5cube w512_1cube w512_3cube w512_5cube
+    bash large_inputs_nisb/submit.sh --dry-run <arm> ...    # print the bsub lines
 
 One full B300 node per arm. Each real run waits on a 20-step, one-GPU smoke run. Outputs go to
 `/nrs/scicompsoft/orhane/mia-train-experiments/large_inputs_nisb/` (`runs/`, `jobs/`, smoke runs

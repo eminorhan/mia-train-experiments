@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Serve all eight stages of lmd_ssl_v1 in one TensorBoard.
 #
-#   bash experiments/lmd_ssl_v1/tensorboard.sh [port]
-#   bash experiments/lmd_ssl_v1/tensorboard.sh 6008 --smoke   # the 20-step check instead
+#   bash lmd_ssl_v1/tensorboard.sh [port]
+#   bash lmd_ssl_v1/tensorboard.sh 6008 --smoke   # the 20-step check instead
 #
 # Rebuilds the symlink tree each run, so a stage appears as soon as its run directory exists.
 # Stages are held one behind the next, so B shows up only after A finishes and C after B.

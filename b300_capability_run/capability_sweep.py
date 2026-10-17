@@ -36,8 +36,8 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "src"))
+MIA_TRAIN = Path("/groups/scicompsoft/home/orhane/projects/mia-train")
+sys.path.insert(0, str(MIA_TRAIN / "src"))
 
 import torch  # noqa: E402
 import torch.distributed as dist  # noqa: E402

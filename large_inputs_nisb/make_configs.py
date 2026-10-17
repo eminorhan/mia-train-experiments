@@ -6,7 +6,7 @@ experiment rests on is that they differ in nothing else. So nothing is hand-main
 setting is written once below, and an arm is a window from WINDOWS plus a cube count from CUBES.
 Regenerate after any edit and read the `git diff`:
 
-    python experiments/large_inputs_nisb/make_configs.py
+    python large_inputs_nisb/make_configs.py
 
 The claim can be checked directly:
 
@@ -17,7 +17,7 @@ prints the experiment name, the training data and the window's lines, and nothin
 import pathlib
 
 HERE = pathlib.Path(__file__).parent
-REL = "experiments/large_inputs_nisb"
+REL = str(HERE.resolve())  # absolute, so copies of the TOMLs (smoke configs, run dirs) still find the YAMLs
 NISB = "/groups/miaai/miaai/lmd-v0.0.1/dev/nisb/base"
 
 # The 5 base cubes, taken in seed order so the arms are nested subsets, as in data_scaling.
@@ -183,7 +183,7 @@ def volume(split: str, seed: str, weight: float) -> str:
 for n in CUBES:
     head = DATA_HEAD.format(
         what=f"training data: the first {n} of NISB base's 5 training cubes",
-        source=f"experiments/data_scaling/nisb_base_{n}cube_256.yaml",
+        source=f"data_scaling/nisb_base_{n}cube_256.yaml",
         cubes="The cube sets are data_scaling's:\n# nested, in seed order "
               "(seed0; seed0-2; seed0-4), with equal weights.",
     )
@@ -192,7 +192,7 @@ for n in CUBES:
     print(f"wrote data/nisb_base_train_{n}cube.yaml")
 head = DATA_HEAD.format(
     what="validation data: NISB base's validation cube, seed100, for every arm",
-    source="experiments/data_scaling's [val_data]",
+    source="data_scaling's [val_data]",
     cubes="Model selection only: the test cube\n# (seed101) is mia-evals' and is never read here.",
 )
 (HERE / "data" / "nisb_base_val.yaml").write_text(head + volume("val", "seed100", 1.0))

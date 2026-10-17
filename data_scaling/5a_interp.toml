@@ -45,7 +45,7 @@ split_disconnected = true
 
 [data]
 name = "miao_volumes"
-config_path = "experiments/data_scaling/nisb_base_5cube_256.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/data_scaling/nisb_base_5cube_256.yaml"
 samples_per_epoch = 1000
 
 [val_data]

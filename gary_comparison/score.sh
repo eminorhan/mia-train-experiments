@@ -2,9 +2,9 @@
 # Score one gary_comparison arm at one checkpoint in mia-evals: predict the fit and test blocks,
 # then run every scoring route over them, each as its own LSF job chained on the predictions.
 #
-#   bash experiments/gary_comparison/score.sh 1a_dinov3_axial_subpixel 500000
-#   bash experiments/gary_comparison/score.sh 1a_dinov3_axial_subpixel 500000 --dry-run
-#   bash experiments/gary_comparison/score.sh 1a_dinov3_axial_subpixel 500000 --routes mws
+#   bash gary_comparison/score.sh 1a_dinov3_axial_subpixel 500000
+#   bash gary_comparison/score.sh 1a_dinov3_axial_subpixel 500000 --dry-run
+#   bash gary_comparison/score.sh 1a_dinov3_axial_subpixel 500000 --routes mws
 #
 # Data configs and scoring configs live in mia-evals under the task's own directory
 # (configs/gary_comparison_neuron_instance/{mws_size_filter,mws_size_filter_fill,cc_threshold_size_filter}.toml
@@ -19,7 +19,7 @@
 # The record is named <run>.step<N>.<route> by mia-evals; nothing here chooses a label.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 EVALS=/groups/scicompsoft/home/orhane/projects/mia-evals
 VENV=/groups/scicompsoft/home/orhane/myvenv               # CUDA torch, for predict.py
 MIA_EVALS=/groups/scicompsoft/home/orhane/myvenv/bin/mia-evals      # myvenv for everything (user directive 2026-09-23)
@@ -60,14 +60,14 @@ jobid () { grep -o 'Job <[0-9]*>' | head -1 | tr -dc 0-9; }
 submit () {      # submit <name> <bsub args...> -- <command>   -> job id or DRYRUN
   local name=$1; shift; local args=(); while [[ $1 != -- ]]; do args+=("$1"); shift; done; shift
   if [[ $DRY -eq 1 ]]; then printf 'bsub -P %s %s -J %s ...\n    %s\n' "$PROJECT" "${args[*]}" "$name" "$1" >&2; echo DRYRUN
-  else bsub -P "$PROJECT" "${args[@]}" -J "$name" -cwd "$REPO" -o "$LOGS/${name}_%J.log" -e "$LOGS/${name}_%J.err" "$1" | jobid; fi
+  else bsub -P "$PROJECT" "${args[@]}" -J "$name" -cwd "$MIA_TRAIN" -o "$LOGS/${name}_%J.log" -e "$LOGS/${name}_%J.err" "$1" | jobid; fi
 }
 
 # 1. predictions: one GPU per block. 896^3 x 6 channels of affinities plus the co-registered truth.
 deps=()
 for split in fit test; do
-  cmd="export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$REPO/src; \
-cd '$REPO' && '$VENV/bin/python' src/predict.py '$run' --step $STEP \
+  cmd="export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$MIA_TRAIN/src; \
+cd '$MIA_TRAIN' && '$VENV/bin/python' src/predict.py '$run' --step $STEP \
 --data-config '$EVALS/configs/$TASK/data/$split.yaml' --out '$ART/$split'"
   id=$(submit "gary_p_${ARM}_${STEP}_${split}" -q "$QUEUE" -gpu "num=1" -n 12 -W 4:00 -- "$cmd")
   echo "predict $split: job $id -> $ART/$split"

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Serve the six large_inputs_nisb arms in one TensorBoard.
 #
-#   bash experiments/large_inputs_nisb/tensorboard.sh [port]
-#   bash experiments/large_inputs_nisb/tensorboard.sh 6006 --list    # rebuild the tree, print, do not serve
+#   bash large_inputs_nisb/tensorboard.sh [port]
+#   bash large_inputs_nisb/tensorboard.sh 6006 --list    # rebuild the tree, print, do not serve
 #
 # gary_comparison/tensorboard.sh with this experiment's arms. Rebuilds the symlink tree each time, so
 # an arm appears as soon as its run directory exists (the newest run of an arm wins if it was rerun).

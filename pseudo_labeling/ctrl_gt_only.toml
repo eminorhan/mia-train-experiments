@@ -52,7 +52,7 @@ ignore_index = -1
 name = "miao_volumes"
 # The GT-only control: 5 base cubes, real labels, no pseudo-labels at all. Everything else in
 # this file is byte-identical to 1a_reset_r1, so the ONLY difference is the training labels.
-config_path = "experiments/pseudo_labeling/nisb_base_gt_only_256.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/pseudo_labeling/nisb_base_gt_only_256.yaml"
 samples_per_epoch = 1000
 
 [val_data]

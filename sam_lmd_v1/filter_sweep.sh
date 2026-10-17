@@ -2,8 +2,8 @@
 # Does a merge-aware filter raise pseudo-label precision? Score the labeller on the GT blocks under
 # several filter settings, with the SAME teacher and the SAME blocks as the round's own diagnostic.
 #
-#   bash experiments/sam_lmd_v1/filter_sweep.sh feat64            # teacher = newest sam1__feat64_r0 run
-#   bash experiments/sam_lmd_v1/filter_sweep.sh feat64 --dry-run
+#   bash sam_lmd_v1/filter_sweep.sh feat64            # teacher = newest sam1__feat64_r0 run
+#   bash sam_lmd_v1/filter_sweep.sh feat64 --dry-run
 #
 # One LSF array element per (setting, GT volume): `pseudolabel.py diagnose` on one 512^3 block of
 # each of the four finetune volumes, exactly the block the L1 diagnostic used (block choice is a
@@ -17,7 +17,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/sam_lmd_v1   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
 RUNS=$EXP/runs
@@ -63,17 +63,17 @@ WORKER="$STAGE/cmd/filter_sweep_${ARM}.sh"
   echo "declare -A FLAGS=("
   for name in "${ORDER[@]}"; do printf '  [%s]=%q\n' "$name" "${SETTINGS[$name]}"; done
   echo ")"
-  printf 'cd %q\n' "$REPO"
+  printf 'cd %q\n' "$MIA_TRAIN"
   echo "echo \"element \$I: setting \$S volume \$V\""
   echo "mkdir -p '$OUT'/\"\$S\""
-  echo "$VENV/bin/python experiments/sam_lmd_v1/pseudolabel.py diagnose '$run' --step $STEP --volume \"\$V\" \\"
+  echo "$VENV/bin/python $HERE/pseudolabel.py diagnose '$run' --step $STEP --volume \"\$V\" \\"
   echo "  --out '$OUT'/\"\$S\"/\"\$V\".json --blocks 1 --block $BLOCK --pred-iou $PRED_IOU --stability $STABILITY \${FLAGS[\$S]}"
 } > "$WORKER"
 FINAL="$STAGE/cmd/filter_sweep_${ARM}_final.sh"
 { echo "#!/usr/bin/env bash"
   echo "set -euo pipefail"
-  printf 'cd %q\n' "$REPO"
-  echo "for S in ${ORDER[*]}; do $VENV/bin/python experiments/sam_lmd_v1/pseudolabel.py summarize '$OUT'/\$S > /dev/null; done"
+  printf 'cd %q\n' "$MIA_TRAIN"
+  echo "for S in ${ORDER[*]}; do $VENV/bin/python $HERE/pseudolabel.py summarize '$OUT'/\$S > /dev/null; done"
   echo "$VENV/bin/python - '$OUT' ${ORDER[*]} <<'PY' | tee '$OUT/table.txt'"
   cat <<'PY'
 import json, sys
@@ -101,11 +101,11 @@ PY
 chmod +x "$WORKER" "$FINAL"
 
 TOTAL=$(( ${#ORDER[@]} * ${#GT_VOLUMES[@]} ))
-AARGS=(-P "$PROJECT" -q "$QUEUE" -gpu "num=1" -n 12 -W 2:00 -J "sam1_fsweep_${ARM}[1-$TOTAL]" -cwd "$REPO"
+AARGS=(-P "$PROJECT" -q "$QUEUE" -gpu "num=1" -n 12 -W 2:00 -J "sam1_fsweep_${ARM}[1-$TOTAL]" -cwd "$MIA_TRAIN"
        -o "$LOGS/sam1_fsweep_${ARM}_%J_%I.log" -e "$LOGS/sam1_fsweep_${ARM}_%J_%I.err")
 if (( DRY )); then printf 'bsub %s bash %q\n' "${AARGS[*]}" "$WORKER"; exit 0; fi
 arr=$(bsub "${AARGS[@]}" "bash '$WORKER'" | sed -n 's/^Job <\([0-9]*\)>.*/\1/p')
-fin=$(bsub -P "$PROJECT" -q local -n 2 -W 1:00 -J "sam1_fsweep_${ARM}_final" -w "ended($arr)" -cwd "$REPO" \
+fin=$(bsub -P "$PROJECT" -q local -n 2 -W 1:00 -J "sam1_fsweep_${ARM}_final" -w "ended($arr)" -cwd "$MIA_TRAIN" \
       -o "$LOGS/sam1_fsweep_${ARM}_final_%J.log" -e "$LOGS/sam1_fsweep_${ARM}_final_%J.err" "bash '$FINAL'" \
       | sed -n 's/^Job <\([0-9]*\)>.*/\1/p')
 echo "array $arr [1-$TOTAL]  ->  table job $fin  ->  $OUT/table.txt"

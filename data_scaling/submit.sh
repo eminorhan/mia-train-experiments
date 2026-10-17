@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Submit the data-scaling arms. Each arm is one full node, and two stages held one behind the next.
 #
-#   bash experiments/data_scaling/submit.sh                 # all three arms
-#   bash experiments/data_scaling/submit.sh 1 5             # just those arms
-#   bash experiments/data_scaling/submit.sh --dry-run       # print the bsub lines, submit nothing
-#   bash experiments/data_scaling/submit.sh --smoke         # 20 steps of every stage, one GPU
+#   bash data_scaling/submit.sh                 # all three arms
+#   bash data_scaling/submit.sh 1 5             # just those arms
+#   bash data_scaling/submit.sh --dry-run       # print the bsub lines, submit nothing
+#   bash data_scaling/submit.sh --smoke         # 20 steps of every stage, one GPU
 #
 #   arm 1  seed0                          -> interp 200k -> subpixel 100k
 #   arm 3  seed0,1,2                      -> interp 200k -> subpixel 100k
@@ -26,7 +26,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/data_scaling   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
@@ -112,7 +112,7 @@ sed \"s|PREV_CHECKPOINT|\${RUN}checkpoints/step_\$STEP|\" '$cfg' > '$resolved'"
   } > "$cmd"
 
   local bsub_args=(-P "$PROJECT" -q "$queue" -gpu "num=$procs" -n "$slots" -W "$wall" -r
-                   -J "$tag" -cwd "$REPO"
+                   -J "$tag" -cwd "$MIA_TRAIN"
                    -o "$LOGS/${tag}_%J.log" -e "$LOGS/${tag}_%J.err")
   [[ -n "$dep" ]] && bsub_args+=(-w "done($dep)")
 

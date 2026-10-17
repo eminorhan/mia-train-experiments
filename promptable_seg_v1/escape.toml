@@ -6,7 +6,7 @@
 #
 #   bsub -P miaai -q gpu_h100 -gpu "num=2" -n 24 -W 2:00 -J psv1_escape \
 #     -cwd $JOBS -o $JOBS/psv1_escape_%J.log -e $JOBS/psv1_escape_%J.err \
-#     $JOBS/sam3d_smoke.sh experiments/promptable_seg_v1/escape.toml
+#     $JOBS/sam3d_smoke.sh /groups/scicompsoft/home/orhane/projects/mia-train-experiments/promptable_seg_v1/escape.toml
 #
 # What this trains is a model you *ask* for an object rather than one that labels every voxel. A
 # click, a box or a previous mask goes in; one object comes out, with a predicted IoU so several

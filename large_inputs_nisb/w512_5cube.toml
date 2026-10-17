@@ -55,7 +55,7 @@ decode_chunks = 4           # 8-plane slabs: under cuDNN's 2^31, 3% faster than 
 
 [data]
 name = "miao_volumes"
-config_path = "experiments/large_inputs_nisb/data/nisb_base_train_5cube.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/large_inputs_nisb/data/nisb_base_train_5cube.yaml"
 patch_size = [512, 512, 512]  # x, y, z voxels: the window
 samples_per_epoch = 100000  # 12.5k steps per epoch; each epoch end respawns the workers
 defer_image_ops = true
@@ -64,7 +64,7 @@ defer_image_ops = true
 # seed100, the base validation cube, in every arm, at the arm's own window: RoPE normalises
 # positions by the window, so the model only ever runs at the size it trained at.
 name = "miao_volumes"
-config_path = "experiments/large_inputs_nisb/data/nisb_base_val.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/large_inputs_nisb/data/nisb_base_val.yaml"
 patch_size = [512, 512, 512]
 samples_per_epoch = 32
 defer_image_ops = true

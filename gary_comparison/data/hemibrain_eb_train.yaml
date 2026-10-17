@@ -20,7 +20,7 @@
 #
 #   [data]
 #   name = "miao_volumes"
-#   config_path = "experiments/gary_comparison/data/hemibrain_eb_train.yaml"
+#   config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/gary_comparison/data/hemibrain_eb_train.yaml"
 #   samples_per_epoch = <large>   # epoch boundaries respawn the workers; keep them rare
 #   defer_image_ops = true
 resolutions: [[8.0, 8.0, 8.0]]

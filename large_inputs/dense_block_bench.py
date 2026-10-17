@@ -29,7 +29,7 @@ convolution whose output reaches 2^31 elements runs in output-channel chunks, wh
 The summary puts the blocks into whole encoders, beside two references from
 convnext_block_bench.py's run: ConvNeXt-T with 3^3 depthwise kernels, and the windowed ViT-L.
 
-Measured 2026-09-30 (job 154474411; mia-train-experiments/large_inputs/probes/dense_block/
+Measured 2026-09-30 (job 154474411; /nrs/scicompsoft/orhane/mia-train-experiments/large_inputs/probes/dense_block/
 summary.txt). Encoders at 1024^3, compiled, channels-last, with activation checkpointing, in
 s/GPU-step: ResNet-34 layout 0.25, the same at ConvNeXt-T widths 0.66, ResNet-50 layout 0.35,
 Fused-MBConv at ConvNeXt-T widths 1.60, FasterNet 0.35. For comparison, the 3^3 ConvNeXt-T took
@@ -37,8 +37,8 @@ Fused-MBConv at ConvNeXt-T widths 1.60, FasterNet 0.35. For comparison, the 3^3 
 peak from 64 channels up; channels-last beats contiguous everywhere; cudnn.benchmark changes
 nothing.
 
-Run one GPU's share:  python experiments/large_inputs/dense_block_bench.py --runs basic:n1 --out DIR
-Summarize a run:      python experiments/large_inputs/dense_block_bench.py --summarize DIR
+Run one GPU's share:  python large_inputs/dense_block_bench.py --runs basic:n1 --out DIR
+Summarize a run:      python large_inputs/dense_block_bench.py --summarize DIR
 """
 
 from __future__ import annotations

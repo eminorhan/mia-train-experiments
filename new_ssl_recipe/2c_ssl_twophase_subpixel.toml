@@ -21,7 +21,7 @@
 #   STEP=$(ls -d ${RUN}checkpoints/step_* | sed 's|.*step_||' | sort -n | tail -1)
 #   OUT=/nrs/scicompsoft/orhane/mia-train-experiments/new_ssl_recipe/2c_resolved.toml
 #   sed "s|PREV_CHECKPOINT|${RUN}checkpoints/step_${STEP}|" \
-#     experiments/new_ssl_recipe/2c_ssl_twophase_subpixel.toml > "$OUT"
+#     /groups/scicompsoft/home/orhane/projects/mia-train-experiments/new_ssl_recipe/2c_ssl_twophase_subpixel.toml > "$OUT"
 #
 #   bsub -P miaai -q gpu_h200 -gpu "num=8" -n 96 -W 20:00 -r -J sslrec_2c \
 #     -cwd /groups/scicompsoft/home/orhane/projects/mia-train -w "done(<2b job id>)" \
@@ -91,7 +91,7 @@ name = "miao_volumes"
 # The five NISB `base` training cubes at 256^3 with the 16 in-plane rotations/flips. Byte-identical
 # to init_comparison's copy, and shared by all eight stages here -- every step this arm has taken,
 # self-supervised and supervised, has been on these five cubes.
-config_path = "experiments/new_ssl_recipe/nisb_base_256_aug.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/new_ssl_recipe/nisb_base_256_aug.yaml"
 samples_per_epoch = 1000  # bookkeeping only; `max_steps` is what ends the run
 
 [val_data]

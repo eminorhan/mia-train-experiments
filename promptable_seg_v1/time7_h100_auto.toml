@@ -15,7 +15,7 @@
 # Run this on H100, not B300. Measured on this algorithm: a B300 delivers 0.47x an H100's
 # throughput despite 2.27x the peak bf16 FLOPs, and a compiled B300 still loses to an eager H100.
 # The step is launch-bound, so a device whose advantage is arithmetic has nothing to sell here.
-# See experiments/promptable_seg_v1/RESULTS.md -- and note that the opposite recommendation is
+# See promptable_seg_v1/RESULTS.md -- and note that the opposite recommendation is
 # correct for simmim/affinity_seg, so re-measure rather than carrying either across.
 #
 #   bsub -P <project> -q gpu_h100 -gpu "num=4" -n 48 -W 24:00 ... \
@@ -43,7 +43,7 @@ in_chans = 1
 embed_dim = 1024         # ViT-L/16, ~300M parameters. ViT-B/16 (768 / 12 / 12, ~86M) is the
 depth = 24               # cheaper option and loads from `dinov3_vitb16_pretrain_lvd1689m`; L is
 num_heads = 16           # the default here because it is the scale the profiling arms in
-                         # experiments/promptable_seg_v1 were measured at, and a device or kernel
+                         # promptable_seg_v1 were measured at, and a device or kernel
                          # recommendation taken at a smaller encoder does not transfer -- at ViT-B
                          # and below the step is dominated by the decoder's many small kernels
                          # rather than by the encoder's matmuls.
@@ -71,7 +71,7 @@ pos_embed_rope_type = "superposition"
 # The ENCODER's attention kernel. Note the two knobs have different names and different homes:
 # `[model].use_fa4` is the DINOv3 encoder's (a bool, defaulting to SDPA) and
 # `[algorithm].attention_backend` below is the mask decoder's. Both are set to SDPA here, for two
-# measured reasons (experiments/promptable_seg_v1): FlashAttention-4 buys nothing at these shapes,
+# measured reasons (promptable_seg_v1): FlashAttention-4 buys nothing at these shapes,
 # and it CANNOT be combined with `[trainer].compile` -- inductor emits an undefined symbol inside
 # flash-attn's CuTeDSL wrapper and the run dies at step 1. Since compilation pays, SDPA is not a
 # compromise.
@@ -147,7 +147,7 @@ profile = true
 profile_start_step = 40
 profile_steps = 5
 
-# Worth 1.42x on this algorithm (measured, experiments/promptable_seg_v1/RESULTS.md). The step is
+# Worth 1.42x on this algorithm (measured, promptable_seg_v1/RESULTS.md). The step is
 # launch-bound -- 4% MFU, because a two-way decoder runs once per prompt per round, which is many
 # small kernels -- and inductor's fusion is the direct answer to that. Requires the SDPA backend
 # selected above.

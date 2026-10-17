@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # lm_zebrafish_cell_instance: submit arms to gpu_b300, one full node each, each gated on a 20-step smoke run.
 #
-#   bash experiments/lm_zebrafish_cell_instance/submit.sh w496_em w496_noem w288_em w288_noem   # smoke, then the real run on done(smoke)
-#   bash experiments/lm_zebrafish_cell_instance/submit.sh --dry-run w496_em                     # write the job scripts, print the bsub lines
-#   bash experiments/lm_zebrafish_cell_instance/submit.sh --smoke w496_em                       # smoke only
-#   bash experiments/lm_zebrafish_cell_instance/submit.sh --no-smoke w288_em                    # real run only; after a wall-time kill this
+#   bash lm_zebrafish_cell_instance/submit.sh w496_em w496_noem w288_em w288_noem   # smoke, then the real run on done(smoke)
+#   bash lm_zebrafish_cell_instance/submit.sh --dry-run w496_em                     # write the job scripts, print the bsub lines
+#   bash lm_zebrafish_cell_instance/submit.sh --smoke w496_em                       # smoke only
+#   bash lm_zebrafish_cell_instance/submit.sh --no-smoke w288_em                    # real run only; after a wall-time kill this
 #                                                                                               # continues from the last checkpoint (--resume)
 #
 # large_inputs_nisb/submit.sh, plus one thing: every job imports miao from a pinned export of
@@ -17,7 +17,7 @@
 # runs/smoke/. If a smoke fails, its real job stays PEND forever: `bkill` it.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/lm_zebrafish_cell_instance   # this experiment's home on /nrs
@@ -72,7 +72,7 @@ write_cmd () {
     echo "$COMPILE_ENV"
     echo "export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
     printf 'export PYTHONPATH=%q${PYTHONPATH:+:$PYTHONPATH}\n' "$MIAO_SRC"
-    printf 'cd %q\n' "$REPO"
+    printf 'cd %q\n' "$MIA_TRAIN"
     printf '%s -c "%s"\n' "$VENV/bin/python" \
       "import miao; print('[miao]', miao.__file__, flush=True); assert miao.__file__.startswith('$MIAO_SRC/'), 'not the pinned miao'"
     printf '%s --standalone --nproc_per_node=%s src/train.py --config %q %s\n' \
@@ -86,7 +86,7 @@ write_cmd () {
 submit () {
   local logdir=$1 tag=$2 cmd=$3 procs=$4 slots=$5 wall=$6 dep=${7:-}
   local args=(-P "$PROJECT" -q "$QUEUE" -gpu "num=$procs" -n "$slots" -W "$wall" -r
-              -J "lmzf_$tag" -cwd "$REPO" -o "$logdir/lmzf_${tag}_%J.log" -e "$logdir/lmzf_${tag}_%J.err")
+              -J "lmzf_$tag" -cwd "$MIA_TRAIN" -o "$logdir/lmzf_${tag}_%J.log" -e "$logdir/lmzf_${tag}_%J.err")
   [[ -n "$dep" && "$dep" != DRYRUN ]] && args+=(-w "done($dep)")
   if [[ $DRY -eq 1 ]]; then
     printf 'bsub %s bash %q\n' "${args[*]}" "$cmd" >&2; echo DRYRUN

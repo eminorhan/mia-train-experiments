@@ -2,10 +2,10 @@
 # Submit the pseudo-labelling bootstrap. Two arms, two rounds each, with a pseudo-labelling job
 # between the rounds.
 #
-#   bash experiments/pseudo_labeling/submit.sh              # everything
-#   bash experiments/pseudo_labeling/submit.sh --label r1   # only generate round 1's labels
-#   bash experiments/pseudo_labeling/submit.sh 1            # only arm 1 (assumes r1 labels exist)
-#   bash experiments/pseudo_labeling/submit.sh --smoke 1    # 20 steps of arm 1, one GPU, 4 cubes
+#   bash pseudo_labeling/submit.sh              # everything
+#   bash pseudo_labeling/submit.sh --label r1   # only generate round 1's labels
+#   bash pseudo_labeling/submit.sh 1            # only arm 1 (assumes r1 labels exist)
+#   bash pseudo_labeling/submit.sh --smoke 1    # 20 steps of arm 1, one GPU, 4 cubes
 #
 #   1  reset : every round re-initialises from the interpolation-trained encoder at 200k
 #   2  warm  : every round warm-starts from the previous round's student
@@ -25,7 +25,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 BANIS=/groups/scicompsoft/home/orhane/projects/banis
 PROJECT=miaai
@@ -254,11 +254,11 @@ label () {
 
   local arr fin
   arr=$(bsub -P "$PROJECT" -q "$LABEL_QUEUE" -gpu "num=1" -n "$LABEL_SLOTS" -W "${LABEL_WALL:-4:00}" -r \
-    ${dep:+-w "$dep"} -J "pl_label_${tag}[1-$SHARDS]%$LABEL_CONCURRENT" -cwd "$REPO" \
+    ${dep:+-w "$dep"} -J "pl_label_${tag}[1-$SHARDS]%$LABEL_CONCURRENT" -cwd "$MIA_TRAIN" \
     -o "$LOGS/pl_label_${tag}_%J_%I.log" -e "$LOGS/pl_label_${tag}_%J_%I.err" "$worker" | jobid)
   # CPU queue: the finalise step is numpy and zarr, and holding a GPU through it is waste.
   fin=$(bsub -P "$PROJECT" -q local -n 4 -W 2:00 \
-    -w "done($arr)" -J "pl_label_${tag}_fin" -cwd "$REPO" \
+    -w "done($arr)" -J "pl_label_${tag}_fin" -cwd "$MIA_TRAIN" \
     -o "$LOGS/pl_label_${tag}_fin_%J.log" -e "$LOGS/pl_label_${tag}_fin_%J.err" "$final" | jobid)
   echo "    array $arr[1-$SHARDS]%$LABEL_CONCURRENT -> finalise $fin" >&2
   echo "$fin"
@@ -303,7 +303,7 @@ sed -e \"s|ROUND_CONFIG|$roundcfg|\" -e \"s|PREV_CHECKPOINT|\${RUN}checkpoints/s
   chmod +x "$cmd"
 
   bsub -P "$PROJECT" -q "$QUEUE" -gpu "num=$procs" -n "$slots" -W "$wall" -r \
-    ${dep:+-w "$dep"} -J "pl_$tag" -cwd "$REPO" \
+    ${dep:+-w "$dep"} -J "pl_$tag" -cwd "$MIA_TRAIN" \
     -o "$LOGS/pl_${tag}_%J.log" -e "$LOGS/pl_${tag}_%J.err" "$cmd" | jobid
 }
 

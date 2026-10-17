@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Would a PERFECT model's windows assemble into a precise labelling? The control for the sweep.
 #
-#   bash experiments/sam_lmd_v1/oracle_sweep.sh                 # every setting
-#   SETTINGS_ONLY="oracle_consensus oracle_r50_consensus" bash experiments/sam_lmd_v1/oracle_sweep.sh
-#   bash experiments/sam_lmd_v1/oracle_sweep.sh --dry-run
+#   bash sam_lmd_v1/oracle_sweep.sh                 # every setting
+#   SETTINGS_ONLY="oracle_consensus oracle_r50_consensus" bash sam_lmd_v1/oracle_sweep.sh
+#   bash sam_lmd_v1/oracle_sweep.sh --dry-run
 #
 # `pseudolabel.py oracle` replaces the model with the ground truth inside every window: one perfect
 # mask per object component of at least 512 voxels, at the mask stride, and pushes those through
@@ -17,7 +17,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/sam_lmd_v1   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
 RUNS=$EXP/runs
@@ -63,17 +63,17 @@ WORKER="$STAGE/cmd/oracle_sweep_${STAMP}.sh"
   echo "declare -A FLAGS=("
   for name in "${RUN[@]}"; do printf '  [%s]=%q\n' "$name" "${FLAGS[$name]}"; done
   echo ")"
-  printf 'cd %q\n' "$REPO"
+  printf 'cd %q\n' "$MIA_TRAIN"
   echo "echo \"element \$I: setting \$S volume \$V on \$(hostname)\""
   echo "mkdir -p '$OUT'/\"\$S\""
-  echo "$VENV/bin/python experiments/sam_lmd_v1/pseudolabel.py oracle --volume \"\$V\" \\"
+  echo "$VENV/bin/python $HERE/pseudolabel.py oracle --volume \"\$V\" \\"
   echo "  --out '$OUT'/\"\$S\"/\"\$V\".json \${FLAGS[\$S]}"
 } > "$WORKER"
 FINAL="$STAGE/cmd/oracle_sweep_final.sh"
 { echo "#!/usr/bin/env bash"
   echo "set -euo pipefail"
-  printf 'cd %q\n' "$REPO"
-  echo "for S in ${ORDER[*]}; do [[ -d '$OUT'/\$S ]] && $VENV/bin/python experiments/sam_lmd_v1/pseudolabel.py summarize '$OUT'/\$S > /dev/null; done"
+  printf 'cd %q\n' "$MIA_TRAIN"
+  echo "for S in ${ORDER[*]}; do [[ -d '$OUT'/\$S ]] && $VENV/bin/python $HERE/pseudolabel.py summarize '$OUT'/\$S > /dev/null; done"
   echo "$VENV/bin/python - '$OUT' ${ORDER[*]} <<'PY' | tee '$OUT/table.txt'"
   cat <<'PY'
 import json, sys
@@ -107,11 +107,11 @@ PY
 chmod +x "$WORKER" "$FINAL"
 
 TOTAL=$(( ${#RUN[@]} * ${#GT_VOLUMES[@]} ))
-AARGS=(-P "$PROJECT" -q local -n 8 -W 2:00 -J "sam1_oracle[1-$TOTAL]" -cwd "$REPO"
+AARGS=(-P "$PROJECT" -q local -n 8 -W 2:00 -J "sam1_oracle[1-$TOTAL]" -cwd "$MIA_TRAIN"
        -o "$LOGS/sam1_oracle_%J_%I.log" -e "$LOGS/sam1_oracle_%J_%I.err")
 if (( DRY )); then printf 'bsub %s bash %q\n' "${AARGS[*]}" "$WORKER"; cat "$WORKER"; exit 0; fi
 arr=$(bsub "${AARGS[@]}" "bash '$WORKER'" | sed -n 's/^Job <\([0-9]*\)>.*/\1/p')
-fin=$(bsub -P "$PROJECT" -q local -n 2 -W 0:30 -J "sam1_oracle_final" -w "ended($arr)" -cwd "$REPO" \
+fin=$(bsub -P "$PROJECT" -q local -n 2 -W 0:30 -J "sam1_oracle_final" -w "ended($arr)" -cwd "$MIA_TRAIN" \
       -o "$LOGS/sam1_oracle_final_%J.log" -e "$LOGS/sam1_oracle_final_%J.err" "bash '$FINAL'" \
       | sed -n 's/^Job <\([0-9]*\)>.*/\1/p')
 echo "array $arr [1-$TOTAL]  ->  table job $fin  ->  $OUT/table.txt"

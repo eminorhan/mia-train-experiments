@@ -1,6 +1,6 @@
 """The model-free parts of the SAM data engine, each against an obvious reference.
 
-    python -m pytest experiments/sam_lmd_v1/test_tools.py -q
+    python -m pytest sam_lmd_v1/test_tools.py -q
 
 Run from the repository root so `pyproject.toml` puts `src/` on the path. Everything here is CPU,
 seconds, and touches no store under /groups: the block partition is checked for disjointness and

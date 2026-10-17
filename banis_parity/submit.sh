@@ -3,7 +3,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/banis_parity   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
@@ -18,7 +18,7 @@ SLOTS=96
 # `--resume` makes this idempotent: the first launch starts the run, a resubmission after the
 # wall-time limit continues the newest run of this experiment. 300k steps will not fit one window.
 bsub -P "$PROJECT" -q "$QUEUE" -gpu "num=$GPUS" -n "$SLOTS" -W 48:00 -r \
-     -J banis_parity -cwd "$REPO" \
+     -J banis_parity -cwd "$MIA_TRAIN" \
      -o "$LOGS/banis_parity_%J.log" -e "$LOGS/banis_parity_%J.err" \
      "export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4; \
       export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True; \

@@ -14,7 +14,7 @@ pair. Sliding windows were then reimplemented to move tile by tile, which is wha
   block         block windows: SDPA over the batch of windows
   sliding       windows sliding tile by tile, on FlexAttention
 
-Run on one GPU:  python experiments/large_inputs/attention_bench.py --grid 32
+Run on one GPU:  python large_inputs/attention_bench.py --grid 32
 """
 
 from __future__ import annotations
@@ -24,8 +24,8 @@ import math
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "src"))
+MIA_TRAIN = Path("/groups/scicompsoft/home/orhane/projects/mia-train")
+sys.path.insert(0, str(MIA_TRAIN / "src"))
 
 import torch  # noqa: E402
 import torch.nn.functional as F  # noqa: E402

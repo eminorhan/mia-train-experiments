@@ -20,12 +20,12 @@ asks two things:
 Versions 1-2 also swept the mask head's knobs; version 4 replaced that with arms on the encoder's
 scale, the batch and the prompting recipe (below).
 
-    bash experiments/sam_lmd_v1/submit.sh --smoke --rounds 0 feat64   # 20 steps, one GPU
-    bash experiments/sam_lmd_v1/submit.sh --rounds 0 feat64           # VERSION 3: round 0 only
-    bash experiments/sam_lmd_v1/submit.sh                             # every arm, every round
-    bash experiments/sam_lmd_v1/tensorboard.sh                        # watch it
-    bash experiments/sam_lmd_v1/predict_eval.sh feat64 0              # eight volumes -> instances
-    bash experiments/sam_lmd_v1/score.sh feat64 0                     # -> the leaderboard table
+    bash sam_lmd_v1/submit.sh --smoke --rounds 0 feat64   # 20 steps, one GPU
+    bash sam_lmd_v1/submit.sh --rounds 0 feat64           # VERSION 3: round 0 only
+    bash sam_lmd_v1/submit.sh                             # every arm, every round
+    bash sam_lmd_v1/tensorboard.sh                        # watch it
+    bash sam_lmd_v1/predict_eval.sh feat64 0              # eight volumes -> instances
+    bash sam_lmd_v1/score.sh feat64 0                     # -> the leaderboard table
 
 **Status (2026-09-27; version 4: arms 1-12 trained; arms 3-9, 11 and 12 on the leaderboard; arm 10's
 scoring on hold because its 352-voxel lattice does not cover the task region on two volumes).** Nine arms on the encoder's scale, the batch size and the training
@@ -877,7 +877,7 @@ labeller's `min_mask_voxels` is 4096 there; arm 3 scores as before.
   scale of 1), and it removes the `randperm[:b]` that inductor's `randperm_index` pattern cannot
   bind under `torch.compile` -- the failure that stopped every compiled run with `drop_path > 0`
   at batch 1. Test in `tests/unit/test_dinov3_layers.py`.
-- Experiment tooling, model-free, tested by `python -m pytest experiments/sam_lmd_v1/test_tools.py`:
+- Experiment tooling, model-free, tested by `python -m pytest sam_lmd_v1/test_tools.py`:
   `oracle_sweep.sh` / `pseudolabel.py oracle` (perfect per-window masks through the same rules,
   optionally kept with probability `--recall`; CPU only); `assembly_sweep.sh` (the block diagnostic
   under every assembly plus the single-tile reference; `compare_labellings` gained `fragments`,

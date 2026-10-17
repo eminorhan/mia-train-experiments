@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """How large an input volume can a model train on per B300 node, and at what throughput?
 
-Copied 2026-09-29 from `experiments/b300_capability_run/capability_sweep.py` (the 7B DINOv3 run) so
+Copied 2026-09-29 from `b300_capability_run/capability_sweep.py` (the 7B DINOv3 run) so
 this experiment can change it as it moves to other architectures. Changes so far: `--decode-chunks`
 (an explicit count, or `auto` = the fewest slabs that keep each sub-pixel-head slab under cuDNN's
 2^31-element limit, so one config serves every crop size), and the record carries the chunk count,
@@ -49,8 +49,8 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "src"))
+MIA_TRAIN = Path("/groups/scicompsoft/home/orhane/projects/mia-train")
+sys.path.insert(0, str(MIA_TRAIN / "src"))
 
 import torch  # noqa: E402
 import torch.distributed as dist  # noqa: E402

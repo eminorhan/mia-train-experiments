@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Serve the single-crop overfit tests side by side, with the version 3 round-0 run as the reference.
 #
-#   bash experiments/sam_lmd_v1/overfit/tensorboard.sh [port]
-#   bash experiments/sam_lmd_v1/overfit/tensorboard.sh 6007 --list    # rebuild the tree, print, do not serve
+#   bash sam_lmd_v1/overfit/tensorboard.sh [port]
+#   bash sam_lmd_v1/overfit/tensorboard.sh 6007 --list    # rebuild the tree, print, do not serve
 #
 # Runs are named by their test so the legend reads `8nm`, `4nm`, `8nm_stride2` and
 # `ref_feat64_r0_200k`. Rebuilt

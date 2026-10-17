@@ -140,7 +140,7 @@ is static and nothing is read back. `tests/unit/test_promptable_targets.py` pins
 JOBS=/nrs/scicompsoft/orhane/mia-train-experiments/promptable_seg_v1/jobs
 bsub -P miaai -q gpu_h100 -gpu "num=2" -n 24 -W 2:00 -J psv1_escape \
   -cwd $JOBS -o $JOBS/psv1_escape_%J.log -e $JOBS/psv1_escape_%J.err \
-  $JOBS/sam3d_smoke.sh experiments/promptable_seg_v1/escape.toml
+  $JOBS/sam3d_smoke.sh /groups/scicompsoft/home/orhane/projects/mia-train-experiments/promptable_seg_v1/escape.toml
 ```
 
 `sam3d_smoke.sh` takes the config path as its one argument and is otherwise the standard

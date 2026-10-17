@@ -1,11 +1,11 @@
 """Is the IoU head's score any guide to a grid mask's true IoU? Per-candidate evidence, on truth.
 
     # one GT volume, the SAME block the round's L1 diagnostic scored (GPU)
-    python experiments/sam_lmd_v1/calibration_probe.py probe <run dir> --step N \
+    python sam_lmd_v1/calibration_probe.py probe <run dir> --step N \
         --volume kasthuri15_ac3 --out <dir>/kasthuri15_ac3.npz [--block 512] [--max-tiles 27]
 
     # pool every volume's records in a directory into one report (CPU, seconds)
-    python experiments/sam_lmd_v1/calibration_probe.py summarize <dir> \
+    python sam_lmd_v1/calibration_probe.py summarize <dir> \
         [--pred-iou 0.7 --stability 0.8]
 
 The round diagnostics (`pseudolabel.py diagnose`) judge the labeller's OUTPUT: what survives the
@@ -51,8 +51,8 @@ import numpy as np
 import torch
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[1]
-sys.path.insert(0, str(REPO / "src"))
+MIA_TRAIN = Path("/groups/scicompsoft/home/orhane/projects/mia-train")
+sys.path.insert(0, str(MIA_TRAIN / "src"))
 sys.path.insert(0, str(HERE))
 
 from pseudolabel import (  # noqa: E402
@@ -278,7 +278,7 @@ def cmd_probe(args: argparse.Namespace) -> None:
         "tiles_in_block": len(grid.tiles), "tiles_probed": len(tiles), "patch": patch,
         "mask_stride": list(stride), "points_per_side": points_per_side,
         "size_bounds_cells": bounds, "amg": amg_settings(algorithm, amg), "part": PART,
-        "regenerate": " ".join(["python", "experiments/sam_lmd_v1/calibration_probe.py", "probe",
+        "regenerate": " ".join(["python", str(HERE / "calibration_probe.py"), "probe",
                                 str(args.run_dir), "--step", str(step), "--volume", name,
                                 "--out", str(args.out), "--block", str(args.block),
                                 "--max-tiles", str(args.max_tiles)]),

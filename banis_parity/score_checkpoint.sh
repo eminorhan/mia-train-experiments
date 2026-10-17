@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Predict, score and visualise one checkpoint of this experiment, in three chained LSF jobs.
 #
-#   bash experiments/banis_parity/score_checkpoint.sh 160000
-#   bash experiments/banis_parity/score_checkpoint.sh 160000 --reuse        # re-score, no GPU
-#   bash experiments/banis_parity/score_checkpoint.sh 200000 --logits "5 6 7"
+#   bash banis_parity/score_checkpoint.sh 160000
+#   bash banis_parity/score_checkpoint.sh 160000 --reuse        # re-score, no GPU
+#   bash banis_parity/score_checkpoint.sh 200000 --logits "5 6 7"
 #
 # The three stages run in different environments on purpose, and that split is the reason this is
 # a submission script rather than one program:

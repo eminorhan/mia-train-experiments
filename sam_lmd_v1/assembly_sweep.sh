@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Where does the labeller's precision go: in the tiles, or in putting the tiles together?
 #
-#   bash experiments/sam_lmd_v1/assembly_sweep.sh deep4            # every setting, teacher = newest sam1__deep4_r0
-#   SETTINGS_ONLY="propagate_s64 canvas_s64" bash experiments/sam_lmd_v1/assembly_sweep.sh deep4
-#   STEP=50000 SETTINGS_ONLY="single_tile consensus" bash experiments/sam_lmd_v1/assembly_sweep.sh feat64
-#   NM=4 STEP=200000 SETTINGS_ONLY="single_tile consensus" bash experiments/sam_lmd_v1/assembly_sweep.sh arm1_4nm
-#   bash experiments/sam_lmd_v1/assembly_sweep.sh deep4 --dry-run
+#   bash sam_lmd_v1/assembly_sweep.sh deep4            # every setting, teacher = newest sam1__deep4_r0
+#   SETTINGS_ONLY="propagate_s64 canvas_s64" bash sam_lmd_v1/assembly_sweep.sh deep4
+#   STEP=50000 SETTINGS_ONLY="single_tile consensus" bash sam_lmd_v1/assembly_sweep.sh feat64
+#   NM=4 STEP=200000 SETTINGS_ONLY="single_tile consensus" bash sam_lmd_v1/assembly_sweep.sh arm1_4nm
+#   bash sam_lmd_v1/assembly_sweep.sh deep4 --dry-run
 #
 # `pseudolabel.py diagnose` on the SAME 512^3 block of each of the four finetune volumes that the
 # round's L1 diagnostic scored, once per tile-assembly setting, plus a no-assembly reference: eight
@@ -28,7 +28,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/sam_lmd_v1   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
 RUNS=$EXP/runs
@@ -45,8 +45,8 @@ GT_VOLUMES=(kasthuri15_ac3 zebrafish_fish2_quadcube1 liconn_mouse_dg hemibrain_e
 # of the eight 2 um windows), and every voxel floor is 8x (4096 = 512 at 8 nm).
 NM=${NM:-8}
 case "$NM" in
-  8) GT_CONFIG="experiments/lmd_ssl_v1/lmd_finetune_singlescale.yaml"; BLOCK=512; SINGLE="--block 288 --blocks 8"; FLOOR=512 ;;
-  4) GT_CONFIG="experiments/sam_lmd_v1/data/lmd_finetune_singlescale_4nm.yaml"; BLOCK=1024; SINGLE="--block 320 --blocks 32"; FLOOR=4096 ;;
+  8) GT_CONFIG="$HERE/../lmd_ssl_v1/lmd_finetune_singlescale.yaml"; BLOCK=512; SINGLE="--block 288 --blocks 8"; FLOOR=512 ;;
+  4) GT_CONFIG="$HERE/data/lmd_finetune_singlescale_4nm.yaml"; BLOCK=1024; SINGLE="--block 320 --blocks 32"; FLOOR=4096 ;;
   *) echo "NM must be 8 or 4, got $NM" >&2; exit 2 ;;
 esac
 COMMON="--gt-config $GT_CONFIG --min-truth-voxels $FLOOR --min-mask-voxels $FLOOR"
@@ -87,7 +87,7 @@ STEP=${STEP:-$NEWEST}                     # STEP=50000 scores an older checkpoin
 CROP=$("$VENV/bin/python" -c "import json,sys; print(int(json.load(open(sys.argv[1]))['model']['kwargs'].get('img_size', 256)))" "$run/resolved_config.json")
 if [[ "$CROP" != 256 ]]; then
   [[ "$NM" == 8 ]] || { echo "a $CROP-voxel window is only generated at 8 nm" >&2; exit 2; }
-  GT_CONFIG="experiments/sam_lmd_v1/data/lmd_finetune_singlescale_crop${CROP}.yaml"
+  GT_CONFIG="$HERE/data/lmd_finetune_singlescale_crop${CROP}.yaml"
   [[ -f "$GT_CONFIG" ]] || { echo "missing $GT_CONFIG: run make_configs.py" >&2; exit 1; }
   PPS=$(( (14 * CROP + 128) / 256 ))
   COMMON="--gt-config $GT_CONFIG --min-truth-voxels $FLOOR --min-mask-voxels $FLOOR --points-per-side $PPS"
@@ -111,17 +111,17 @@ WORKER="$STAGE/cmd/assembly_sweep_${ARM}_step${STEP}_${STAMP}.sh"
   echo "declare -A FLAGS=("
   for name in "${RUN[@]}"; do printf '  [%s]=%q\n' "$name" "${FLAGS[$name]}"; done
   echo ")"
-  printf 'cd %q\n' "$REPO"
+  printf 'cd %q\n' "$MIA_TRAIN"
   echo "echo \"element \$I: setting \$S volume \$V on \$(hostname)\""
   echo "mkdir -p '$OUT'/\"\$S\""
-  echo "$VENV/bin/python experiments/sam_lmd_v1/pseudolabel.py diagnose '$run' --step $STEP --volume \"\$V\" \\"
+  echo "$VENV/bin/python $HERE/pseudolabel.py diagnose '$run' --step $STEP --volume \"\$V\" \\"
   echo "  --out '$OUT'/\"\$S\"/\"\$V\".json --pred-iou $PRED_IOU --stability $STABILITY $COMMON \${FLAGS[\$S]}"
 } > "$WORKER"
 FINAL="$STAGE/cmd/assembly_sweep_${ARM}_step${STEP}_final.sh"
 { echo "#!/usr/bin/env bash"
   echo "set -euo pipefail"
-  printf 'cd %q\n' "$REPO"
-  echo "for S in ${ORDER[*]}; do [[ -d '$OUT'/\$S ]] && $VENV/bin/python experiments/sam_lmd_v1/pseudolabel.py summarize '$OUT'/\$S > /dev/null; done"
+  printf 'cd %q\n' "$MIA_TRAIN"
+  echo "for S in ${ORDER[*]}; do [[ -d '$OUT'/\$S ]] && $VENV/bin/python $HERE/pseudolabel.py summarize '$OUT'/\$S > /dev/null; done"
   echo "$VENV/bin/python - '$OUT' ${ORDER[*]} <<'PY' | tee '$OUT/table.txt'"
   cat <<'PY'
 import json, sys
@@ -158,11 +158,11 @@ chmod +x "$WORKER" "$FINAL"
 TOTAL=$(( ${#RUN[@]} * ${#GT_VOLUMES[@]} ))
 # 12 slots = one GPU's share on gpu_h100 (12 slots/GPU, 40 GB each), so a one-GPU job strands nothing;
 # 480 GB also covers the 4 nm scoring (a 1024^3 int64 labelling, its truth, and the scoring's temporaries).
-AARGS=(-P "$PROJECT" -q "$QUEUE" -gpu "num=1" -n 12 -W 4:00 -J "sam1_asweep_${ARM}_${STEP}[1-$TOTAL]" -cwd "$REPO"
+AARGS=(-P "$PROJECT" -q "$QUEUE" -gpu "num=1" -n 12 -W 4:00 -J "sam1_asweep_${ARM}_${STEP}[1-$TOTAL]" -cwd "$MIA_TRAIN"
        -o "$LOGS/sam1_asweep_${ARM}_%J_%I.log" -e "$LOGS/sam1_asweep_${ARM}_%J_%I.err")
 if (( DRY )); then printf 'bsub %s bash %q\n' "${AARGS[*]}" "$WORKER"; cat "$WORKER"; exit 0; fi
 arr=$(bsub "${AARGS[@]}" "bash '$WORKER'" | sed -n 's/^Job <\([0-9]*\)>.*/\1/p')
-fin=$(bsub -P "$PROJECT" -q local -n 2 -W 0:30 -J "sam1_asweep_${ARM}_${STEP}_final" -w "ended($arr)" -cwd "$REPO" \
+fin=$(bsub -P "$PROJECT" -q local -n 2 -W 0:30 -J "sam1_asweep_${ARM}_${STEP}_final" -w "ended($arr)" -cwd "$MIA_TRAIN" \
       -o "$LOGS/sam1_asweep_${ARM}_final_%J.log" -e "$LOGS/sam1_asweep_${ARM}_final_%J.err" "bash '$FINAL'" \
       | sed -n 's/^Job <\([0-9]*\)>.*/\1/p')
 echo "array $arr [1-$TOTAL]  ->  table job $fin  ->  $OUT/table.txt"

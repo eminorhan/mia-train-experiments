@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Predict this experiment's arms over the instance-segmentation eval set, for scoring in mia-evals.
 #
-#   bash experiments/lmd_ssl_v1/predict_eval.sh 2c                    # both halves, arm 2 stage C
-#   bash experiments/lmd_ssl_v1/predict_eval.sh 2c --half test         # reported half only
-#   bash experiments/lmd_ssl_v1/predict_eval.sh 2c --volume kasthuri15_ac4
-#   bash experiments/lmd_ssl_v1/predict_eval.sh 2c --dry-run
+#   bash lmd_ssl_v1/predict_eval.sh 2c                    # both halves, arm 2 stage C
+#   bash lmd_ssl_v1/predict_eval.sh 2c --half test         # reported half only
+#   bash lmd_ssl_v1/predict_eval.sh 2c --volume kasthuri15_ac4
+#   bash lmd_ssl_v1/predict_eval.sh 2c --dry-run
 #
 # One job per volume, because the volumes differ in cost by two orders of magnitude: 16 tiles for
 # Kasthuri against 2744 for the zebrafish doublecube, and 4 GB of blend accumulator against 264 GB.
@@ -32,7 +32,8 @@
 #                                which exceeds what a single gpu_l4_16 GPU's slot budget allows.
 set -euo pipefail
 
-REPO=/groups/scicompsoft/home/orhane/projects/mia-train
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v1   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
 RUNS=$EXP/runs
@@ -108,8 +109,8 @@ jobid () { sed -n 's/^Job <\([0-9]*\)>.*/\1/p'; }
 for half in "${HALVES[@]}"; do
   # The two task halves in mia-evals read these same YAMLs, so the volume lists cannot diverge.
   case "$half" in
-    test)     config="$REPO/experiments/lmd_ssl_v1/lmd_val_singlescale.yaml" ;;
-    finetune) config="$REPO/experiments/lmd_ssl_v1/lmd_finetune_singlescale.yaml" ;;
+    test)     config="$HERE/lmd_val_singlescale.yaml" ;;
+    finetune) config="$HERE/lmd_finetune_singlescale.yaml" ;;
     *) echo "--half must be test or finetune, got $half" >&2; exit 2 ;;
   esac
   out="$OUT_ROOT/$half"
@@ -126,15 +127,15 @@ PY
     n=$(slots_for "$volume"); w=$(wall_for "$volume"); q=$(queue_for "$volume")
     tag="${ARM}_${half}_${volume}"
     cmd="export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 \
-PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$REPO/src; \
-$VENV/bin/python $REPO/src/predict.py '$run' --data-config '$config' \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$MIA_TRAIN/src; \
+$VENV/bin/python $MIA_TRAIN/src/predict.py '$run' --data-config '$config' \
 --volume '$volume' --step $STEP --out '$out'"
     if (( DRY )); then
       printf 'bsub -P %s -q %s -gpu "num=1" -n %s -W %s -J p_%s\n' \
         "$PROJECT" "$q" "$n" "$w" "$tag"
       continue
     fi
-    id=$(bsub -P "$PROJECT" -q "$q" -gpu "num=1" -n "$n" -W "$w" -J "p_$tag" -cwd "$REPO" \
+    id=$(bsub -P "$PROJECT" -q "$q" -gpu "num=1" -n "$n" -W "$w" -J "p_$tag" -cwd "$MIA_TRAIN" \
       -o "$LOGS/p_${tag}_%J.log" -e "$LOGS/p_${tag}_%J.err" "$cmd" | jobid)
     printf '  %-28s %-9s %-13s slots=%-2s wall=%-6s job=%s\n' \
       "$volume" "$half" "$q" "$n" "$w" "$id"

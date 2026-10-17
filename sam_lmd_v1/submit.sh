@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Submit sam_lmd_v1: per arm, round 0 -> label -> round 1 -> label -> round 2, each held behind the last.
 #
-#   bash experiments/sam_lmd_v1/submit.sh                    # every arm
-#   bash experiments/sam_lmd_v1/submit.sh base stride2       # just these arms
-#   bash experiments/sam_lmd_v1/submit.sh --dry-run          # write the job scripts, print the bsub lines
-#   bash experiments/sam_lmd_v1/submit.sh --smoke base       # 20-step rounds, one tiny block, one GPU
-#   bash experiments/sam_lmd_v1/submit.sh --rounds 1 base    # round 0 and one data-engine round only
-#   bash experiments/sam_lmd_v1/submit.sh --skip-r0 base     # round 0 already ran; start at L1
-#   bash experiments/sam_lmd_v1/submit.sh --rounds 0 --after <smoke job id> arm8_8nm_gb16_musam128
+#   bash sam_lmd_v1/submit.sh                    # every arm
+#   bash sam_lmd_v1/submit.sh base stride2       # just these arms
+#   bash sam_lmd_v1/submit.sh --dry-run          # write the job scripts, print the bsub lines
+#   bash sam_lmd_v1/submit.sh --smoke base       # 20-step rounds, one tiny block, one GPU
+#   bash sam_lmd_v1/submit.sh --rounds 1 base    # round 0 and one data-engine round only
+#   bash sam_lmd_v1/submit.sh --skip-r0 base     # round 0 already ran; start at L1
+#   bash sam_lmd_v1/submit.sh --rounds 0 --after <smoke job id> arm8_8nm_gb16_musam128
 #                                                            # round 0 only, released by done(<smoke>)
 #
 # Where things land (layout of 2026-09-16): job scripts, the placeholder-resolved TOMLs and the LSF
@@ -40,7 +40,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/sam_lmd_v1   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
@@ -133,10 +133,10 @@ mkdir -p "$LOGS" "$RUNS_ROOT" "$ROOT/rounds" "$ROOT/pseudo" "$ROOT/diag"
 [[ -f "$STAGE/README.md" ]] || cat > "$STAGE/README.md" <<EOF
 # sam_lmd_v1 scratch
 
-Everything here is regenerable from mia-train's \`experiments/sam_lmd_v1/\`:
+Everything here is regenerable from mia-train-experiments' \`sam_lmd_v1/\`:
 
 - \`pseudo/<arm>/*.zarr\`   pseudo-label sidecars (\`raw\` symlinked, \`labels/sam_rN\` ours) --
-                              \`bash experiments/sam_lmd_v1/submit.sh <arm>\` regenerates them from the
+                              \`bash sam_lmd_v1/submit.sh <arm>\` regenerates them from the
                               round's teacher checkpoint under $RUNS/sam1__<arm>_r<N-1>_*
 - \`rounds/<arm>_rN.yaml\`   the round's miao config -- \`make_round_config.py\` over \`pseudo/<arm>\`
 - \`diag/<arm>/sam_rN/\`      the labeller scored on the GT volumes -- \`pseudolabel.py diagnose\`
@@ -195,14 +195,14 @@ sed -e \"s|ROUND_CONFIG|$roundcfg|\" -e \"s|PREV_CHECKPOINT|\$RUN/checkpoints/st
     echo "$COMPILE_ENV"
     echo "export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
     echo "$prologue"
-    printf 'cd %q\n' "$REPO"
+    printf 'cd %q\n' "$MIA_TRAIN"
     printf '%s --standalone --nproc_per_node=%s src/train.py --config %q %s\n' \
       "$VENV/bin/torchrun" "$procs" "$resolved" "$tail_args"
   } > "$cmd"
   chmod +x "$cmd"
 
   local args=(-P "$PROJECT" -q "$QUEUE" -gpu "num=$procs" -n "$slots" -W "$wall" -r
-              -J "sam1_$tag" -cwd "$REPO" -o "$LOGS/sam1_${tag}_%J.log" -e "$LOGS/sam1_${tag}_%J.err")
+              -J "sam1_$tag" -cwd "$MIA_TRAIN" -o "$LOGS/sam1_${tag}_%J.log" -e "$LOGS/sam1_${tag}_%J.err")
   [[ -n "$dep" && "$dep" != DRYRUN ]] && args+=(-w "done($dep)")
   if [[ $DRY -eq 1 ]]; then
     printf 'bsub %s bash %q\n' "${args[*]}" "$cmd" >&2; echo DRYRUN
@@ -253,15 +253,15 @@ $(latest_step)"
     echo "I=\${LSB_JOBINDEX:-1}"
     echo "VOLUMES=($(printf '%q ' "${volumes[@]}"))"
     echo "GTS=($(printf '%q ' "${gts[@]}"))"
-    printf 'cd %q\n' "$REPO"
+    printf 'cd %q\n' "$MIA_TRAIN"
     echo "if (( I <= $n )); then"
     echo "  V=\${VOLUMES[I-1]}; echo \"element \$I/$total: label \$V with \$RUN step \$STEP\""
-    echo "  $VENV/bin/python experiments/sam_lmd_v1/pseudolabel.py label \"\$RUN\" --step \"\$STEP\" \\"
+    echo "  $VENV/bin/python $HERE/pseudolabel.py label \"\$RUN\" --step \"\$STEP\" \\"
     echo "    --volume \"\$V\" --out '$sidecars' --label-name $label_name --blocks $blocks --block $block \\"
     echo "    --pred-iou $PRED_IOU --stability $STABILITY"
     echo "else"
     echo "  V=\${GTS[I-$n-1]}; echo \"element \$I/$total: diagnose \$V with \$RUN step \$STEP\""
-    echo "  $VENV/bin/python experiments/sam_lmd_v1/pseudolabel.py diagnose \"\$RUN\" --step \"\$STEP\" \\"
+    echo "  $VENV/bin/python $HERE/pseudolabel.py diagnose \"\$RUN\" --step \"\$STEP\" \\"
     echo "    --volume \"\$V\" --out '$diag'/\"\$V\".json --blocks $blocks --block $block \\"
     echo "    --pred-iou $PRED_IOU --stability $STABILITY"
     echo "fi"
@@ -269,15 +269,15 @@ $(latest_step)"
   { echo "#!/usr/bin/env bash"
     echo "set -euo pipefail"
     echo "$THREADS"
-    printf 'cd %q\n' "$REPO"
-    echo "$VENV/bin/python experiments/sam_lmd_v1/make_round_config.py --sidecar-root '$sidecars' \\"
+    printf 'cd %q\n' "$MIA_TRAIN"
+    echo "$VENV/bin/python $HERE/make_round_config.py --sidecar-root '$sidecars' \\"
     echo "    --label-name $label_name --out '$roundcfg' --gt-weight $GT_WEIGHT --expect $n --verify"
-    echo "$VENV/bin/python experiments/sam_lmd_v1/pseudolabel.py summarize '$diag' || echo 'diagnostics summary failed (non-fatal)'"
+    echo "$VENV/bin/python $HERE/pseudolabel.py summarize '$diag' || echo 'diagnostics summary failed (non-fatal)'"
   } > "$final"
   chmod +x "$worker" "$final"
 
   local aargs=(-P "$PROJECT" -q "$LABEL_QUEUE" -gpu "num=1" -n "$LABEL_SLOTS" -W "$wall" -r
-               -J "sam1_${tag}[1-$total]%$LABEL_CONCURRENT" -cwd "$REPO"
+               -J "sam1_${tag}[1-$total]%$LABEL_CONCURRENT" -cwd "$MIA_TRAIN"
                -o "$LOGS/sam1_${tag}_%J_%I.log" -e "$LOGS/sam1_${tag}_%J_%I.err")
   [[ -n "$dep" && "$dep" != DRYRUN ]] && aargs+=(-w "done($dep)")
   local arr fin
@@ -286,7 +286,7 @@ $(latest_step)"
   else
     arr=$(bsub "${aargs[@]}" "bash '$worker'" | jobid)
   fi
-  local fargs=(-P "$PROJECT" -q local -n 4 -W 2:00 -J "sam1_${tag}_final" -cwd "$REPO"
+  local fargs=(-P "$PROJECT" -q local -n 4 -W 2:00 -J "sam1_${tag}_final" -cwd "$MIA_TRAIN"
                -o "$LOGS/sam1_${tag}_final_%J.log" -e "$LOGS/sam1_${tag}_final_%J.err")
   [[ "$arr" != DRYRUN ]] && fargs+=(-w "done($arr)")
   if [[ $DRY -eq 1 ]]; then

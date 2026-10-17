@@ -56,7 +56,7 @@ decode_chunks = 1           # undivided, as large_inputs_nisb's 256^3 arms (16.8
 
 [data]
 name = "miao_volumes"
-config_path = "experiments/lm_zebrafish_cell_instance/data/train.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lm_zebrafish_cell_instance/data/train.yaml"
 patch_size = [496, 496, 144]  # x, y, z voxels: the window
 samples_per_epoch = 100000  # 12.5k steps per epoch; each epoch end respawns the workers
 defer_image_ops = true

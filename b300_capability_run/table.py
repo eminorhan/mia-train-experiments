@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Turn the sweep's JSON lines into the markdown tables in README.md.
 
-    python experiments/b300_capability_run/table.py /nrs/.../b300_capability/*.jsonl
+    python b300_capability_run/table.py /nrs/.../b300_capability/*.jsonl
 
 Regenerating the table rather than hand-copying it is the point: the sweep is re-run whenever the
 model, the head or the parallelism changes, and a README whose numbers were typed once drifts from

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Serve the four lm_zebrafish_cell_instance arms in one TensorBoard.
 #
-#   bash experiments/lm_zebrafish_cell_instance/tensorboard.sh [port]
-#   bash experiments/lm_zebrafish_cell_instance/tensorboard.sh 6006 --list    # rebuild the tree, print, do not serve
+#   bash lm_zebrafish_cell_instance/tensorboard.sh [port]
+#   bash lm_zebrafish_cell_instance/tensorboard.sh 6006 --list    # rebuild the tree, print, do not serve
 #
 # large_inputs_nisb/tensorboard.sh with this experiment's arms. Rebuilds the symlink tree each time, so
 # an arm appears as soon as its run directory exists (the newest run of an arm wins if it was rerun).

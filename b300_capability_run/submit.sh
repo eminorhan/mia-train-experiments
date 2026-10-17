@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Submit the B300 capability sweep: how large a crop a 7B DINOv3 affinity fine-tune can train on.
 #
-#   bash experiments/b300_capability_run/submit.sh                 # both arms, 8 nodes
-#   bash experiments/b300_capability_run/submit.sh hsdp             # one arm
+#   bash b300_capability_run/submit.sh                 # both arms, 8 nodes
+#   bash b300_capability_run/submit.sh hsdp             # one arm
 #   NODES=1 SIZES="128 256" DIMS=2,4,1 bash .../submit.sh hsdp      # single-node smoke test
 #
 # Each arm walks its sizes in ascending order, one `torchrun` per size, stopping at the first that
@@ -22,7 +22,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/b300_capability_run   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
@@ -71,21 +71,21 @@ for arm in "${ARMS[@]}"; do
     echo "set -uo pipefail"
     echo "export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4"
     echo "export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
-    echo "cd $REPO"
+    echo "cd $MIA_TRAIN"
     echo "for size in $SIZES; do"
     echo "  echo \"=== $arm \${size}^3 ===\""
     echo "  before=\$(wc -l < $results 2>/dev/null || echo 0)"
     if [[ $NODES -eq 1 ]]; then
       echo "  $VENV/bin/torchrun --standalone --nproc_per_node=$GPUS \\"
-      echo "    experiments/b300_capability_run/capability_sweep.py \\"
+      echo "    $HERE/capability_sweep.py \\"
       echo "    --config $cfg --size \$size --results $results \\"
       echo "    --warmup $WARMUP --steps $STEPS ${DIMS:+--dims $DIMS} ${FLOPS:+--measure-flops} ${PROFILE:+--profile} ${TRACE:+--trace $TRACE} ${COMPILE_BLOCKS:+--compile-blocks}"
     else
       # launch_multinode.sh reads LSF's host list and starts one torchrun per node under a c10d
       # rendezvous; ENTRYPOINT points it at the sweep instead of src/train.py.
-      echo "  ENTRYPOINT=experiments/b300_capability_run/capability_sweep.py \\"
-      echo "  MIA_TRAIN=$REPO VENV=$VENV \\"
-      echo "    $REPO/deploy/lsf/launch_multinode.sh $GPUS $cfg \\"
+      echo "  ENTRYPOINT=$HERE/capability_sweep.py \\"
+      echo "  MIA_TRAIN=$MIA_TRAIN VENV=$VENV \\"
+      echo "    $MIA_TRAIN/deploy/lsf/launch_multinode.sh $GPUS $cfg \\"
       echo "    --size \$size --results $results --warmup $WARMUP --steps $STEPS \\"
       echo "    ${DIMS:+--dims $DIMS} ${FLOPS:+--measure-flops} ${PROFILE:+--profile} ${TRACE:+--trace $TRACE} ${COMPILE_BLOCKS:+--compile-blocks}"
     fi
@@ -105,7 +105,7 @@ for arm in "${ARMS[@]}"; do
           -n "$((SLOTS * NODES))")
   fi
 
-  bsub -P "$PROJECT" "${args[@]}" -W "$WALL" -J "b300cap_$arm" -cwd "$REPO" \
+  bsub -P "$PROJECT" "${args[@]}" -W "$WALL" -J "b300cap_$arm" -cwd "$MIA_TRAIN" \
     -o "$LOGS/b300cap_${arm}_%J.log" -e "$LOGS/b300cap_${arm}_%J.err" \
     "bash '$cmd'"
   echo "  arm $arm: $NODES node(s), sizes $SIZES -> $results"

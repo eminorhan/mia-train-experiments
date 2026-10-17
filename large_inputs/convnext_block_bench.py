@@ -6,7 +6,7 @@ Written 2026-09-29, before porting DINOv3's ConvNeXt to 3D. Its 7x7 depthwise co
 PyTorch's much less used 3D depthwise kernels. This measures what that costs.
 
 Measured 2026-09-29 on one B300 per case (torch 2.13, cuDNN 9.20; job 154473598, results in
-mia-train-experiments/large_inputs/probes/convnext_block/summary.txt). Encoder blocks at 1024^3,
+/nrs/scicompsoft/orhane/mia-train-experiments/large_inputs/probes/convnext_block/summary.txt). Encoder blocks at 1024^3,
 compiled, with activation checkpointing, in seconds per GPU-step for 7^3/5^3/3^3 kernels: ConvNeXt-T
 10.3/4.3/1.1, -S 13.0/5.4/1.4, -L 26.0/10.8/2.8, against 1.82 for the windowed ViT-L encoder.
 PyTorch's depthwise kernel (contiguous layout) runs at 1.5-2 TFLOP/s, ~2% of the CUDA-core peak,
@@ -36,8 +36,8 @@ costs.
             1024^3 with activation checkpointing, eager and compiled -- the encoder these blocks
             would replace, measured the same way.
 
-Run one GPU's share:  python experiments/large_inputs/convnext_block_bench.py --cases t1 --out DIR
-Summarize a run:      python experiments/large_inputs/convnext_block_bench.py --summarize DIR
+Run one GPU's share:  python large_inputs/convnext_block_bench.py --cases t1 --out DIR
+Summarize a run:      python large_inputs/convnext_block_bench.py --summarize DIR
 """
 
 from __future__ import annotations
@@ -52,8 +52,8 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "src"))
+MIA_TRAIN = Path("/groups/scicompsoft/home/orhane/projects/mia-train")
+sys.path.insert(0, str(MIA_TRAIN / "src"))
 
 import torch  # noqa: E402
 import torch.nn as nn  # noqa: E402
@@ -77,7 +77,7 @@ MODELS = {  # (case, blocks) per stage; ConvNeXt-S has T's widths with L's depth
 KERNELS = (7, 5, 3)
 LAYOUTS = {"ncdhw": torch.contiguous_format, "ndhwc": torch.channels_last_3d}
 INDEX_LIMIT = 2**31
-VIT_CONFIG = REPO / "experiments/large_inputs/vitl_dp_win16.toml"
+VIT_CONFIG = Path(__file__).resolve().parent / "vitl_dp_win16.toml"
 
 
 class DepthwiseConv3d(nn.Conv3d):

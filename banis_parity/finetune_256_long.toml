@@ -43,7 +43,7 @@ split_disconnected = true
 
 [data]
 name = "miao_volumes"
-config_path = "experiments/banis_parity/nisb_base_256_aug.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/banis_parity/nisb_base_256_aug.yaml"
 samples_per_epoch = 1000
 
 [val_data]

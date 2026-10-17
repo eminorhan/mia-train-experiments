@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Submit the arms of lmd_ssl_v1. Each arm is a chain of stages, held one behind the next.
 #
-#   bash experiments/lmd_ssl_v1/submit.sh              # every arm
-#   bash experiments/lmd_ssl_v1/submit.sh 1 3          # just those arms
-#   bash experiments/lmd_ssl_v1/submit.sh --dry-run    # print the bsub lines, submit nothing
-#   bash experiments/lmd_ssl_v1/submit.sh --smoke      # 20 steps of every stage, one GPU
+#   bash lmd_ssl_v1/submit.sh              # every arm
+#   bash lmd_ssl_v1/submit.sh 1 3          # just those arms
+#   bash lmd_ssl_v1/submit.sh --dry-run    # print the bsub lines, submit nothing
+#   bash lmd_ssl_v1/submit.sh --smoke      # 20 steps of every stage, one GPU
 #
 #   arm 1  DINOv3 random init  -> SimMIM 100k    -> finetune interp 50k -> subpixel 50k
 #   arm 2  DINOv3 <- LVD ckpt  -> (no SSL)       -> finetune interp 50k -> subpixel 50k
@@ -24,7 +24,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$HERE/../.." && pwd)"
+MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v1   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
@@ -167,7 +167,7 @@ sed \"s|PREV_CHECKPOINT|\${RUN}checkpoints/step_\$STEP|\" '$cfg' > '$resolved'"
     tail_args="$([[ $SMOKE -eq 1 ]] && printf -- "--output-root %q" "$STAGE/smoke" || echo "--output-root $RUNS --resume")"
     if [[ $multinode -eq 1 ]]; then
       printf 'MIA_TRAIN=%q VENV=%q %q %s %q %s\n' \
-        "$REPO" "$VENV" "$REPO/deploy/lsf/launch_multinode.sh" "$procs" "$cfg" "$tail_args"
+        "$MIA_TRAIN" "$VENV" "$MIA_TRAIN/deploy/lsf/launch_multinode.sh" "$procs" "$cfg" "$tail_args"
     else
       printf '%s --standalone --nproc_per_node=%s src/train.py --config %q %s\n' \
         "$VENV/bin/torchrun" "$procs" "$cfg" "$tail_args"
@@ -178,11 +178,11 @@ sed \"s|PREV_CHECKPOINT|\${RUN}checkpoints/step_\$STEP|\" '$cfg' > '$resolved'"
   if [[ $multinode -eq 1 ]]; then
     args=(-P "$PROJECT" -q "$MN_QUEUE" -app "parallel-96" -gpu "num=$procs:mode=shared"
           -n "$((slots * MN_NODES))" -W "$wall" -r
-          -J "lmd1_$name" -cwd "$REPO"
+          -J "lmd1_$name" -cwd "$MIA_TRAIN"
           -o "$LOGS/lmd1_${name}_%J.log" -e "$LOGS/lmd1_${name}_%J.err")
   else
     args=(-P "$PROJECT" -q "$queue" -gpu "num=$procs" -n "$slots" -W "$wall" -r
-          -J "lmd1_$name" -cwd "$REPO"
+          -J "lmd1_$name" -cwd "$MIA_TRAIN"
           -o "$LOGS/lmd1_${name}_%J.log" -e "$LOGS/lmd1_${name}_%J.err")
   fi
   [[ -n "$dep" && "$dep" != "DRYRUN" ]] && args+=(-w "done($dep)")

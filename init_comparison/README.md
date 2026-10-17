@@ -58,7 +58,7 @@ trained cold again.
 ## Augmentation (arm 4)
 
 BANIS trains with augmentations we had never used. Four are now implemented in
-[`src/data/augment.py`](../../src/data/augment.py), configured by an `[augment]` section, at
+[`src/data/augment.py`](https://github.com/AI-HHMI/mia-train/blob/master/src/data/augment.py), configured by an `[augment]` section, at
 BANIS' own default magnitudes -- both codebases present images in [0, 1], so the numbers transfer
 unchanged:
 
@@ -88,11 +88,11 @@ no config key can quietly change what a validation number means.
 ## Running it
 
 ```bash
-bash experiments/init_comparison/submit.sh              # every arm, both phases
-bash experiments/init_comparison/submit.sh 2 4          # just those arms
-bash experiments/init_comparison/submit.sh --smoke      # 20 steps of all nine stages
-QUEUE=gpu_h200 bash experiments/init_comparison/submit.sh 3   # override the queue choice
-bash experiments/init_comparison/tensorboard.sh
+bash init_comparison/submit.sh              # every arm, both phases
+bash init_comparison/submit.sh 2 4          # just those arms
+bash init_comparison/submit.sh --smoke      # 20 steps of all nine stages
+QUEUE=gpu_h200 bash init_comparison/submit.sh 3   # override the queue choice
+bash init_comparison/tensorboard.sh
 ```
 
 Each arm submits as a chain, every stage held on `done()` of the one before it. A stage cannot name
@@ -109,7 +109,7 @@ rather than learned.
 ## Scoring
 
 ```bash
-bash experiments/init_comparison/score_checkpoint.sh 2b_dinov3_subpixel 100000
+bash init_comparison/score_checkpoint.sh 2b_dinov3_subpixel 100000
 ```
 
 A wrapper over [`../banis_parity/score_checkpoint.sh`](../banis_parity/score_checkpoint.sh); the

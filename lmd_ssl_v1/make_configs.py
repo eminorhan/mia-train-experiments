@@ -5,7 +5,7 @@ Three arms differing in how the encoder is initialised, then ONE shared two-stag
 eight near-identical TOMLs by hand is how "the arms share a protocol" quietly stops being true, so
 they are generated; an arm's identity is its entry in ARMS and nothing else.
 
-    python experiments/lmd_ssl_v1/make_configs.py
+    python lmd_ssl_v1/make_configs.py
 
 See README.md for the design and its caveats.
 """
@@ -14,7 +14,7 @@ from __future__ import annotations
 import pathlib
 
 HERE = pathlib.Path(__file__).resolve().parent
-REL = "experiments/lmd_ssl_v1"
+REL = str(HERE)  # absolute, so copies of the TOMLs (smoke configs, run dirs) still find the YAMLs
 LMD = "/groups/miaai/miaai/lmd-v0.0.1/configs"
 
 SSL_STEPS = 100_000
