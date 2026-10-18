@@ -1,0 +1,89 @@
+# lmd_ssl_v2 arm 1b: SimMIM pretraining from random init.
+# Arm 1a is this file plus an [init] block (the released DINOv3 LVD-1689M checkpoint); `diff` shows nothing else differs.
+#
+# 3D DINOv3 ViT-L, 256^3 crops at patch 8 (32,768 tokens), mask ratio 0.9, 100k steps, 5k warmup,
+# checkpoints every 25k; one B300 node at batch 1/rank (global batch 8). Corpus: data/, a copy of
+# lmd-configs' census-20261015 single-scale unlabeled config (242 volumes, 8 nm) plus the j0126 zebra
+# finch volume, trimmed to its tissue by a bounding box (see the data file).
+#
+# Template: gary_comparison 2c. Changed: patch 16 -> 8, mask_granularity 2 -> 4 (the same 32-voxel
+# masked blocks), the corpus, 500k -> 100k steps, batch 16 -> 1 per rank, drop_path 0.1 -> 0.0 (it
+# drops nothing at 1 sample/rank), validation on the corpus instead of the hemibrain slab,
+# attn_max_score = 1e5 (2c predates the cap), and checkpoint_every 100k -> 25k.
+experiment_name = "lmd2__1b_simmim_scratch"
+
+[model]
+name = "dinov3_vit3d"
+img_size = 256            # 32^3 = 32,768 tokens at patch 8
+patch_size = 8            # 64 nm tokens at 8 nm
+in_chans = 1
+embed_dim = 1024          # ViT-L
+depth = 24
+num_heads = 16            # head_dim 64; 64 % 6 = 4, so axial 3D RoPE leaves 4 channels unrotated
+n_storage_tokens = 4
+layerscale_init = 1.0e-05 # the released weights were trained with LayerScale; 1b keeps it so the encoders match
+mask_k_bias = true
+pos_embed_rope_dtype = "fp32"
+pos_embed_rope_type = "vanilla"  # axial 3D RoPE, as gary_comparison 4a (LVD) and 2c (scratch)
+# DINOv3's drop path is sample-level stochastic depth: at one sample per rank it never drops anything.
+drop_path_rate = 0.0
+use_fa4 = false           # `[trainer].compile` needs torch SDPA
+# Every attention score at most 1e5, by capping the lengths of queries and keys, as in every DINOv3 config
+# since the cap landed (large_inputs_nisb, lm_zebrafish_cell_instance). Inactive at the start: the released
+# model's scores reach ~1.6e4 (measured at patch 16). Without it, large_inputs_nisb's first launch grew
+# block 0's scores to 3e8, where the fused kernels' gradients are wrong.
+attn_max_score = 1e5
+
+[algorithm]
+name = "simmim"
+mask_ratio = 0.9
+# In patches: 4 x 8 = 32-voxel masked blocks, 512 per crop, 461 of them hidden -- 2c's masking exactly
+# (granularity 2 at patch 16). Granularity 2 here would hide 16-voxel blocks.
+mask_granularity = 4
+norm_pix_loss = false     # raw [0, 1] intensities as the target, as the paper and 2c
+
+[data]
+name = "miao_volumes"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lmd_ssl_v2/data/8nm_p256_swe0.4_min1e8_up8_census20261015.yaml"
+# 125k steps per epoch at global batch 8, so the run never crosses an epoch boundary (each one respawns
+# the loader workers). Sampling is with replacement, so the value changes nothing else.
+samples_per_epoch = 1000000
+defer_image_ops = true
+
+[val_data]
+# Fresh random crops from the same corpus at every validation, un-augmented: a progress readout, not a
+# held-out set.
+name = "miao_volumes"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lmd_ssl_v2/data/8nm_p256_swe0.4_min1e8_up8_census20261015.yaml"
+samples_per_epoch = 128
+defer_image_ops = true
+
+[trainer]
+max_steps = 100000
+batch_size = 1            # per rank; x 8 ranks -> global batch 8
+lr = 0.0003
+warmup_steps = 5000
+min_lr_ratio = 0.001
+weight_decay = 0.05
+grad_clip_norm = 1.0
+layerwise_lr_decay = 1.0
+patch_embed_lr_mult = 1.0
+lr_schedule = "linear"
+precision = "bf16"
+compile = true            # needs TORCHINDUCTOR_LAYOUT_OPTIMIZATION=0 in the job, as gary_comparison/submit.sh sets
+activation_checkpointing = false
+log_every = 1000
+val_every = 10000
+checkpoint_every = 25000  # 4 checkpoints: 25k, 50k, 75k, 100k
+num_workers = 8
+seed = 0
+
+[parallelism]
+dp_replicate = 1
+dp_shard = 8              # one B300 node
+tp = 1
+
+[augment]
+# Geometric only, as in gary_comparison 2a-2c (decided 2026-09-20): SimMIM's target is its input, so
+# photometric noise and slice drop/shift would enter the reconstruction target.
+rotate = "inplane"
