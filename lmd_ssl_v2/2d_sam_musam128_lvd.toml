@@ -1,0 +1,96 @@
+# lmd_ssl_v2 arm 2d: promptable segmentation (SAM-style promptable_seg), sam_lmd_v1 arm 8's head and prompting
+# recipe (128 objects per crop, click pairs, mask fed back with p 0.5), on 2a's encoder, init, data, schedule,
+# augmentation and node. Changed from arm 8 to match 2a: patch 8 (mask_upscale 2 keeps arm 8's 32 nm mask cells),
+# global batch 8 (arm 8: 16), 100k steps (arm 8: 200k), 5k warmup, lmd_ssl_v2's data.
+# No label_margin: SAM's targets lie inside the window. -1 (label_fill) is unknown: no prompts there, and every loss
+# weights mask cells by their labelled fraction.
+experiment_name = "lmd2__2d_sam_musam128_lvd"
+
+[model]
+name = "dinov3_vit3d"
+img_size = 256            # 32^3 = 32,768 tokens at patch 8
+patch_size = 8            # 64 nm tokens at 8 nm
+in_chans = 1
+embed_dim = 1024          # ViT-L
+depth = 24
+num_heads = 16            # head_dim 64; 64 % 6 = 4, so axial 3D RoPE leaves 4 channels unrotated
+n_storage_tokens = 4
+layerscale_init = 1.0e-05 # the released weights were trained with LayerScale; 2b keeps it so the encoders match
+mask_k_bias = true
+pos_embed_rope_dtype = "fp32"
+pos_embed_rope_type = "vanilla"  # axial 3D RoPE, as 1a/1b and gary_comparison 4a/5b
+drop_path_rate = 0.0
+use_fa4 = false           # `[trainer].compile` needs torch SDPA
+attn_max_score = 1e5
+
+[init]
+path = "/groups/miaai/miaai/pretrained_models/dinov3/dinov3_vitl16_pretrain_lvd1689m-8aa4cbdd.pth"
+# The (1024,3,16,16) patch kernel -> (1024,1,8,8,8): the release's input standardisation folded in, RGB
+# summed, spread over z, then block-sum resized to patch 8 (utils/pretrained.py).
+inflate_2d_to_3d = true
+skip = ["rope_embed."]    # a 2D checkpoint says nothing about z; the 3D RoPE tables are rebuilt
+strict = true
+
+[algorithm]
+name = "promptable_seg"
+prompt_dim = 256          # width of the neck and the two-way decoder
+decoder_depth = 2
+decoder_heads = 8
+num_multimask_outputs = 3
+mask_upscale = 2          # masks at patch 8 / 2 = stride 4 = 32 nm, as arm 8 (patch 16 / 4)
+mask_feature_dim = 64
+mask_refine_depth = 2
+masks_per_sample = 128    # objects drawn per crop
+min_object_voxels = 512   # smaller objects are never prompted for
+rounds = 3                # a click or box, then two correction rounds
+box_prob = 0.5
+attention_backend = "sdpa"  # the decoder's kernel; sdpa is the one torch.compile accepts
+correction_pairs = true   # each correction round adds a foreground AND a background click (Archit et al. 2025)
+mask_prompt_prob = 0.5    # a correction round sees the previous mask with this probability
+
+[data]
+name = "miao_volumes"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lmd_ssl_v2/data/instance_seg_v2_8nm_p256_census20261015_finetune.yaml"
+samples_per_epoch = 1000000
+defer_image_ops = false   # prompts are drawn in the workers; augmentation must run there first
+
+[val_data]
+name = "miao_volumes"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lmd_ssl_v2/data/instance_seg_v2_8nm_p256_census20261015_finetune.yaml"
+samples_per_epoch = 128
+defer_image_ops = false   # prompts are drawn in the workers; augmentation must run there first
+
+[trainer]
+max_steps = 100000
+batch_size = 1            # per rank; x 8 ranks -> global batch 8
+lr = 0.0003
+warmup_steps = 5000
+min_lr_ratio = 0.001
+weight_decay = 0.05
+grad_clip_norm = 1.0
+layerwise_lr_decay = 1.0
+patch_embed_lr_mult = 1.0
+lr_schedule = "linear"
+precision = "bf16"
+compile = true            # needs TORCHINDUCTOR_LAYOUT_OPTIMIZATION=0 in the job (the head's 3D convolutions), as submit.sh sets
+activation_checkpointing = true   # the mask head's expansion to mask resolution, per prompt (arm 8)
+log_every = 1000
+val_every = 10000
+checkpoint_every = 25000  # 4 checkpoints: 25k, 50k, 75k, 100k
+num_workers = 8
+seed = 0
+
+[parallelism]
+dp_replicate = 1
+dp_shard = 8              # one B300 node
+tp = 1
+
+[augment]
+rotate = "inplane"
+drop_slice_prob = 0.05
+shift_slice_prob = 0.05
+shift_magnitude = 10
+intensity = true
+mul_intensity = 0.1
+add_intensity = 0.1
+noise_scale = 0.5

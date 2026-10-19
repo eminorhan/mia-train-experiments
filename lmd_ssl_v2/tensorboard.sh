@@ -18,9 +18,16 @@
 #   1b_simmim_scratch_b32  arm 1b at batch 4 per rank (global 32), nothing else
 #                      Each logged train point averages 32 crops instead of 8, so expect about half the scatter.
 #                      Compare with 1a/1b at equal samples (b32 step S = b8 step 4S) as well as equal steps.
+#   1c_simmim_lvd_b32_mask60_g2  arm 1a_b32 with mask ratio 0.6 and 16-voxel masked blocks (1a: 0.9, 32 voxels)
+#                      Its loss is not comparable with 1a's: an easier, more local prediction task.
 #   2a_affinity_unetr_lvd      affinity_seg + UNETR on the v2 finetune half + 33 zebrafinch cubes, LVD start
 #   2b_affinity_unetr_scratch  arm 2a from random init
 #                      Early check (cold head): train/affinity_accuracy should leave train/target_positive_rate by ~3k.
+#   2c_mtlsd_unetr_lvd         arm 2a plus the LSD auxiliary target (sigma 80 nm), labels read 30 voxels past the window
+#                      train/loss = loss_affinity + loss_lsd; compare 2a on train/loss_affinity, not train/loss.
+#   2e_mtlsd_unetr_lvd_w10     arm 2c with lsd_weight 10 (2c: 1); train/loss = loss_affinity + 10 x loss_lsd
+#   2d_sam_musam128_lvd        promptable segmentation (sam_lmd_v1 arm 8's recipe) on 2a's encoder, init and data
+#                      first_iou / final_iou: mask IoU after the first prompt and after two correction rounds.
 #
 # WHAT TO READ
 #
@@ -48,7 +55,9 @@ EXP=/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v2   # this experiment
 RUNS=$EXP/runs
 VIEW=$EXP/tensorboard
 VENV=/groups/scicompsoft/home/orhane/myvenv
-ARMS=(1a_simmim_lvd 1b_simmim_scratch 1a_simmim_lvd_b32 1b_simmim_scratch_b32 2a_affinity_unetr_lvd 2b_affinity_unetr_scratch)
+ARMS=(1a_simmim_lvd 1b_simmim_scratch 1a_simmim_lvd_b32 1b_simmim_scratch_b32 1c_simmim_lvd_b32_mask60_g2
+      2a_affinity_unetr_lvd 2b_affinity_unetr_scratch
+      2c_mtlsd_unetr_lvd 2d_sam_musam128_lvd 2e_mtlsd_unetr_lvd_w10)
 
 PORT=6006 SMOKE=0 LIST=0
 for arg in "$@"; do

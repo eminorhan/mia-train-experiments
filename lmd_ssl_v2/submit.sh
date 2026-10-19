@@ -28,9 +28,10 @@ SMOKE_GPUS=${SMOKE_GPUS:-1}         # the smoke's GPUs; its derived config gets 
 # 100k steps at ~0.55 s/step (gary_comparison 4a: patch 8, batch 1/rank, one B300 node) is ~15 h; 48 h tolerates a
 # 3x slower step. `-r` plus `--resume` turns a node failure into a requeue from the last checkpoint (every 25k).
 WALL=${WALL:-48:00}
-# A miao source tree to use instead of myvenv's release, first on PYTHONPATH in the job; the job stops unless it is
-# the miao imported. 2a/2b need miao's unmerged feature/label-fill (label_fill in their finetune data config).
-MIAO_SRC=${MIAO_SRC:-}
+# The miao the job imports: a read-only copy of one commit of our fork (github.com/eminorhan/miao), first on
+# PYTHONPATH; the job stops unless it is the miao imported. 62b3746 = v0.4.2 + label_fill + nearest-exact label
+# resampling + label_margin, which the 2a/2b/2c data settings need.
+MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/62b3746/src}
 THREADS="export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4"
 # inductor's layout optimisation can hand cuDNN SDPA a query with a non-unit last stride under compile, killing the
 # run at step 1; gary_comparison and sam_lmd_v1 set this for every compiled run.
@@ -68,6 +69,7 @@ write_cmd () {
       echo "$VENV/bin/python -c \"import miao; assert miao.__file__.startswith('$MIAO_SRC'), miao.__file__; print('[miao]', miao.__file__)\""
     fi
     printf 'cd %q\n' "$MIA_TRAIN"
+    echo 'echo "[mia-train] $(git rev-parse --short HEAD), uncommitted: $(git status --short --untracked-files=no | tr "\n" " ")"'
     printf '%s --standalone --nproc_per_node=%s src/train.py --config %q %s\n' \
       "$VENV/bin/torchrun" "$procs" "$cfg" "$*"
   } > "$cmd"

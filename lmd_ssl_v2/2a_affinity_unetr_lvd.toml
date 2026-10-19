@@ -12,6 +12,7 @@
 #   - augmentation: BANIS' set, as every affinity arm here (gary_comparison, lm_zebrafish_cell_instance). 1a/1b used
 #     rotation only, because SimMIM's target is its input.
 # gary_comparison 5b ran this head at patch 8 at 0.585 s/step on 8 B300s, so 100k steps take ~16 h.
+# Labels read 10 voxels past each window face (label_margin; needs the miao fork, submit.sh MIAO_SRC).
 experiment_name = "lmd2__2a_affinity_unetr_lvd"
 
 [model]
@@ -57,12 +58,16 @@ name = "miao_volumes"
 config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lmd_ssl_v2/data/instance_seg_v2_8nm_p256_census20261015_finetune.yaml"
 samples_per_epoch = 1000000
 defer_image_ops = true
+label_margin = [10, 10, 10]  # labels past each window face: what the long-range affinities read
+label_margin_fill = -1    # margin off a label array: unknown
 
 [val_data]
 name = "miao_volumes"
 config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lmd_ssl_v2/data/instance_seg_v2_8nm_p256_census20261015_finetune.yaml"
 samples_per_epoch = 128
 defer_image_ops = true
+label_margin = [10, 10, 10]  # labels past each window face: what the long-range affinities read
+label_margin_fill = -1    # margin off a label array: unknown
 
 [trainer]
 max_steps = 100000
