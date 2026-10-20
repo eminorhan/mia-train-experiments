@@ -26,6 +26,9 @@
 #   2c_mtlsd_unetr_lvd         arm 2a plus the LSD auxiliary target (sigma 80 nm), labels read 30 voxels past the window
 #                      train/loss = loss_affinity + loss_lsd; compare 2a on train/loss_affinity, not train/loss.
 #   2e_mtlsd_unetr_lvd_w10     arm 2c with lsd_weight 10 (2c: 1); train/loss = loss_affinity + 10 x loss_lsd
+#   2f_affinity_unetr_simmim_lvd           arm 2a from 1a_simmim_lvd_b32's final encoder instead of LVD's
+#   2g_affinity_unetr_simmim_scratch       arm 2a from 1b_simmim_scratch_b32's final encoder
+#   2h_affinity_unetr_simmim_lvd_mask60_g2 arm 2a from 1c_simmim_lvd_b32_mask60_g2's final encoder
 #   2d_sam_musam128_lvd        promptable segmentation (sam_lmd_v1 arm 8's recipe) on 2a's encoder, init and data
 #                      first_iou / final_iou: mask IoU after the first prompt and after two correction rounds.
 #
@@ -57,7 +60,8 @@ VIEW=$EXP/tensorboard
 VENV=/groups/scicompsoft/home/orhane/myvenv
 ARMS=(1a_simmim_lvd 1b_simmim_scratch 1a_simmim_lvd_b32 1b_simmim_scratch_b32 1c_simmim_lvd_b32_mask60_g2
       2a_affinity_unetr_lvd 2b_affinity_unetr_scratch
-      2c_mtlsd_unetr_lvd 2d_sam_musam128_lvd 2e_mtlsd_unetr_lvd_w10)
+      2c_mtlsd_unetr_lvd 2d_sam_musam128_lvd 2e_mtlsd_unetr_lvd_w10
+      2f_affinity_unetr_simmim_lvd 2g_affinity_unetr_simmim_scratch 2h_affinity_unetr_simmim_lvd_mask60_g2)
 
 PORT=6006 SMOKE=0 LIST=0
 for arg in "$@"; do
@@ -84,7 +88,7 @@ link () {
   local name=$1 dir
   dir=$(ls -dt $2 2>/dev/null | head -1 || true)
   if [[ -n "$dir" && -d "${dir%/}/tensorboard" ]]; then
-    ln -sfn "${dir%/}/tensorboard" "$VIEW/$name"; printf '  %-26s -> %s\n' "$name" "$(basename "${dir%/}")"
+    ln -sfn "${dir%/}/tensorboard" "$VIEW/$name"; printf '  %-40s -> %s\n' "$name" "$(basename "${dir%/}")"
   else
     missing+=("$name")
   fi

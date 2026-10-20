@@ -1,0 +1,89 @@
+# lmd_ssl_v2 arm 2g: arm 2a with the encoder initialised from arm 1b_simmim_scratch_b32's final SimMIM checkpoint
+# (step 100k) instead of the released DINOv3 LVD-1689M weights. Nothing else differs.
+experiment_name = "lmd2__2g_affinity_unetr_simmim_scratch"
+
+[model]
+name = "dinov3_vit3d"
+img_size = 256            # 32^3 = 32,768 tokens at patch 8
+patch_size = 8            # 64 nm tokens at 8 nm
+in_chans = 1
+embed_dim = 1024          # ViT-L
+depth = 24
+num_heads = 16            # head_dim 64; 64 % 6 = 4, so axial 3D RoPE leaves 4 channels unrotated
+n_storage_tokens = 4
+layerscale_init = 1.0e-05 # the released weights were trained with LayerScale; 2b keeps it so the encoders match
+mask_k_bias = true
+pos_embed_rope_dtype = "fp32"
+pos_embed_rope_type = "vanilla"  # axial 3D RoPE, as 1a/1b and gary_comparison 4a/5b
+drop_path_rate = 0.0
+use_fa4 = false           # `[trainer].compile` needs torch SDPA
+attn_max_score = 1e5
+
+[init]
+path = "/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v2/runs/lmd2__1b_simmim_scratch_b32_20261017_205909/checkpoints/step_100000"
+prefix = "model."         # the encoder only; SimMIM's head and mask token stay behind
+strict = true
+
+[algorithm]
+name = "affinity_seg"
+long_range = 10           # nearest-neighbour offsets plus 10-voxel ones, as in every affinity arm here
+decoder = "unetr"
+decoder_skip_layers = [7, 15, 23]  # 0-based: blocks 8/16/24, the ends of the stack's thirds (the default at patch 8)
+decoder_widths = [16, 32, 64]      # channels at strides 1/2/4 (the default); patch 8 has three x2 stages
+decoder_image_skip = true          # the raw-image path, the head's only input finer than a token (the default)
+# FALSE because this head starts cold: zeroed, its output would be a constant and no gradient would reach the
+# encoder at step 0. Collapse check for the first ~3k steps: train affinity_accuracy equal to target_positive_rate
+# (the trivial "everything connected" predictor); gary_comparison's cold heads left it by step 3k.
+decoder_zero_init_output = false
+split_disconnected = false
+
+[data]
+name = "miao_volumes"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lmd_ssl_v2/data/instance_seg_v2_8nm_p256_census20261015_finetune.yaml"
+samples_per_epoch = 1000000
+defer_image_ops = true
+label_margin = [10, 10, 10]  # labels past each window face: what the long-range affinities read
+label_margin_fill = -1    # margin off a label array: unknown
+
+[val_data]
+name = "miao_volumes"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lmd_ssl_v2/data/instance_seg_v2_8nm_p256_census20261015_finetune.yaml"
+samples_per_epoch = 128
+defer_image_ops = true
+label_margin = [10, 10, 10]  # labels past each window face: what the long-range affinities read
+label_margin_fill = -1    # margin off a label array: unknown
+
+[trainer]
+max_steps = 100000
+batch_size = 1            # per rank; x 8 ranks -> global batch 8
+lr = 0.0003
+warmup_steps = 5000
+min_lr_ratio = 0.001
+weight_decay = 0.05
+grad_clip_norm = 1.0
+layerwise_lr_decay = 1.0
+patch_embed_lr_mult = 1.0
+lr_schedule = "linear"
+precision = "bf16"
+compile = true            # needs TORCHINDUCTOR_LAYOUT_OPTIMIZATION=0 in the job (the head's 3D convolutions), as submit.sh sets
+activation_checkpointing = false
+log_every = 1000
+val_every = 10000
+checkpoint_every = 25000  # 4 checkpoints: 25k, 50k, 75k, 100k
+num_workers = 8
+seed = 0
+
+[parallelism]
+dp_replicate = 1
+dp_shard = 8              # one B300 node
+tp = 1
+
+[augment]
+rotate = "inplane"
+drop_slice_prob = 0.05
+shift_slice_prob = 0.05
+shift_magnitude = 10
+intensity = true
+mul_intensity = 0.1
+add_intensity = 0.1
+noise_scale = 0.5

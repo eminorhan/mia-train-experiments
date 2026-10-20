@@ -35,6 +35,7 @@ is in that repo.
 - [`large_inputs_nisb/`](large_inputs_nisb/): does labelled-data scaling on NISB pay off at a larger window?
 - [`lm_zebrafish_cell_instance/`](lm_zebrafish_cell_instance/): an affinity model for mia-evals' `lm_zebrafish_cell_instance` task.
 - [`lmd_ssl_v1/`](lmd_ssl_v1/): does SSL on the lmd corpus beat a pretrained checkpoint?
+- [`lmd_ssl_v2/`](lmd_ssl_v2/): does SimMIM on the 2026-10-15 lmd corpus beat the LVD checkpoint for affinity prediction, and do LSDs or a SAM model help?
 - [`lora_vs_fullft/`](lora_vs_fullft/): can a 3.4%-trainable fine-tune match a full one on NISB?
 - [`lsd_aux_v1/`](lsd_aux_v1/): do local shape descriptors help the affinity head?
 - [`new_ssl_recipe/`](new_ssl_recipe/): does a two-phase SSL recipe beat plain joint SSL, and does either beat no SSL at all?
