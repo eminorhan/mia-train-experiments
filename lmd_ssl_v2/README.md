@@ -76,3 +76,6 @@ Runs, job logs and probes land in `/nrs/scicompsoft/orhane/mia-train-experiments
   (234 GB of 268 per GPU).
 - **SimMIM's loss is not the readout.** Rank the SSL arms by their fine-tunes (2f-2h against 2a/2b),
   scored with mia-evals on the test half; `val/boundary_accuracy` is a proxy.
+- **Scoring** (`score.sh`, mia-evals `lmd_ssl_v2_neuron_instance` or `--fast` its 512^3-crop sibling): the test
+  half without `jiefu_cerebellum`, whose labels are over-fragmented. With `--steps` the checkpoint is chosen on
+  the fit half together with the size filter, and only the winner is scored on the test half.
