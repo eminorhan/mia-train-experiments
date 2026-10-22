@@ -12,6 +12,7 @@
 #   bash lmd_ssl_v2/score.sh 2a_affinity_unetr_lvd --predict-only   # or --score-only once the predictions exist
 #   bash lmd_ssl_v2/score.sh 2a_affinity_unetr_lvd --dry-run
 #   bash lmd_ssl_v2/score.sh 2f_affinity_unetr_simmim_lvd --fast --step 100000 --after <training job>   # chained
+#   bash lmd_ssl_v2/score.sh 2h_... --fast --steps 25000,50000,75000,100000 --after <training job>  # unsaved ones wait
 #   PREDICT_QUEUE=gpu_b300 bash lmd_ssl_v2/score.sh ...           # every prediction on one queue, not queue_for's
 #
 # --steps makes the checkpoint one more hyperparameter of the post-processing (sweep.py): every listed checkpoint
@@ -68,7 +69,7 @@ ARM=${ARGS[0]:?usage: score.sh <arm> [--fast] [--step N | --steps N,N,..] [--pre
 run=$(ls -dt "$RUNS/lmd2__${ARM}_20"*/ 2>/dev/null | head -1 || true); run=${run%/}
 [[ -n "$run" ]] || { echo "no run directory matching lmd2__${ARM}_20* under $RUNS" >&2; exit 1; }
 if [[ $SWEEP -eq 1 ]]; then
-  [[ -z "$STEP$AFTER" ]] || { echo "--steps takes neither --step nor --after" >&2; exit 2; }
+  [[ -z "$STEP" ]] || { echo "--steps takes no --step" >&2; exit 2; }
 elif [[ -n "$AFTER" ]]; then                   # the checkpoint appears when job $AFTER finishes
   [[ -n "$STEP" ]] || { echo "--after needs --step: the checkpoint does not exist yet" >&2; exit 2; }
   STEPS=$STEP
@@ -154,7 +155,7 @@ if [[ $PREDICT -eq 1 ]]; then
 PYTHONPATH=$MIAO_SRC:$MIA_TRAIN/src; $VENV/bin/python -c \"import miao; assert miao.__file__.startswith('$MIAO_SRC'), miao.__file__\" \
 && $predict"
         args=(-q "${PREDICT_QUEUE:-$(queue_for "$volume" "$split")}" -gpu "num=1" -n 12 -W "$wall")
-        [[ -n "$AFTER" ]] && args+=(-w "done($AFTER)")
+        [[ -n "$AFTER" && ! -d "$run/checkpoints/step_$step" ]] && args+=(-w "done($AFTER)")   # not saved yet
         id=$(submit "lmd2_p_${ARM}_${step}_$volume" "${args[@]}" -- "$cmd")
         printf '  predict %-6s %-5s %-36s job %s\n' "$step" "$split" "$volume" "$id"
         predicted["$step $split"]+=" $id"
