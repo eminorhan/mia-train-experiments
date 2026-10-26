@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Score one lmd_ssl_v2 arm on mia-evals' lmd_ssl_v2_neuron_instance, or with --fast on its 512^3-crop sibling
 # lmd_ssl_v2_neuron_instance_crop512: predict every volume of both halves, one job per volume, then score them in
-# jobs chained on the predictions. An affinity arm is scored through mws_blockwise_size_filter (full) or
-# mws_size_filter (fast, exact); a promptable (SAM) arm through identity_size_filter, from predict_sam.sh's
-# segment-everything labellings.
+# jobs chained on the predictions. An affinity arm is scored through mws_size_filter (exact mutex watershed) on
+# either task; a promptable (SAM) arm through identity_size_filter, from predict_sam.sh's segment-everything
+# labellings.
 #
 #   bash lmd_ssl_v2/score.sh 2a_affinity_unetr_lvd                  # its final checkpoint
 #   bash lmd_ssl_v2/score.sh 2a_affinity_unetr_lvd --fast           # the crop512 eval, into eval/<arm>/step<N>/crop512/
@@ -14,6 +14,7 @@
 #   bash lmd_ssl_v2/score.sh 2f_affinity_unetr_simmim_lvd --fast --step 100000 --after <training job>   # chained
 #   bash lmd_ssl_v2/score.sh 2h_... --fast --steps 25000,50000,75000,100000 --after <training job>  # unsaved ones wait
 #   PREDICT_QUEUE=gpu_b300 bash lmd_ssl_v2/score.sh ...           # every prediction on one queue, not queue_for's
+#   SCORE_AFTER="<job> <job>" bash lmd_ssl_v2/score.sh ... --score-only   # the scorer also waits for these jobs
 #
 # --steps makes the checkpoint one more hyperparameter of the post-processing (sweep.py): every listed checkpoint
 # is predicted on both halves and scored on the fit half under every candidate, one job each; the (checkpoint,
@@ -41,10 +42,13 @@ EXP=/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v2
 RUNS=$EXP/runs
 LOGS=$EXP/jobs
 MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/62b3746/src}
-# The scorer's memory is its slots x 15 GB on `local`: its 8 watershed processes hold one 512^3 block each (~40 GB),
-# then the labelling, truth and metric of one volume (the zebrafish doublecube: 7.1 G voxels, ~28 GB per uint32 array).
+# The scorer's memory is its slots x 15 GB on `local`. Exact mws on the full task peaks at an estimated 2.5-3.7 TB, at
+# the zebrafish doublecube (7.1 G voxels, ~4-5 mutex insertions per voxel), more than any CPU node holds: that scorer
+# takes a whole B300 node instead, 96 x 40 GB with all 8 GPUs reserved and left idle (the esub wants 12 slots per
+# GPU), and spills its edges to the node's own disk (local_scratch.sh), not /nrs.
 SCORE_SLOTS=${SCORE_SLOTS:-63}
 SCORE_WALL=${SCORE_WALL:-48:00}
+SCORE_AFTER=${SCORE_AFTER:-}
 
 PREDICT_QUEUE=${PREDICT_QUEUE:-}
 
@@ -89,9 +93,12 @@ RUN_NAME=$(basename "$run")
 if [[ $FAST -eq 1 ]]; then
   TASK=lmd_ssl_v2_neuron_instance_crop512 ROUTE=mws_size_filter SUB=/crop512
 else
-  TASK=lmd_ssl_v2_neuron_instance ROUTE=mws_blockwise_size_filter SUB=""
+  TASK=lmd_ssl_v2_neuron_instance ROUTE=mws_size_filter SUB=""
 fi
 [[ $algorithm == promptable_seg ]] && ROUTE=identity_size_filter
+WHOLE_NODE=0; [[ $FAST -eq 0 && $algorithm == affinity_seg ]] && WHOLE_NODE=1
+[[ $SWEEP -eq 1 && $WHOLE_NODE -eq 1 ]] && {
+  echo "--steps is set up for the fast eval only: on the full task each exact-mws job needs a whole B300 node" >&2; exit 2; }
 TASK_DIR=/nrs/scicompsoft/orhane/mia-evals/$TASK
 art_for () { echo "$EXP/eval/$ARM/step$1$SUB"; }       # one checkpoint's predictions: fit/ and test/
 if [[ $SWEEP -eq 1 ]]; then echo "run $run, the best of steps $STEPS -> record $RUN_NAME.step<best>.$ROUTE"
@@ -167,23 +174,34 @@ fi
 SCORE_ENV="export OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8; cd '$EVALS' &&"
 NUMA="'$VENV/bin/python' '$HERE/../gary_comparison/numa_local.py'"
 scorer () {      # scorer <step>: mia-evals score on that checkpoint; '{step}' leaves the step to sweep.py best
-  local art rec=$RUN_NAME.step$1.$ROUTE
+  local art rec=$RUN_NAME.step$1.$ROUTE scratch
   art=$(art_for "$1")
-  echo "$NUMA '$MIA_EVALS' score configs/$TASK/$ROUTE.toml --test '$art/test' --val '$art/fit' --run-dir '$run' \
---scored-out '$TASK_DIR/scored/$rec' --scratch '$TASK_DIR/scorescratch/$rec'"
+  scratch="--scratch '$TASK_DIR/scorescratch/$rec'" local=""
+  [[ $WHOLE_NODE -eq 1 ]] && scratch="" local="bash '$HERE/local_scratch.sh' 600 "    # adds --scratch on local disk
+  echo "$local$NUMA '$MIA_EVALS' score configs/$TASK/$ROUTE.toml --test '$art/test' --val '$art/fit' --run-dir '$run' \
+--scored-out '$TASK_DIR/scored/$rec' $scratch"
 }
+score_args () {  # the scorer's bsub resources -> SARGS
+  if [[ $WHOLE_NODE -eq 1 ]]; then
+    SARGS=(-q gpu_b300 -gpu "num=8" -n 96 -R "select[tmp>600000]" -W "$SCORE_WALL")
+  else
+    SARGS=(-q local -n "$SCORE_SLOTS" -W "$SCORE_WALL")
+  fi
+}
+score_args
+where="$SCORE_SLOTS slots"; [[ $WHOLE_NODE -eq 1 ]] && where="a whole B300 node"
 if [[ $SCORE -eq 1 && $SWEEP -eq 0 ]]; then
-  args=(-q local -n "$SCORE_SLOTS" -W "$SCORE_WALL")
-  w=$(waits ${predicted["$STEP fit"]:-} ${predicted["$STEP test"]:-}); [[ -z "$w" ]] || args+=(-w "$w")
+  args=("${SARGS[@]}")
+  w=$(waits ${predicted["$STEP fit"]:-} ${predicted["$STEP test"]:-} $SCORE_AFTER); [[ -z "$w" ]] || args+=(-w "$w")
   id=$(submit "lmd2_sc_${ARM}_${STEP}_$ROUTE" "${args[@]}" -- "$SCORE_ENV $(scorer "$STEP")")
-  echo "  score   $ROUTE on $SCORE_SLOTS slots: job $id -> record $RUN_NAME.step$STEP.$ROUTE"
+  echo "  score   $ROUTE on $where: job $id -> record $RUN_NAME.step$STEP.$ROUTE"
 fi
 if [[ $SCORE -eq 1 && $SWEEP -eq 1 ]]; then
   fits=() before_best=()
   for step in $STEPS; do
     art=$(art_for "$step")
     args=(-q local -n "$SCORE_SLOTS" -W "$SCORE_WALL")
-    w=$(waits ${predicted["$step fit"]:-}); [[ -z "$w" ]] || args+=(-w "$w")
+    w=$(waits ${predicted["$step fit"]:-} $SCORE_AFTER); [[ -z "$w" ]] || args+=(-w "$w")
     cmd="$SCORE_ENV $NUMA '$VENV/bin/python' '$HERE/sweep.py' fit configs/$TASK/$ROUTE.toml --val '$art/fit' \
 --scratch '$TASK_DIR/scorescratch/$RUN_NAME.step$step.$ROUTE' --out '$art/fit_scores.$ROUTE.json'"
     id=$(submit "lmd2_fit_${ARM}_${step}_$ROUTE" "${args[@]}" -- "$cmd")
