@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # predict.py's segment-everything pass for one volume of a promptable (SAM) arm, with sam_lmd_v1's labeller settings:
 # its pseudolabel.LABEL_AMG, and points_per_batch from the arm's mask stride, as sam_lmd_v1/predict_eval.sh does.
-# Run inside a job by score.sh, which sets PYTHONPATH (the miao pin, then mia-train's src).
+# Run inside a job by score.sh, which sets PYTHONPATH (the miao pin, then mia-train's src). Anything after the five
+# arguments goes to predict.py as is (score_zebrafinch.sh: --no-truth, --allow-resolution-mismatch).
 #
-#   bash lmd_ssl_v2/predict_sam.sh <run dir> <step> <data config> <volume> <out dir>
+#   bash lmd_ssl_v2/predict_sam.sh <run dir> <step> <data config> <volume> <out dir> [predict.py flags...]
 set -euo pipefail
 RUN=$1 STEP=$2 CONFIG=$3 VOLUME=$4 OUT=$5
+shift 5
 MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
 SAM=/groups/scicompsoft/home/orhane/projects/mia-train-experiments/sam_lmd_v1
 PY=/groups/scicompsoft/home/orhane/myvenv/bin/python
@@ -30,4 +32,4 @@ overrides+=" --override algorithm.points_per_batch=$batch"
 echo "[predict_sam] mask stride $stride, points_per_batch $batch; $overrides"
 cd "$MIA_TRAIN"
 # shellcheck disable=SC2086                    # word-split on purpose: a list of --override flags
-$PY src/predict.py "$RUN" --step "$STEP" --data-config "$CONFIG" --volume "$VOLUME" --out "$OUT" $overrides
+$PY src/predict.py "$RUN" --step "$STEP" --data-config "$CONFIG" --volume "$VOLUME" --out "$OUT" $overrides "$@"

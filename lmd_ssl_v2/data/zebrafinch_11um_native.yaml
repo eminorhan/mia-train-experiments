@@ -1,0 +1,20 @@
+# lmd_ssl_v2's prediction config for mia-evals' zebrafinch_neurite_tracing_11um on the store's own 20 x 9 x 9 nm grid.
+# A copy of mia-evals configs/zebrafinch_neurite_tracing_11um/data/test.yaml (cb4b5c2) with two changes: the arms'
+# 256^3 patch, and a box grown to 1024 x 1664 x 1664 so the lattice (7 x 12 x 12 tiles) covers the 540 x 1200 x 1200
+# cube with 242 (z) / 232 (y, x) voxels of context per side, more than 3/4 of a patch. The arms trained at 8 nm, so
+# predict.py needs --allow-resolution-mismatch here. The volume keeps the task's name: the scorer finds it by name.
+
+resolutions: [[20.0, 9.0, 9.0]]
+patch_size: [256, 256, 256]
+output_axes: lczyx
+samples_per_epoch: 1000
+defer_image_ops: true   # irrelevant for prediction; kept so the rule holds for every miao config
+
+volumes:
+  - name: zebrafinch_11um_test
+    path: /groups/miaai/miaai/mia-evals-data/zebrafinch_j0126/zebrafinch_j0126.zarr
+    image_key: raw
+    zarr_version: zarr2
+    bounding_box: [[2298, 3322], [4568, 6232], [4668, 6332]]   # z, y, x; the cube is [[2540, 3080], [4800, 6000], [4900, 6100]]
+    weight: 1.0
+    normalize: true   # uint8 on disk, so this maps to [0, 1] by dtype max

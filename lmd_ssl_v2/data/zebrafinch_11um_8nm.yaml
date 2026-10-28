@@ -1,0 +1,21 @@
+# lmd_ssl_v2's prediction config for mia-evals' zebrafinch_neurite_tracing_11um at the arms' own 8 nm.
+# A copy of mia-evals configs/zebrafinch_neurite_tracing_11um/data/test.yaml (cb4b5c2) with three changes: 8 nm, the
+# arms' 256^3 patch, and a box grown to 728 x 1596 x 1596 store voxels. Each tile reads 104 x 228 x 228 of them (miao's
+# 103 rounded up to even) into 256^3, so the lattice is 13^3 tiles, 1792^3 voxels of 8.125 x 8.016 x 8.016 nm, with
+# 94 (z) / 198 (y, x) store voxels of context per side of the cube: 1.88 / 1.78 um, more than 3/4 of a patch.
+# zf_convert.py turns the result into a labelling of the cube in store voxels, which mia-evals scores.
+
+resolutions: [[8.0, 8.0, 8.0]]
+patch_size: [256, 256, 256]
+output_axes: lczyx
+samples_per_epoch: 1000
+defer_image_ops: true   # irrelevant for prediction; kept so the rule holds for every miao config
+
+volumes:
+  - name: zebrafinch_11um_test
+    path: /groups/miaai/miaai/mia-evals-data/zebrafinch_j0126/zebrafinch_j0126.zarr
+    image_key: raw
+    zarr_version: zarr2
+    bounding_box: [[2446, 3174], [4602, 6198], [4702, 6298]]   # z, y, x; the cube is [[2540, 3080], [4800, 6000], [4900, 6100]]
+    weight: 1.0
+    normalize: true   # uint8 on disk, so this maps to [0, 1] by dtype max
