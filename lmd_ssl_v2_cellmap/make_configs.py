@@ -16,6 +16,7 @@ Writes, next to this file:
                                   miao reads, so the prediction lattice covers every crop voxel. No label_key: the
                                   scorer reads the truth from the store.
   <arm>.toml, <arm>_fewshot.toml  one run per arm and task (ARMS)
+  <arm>_b32.toml                  series b32: the large task again, 15k steps at a global batch of 32 (B32)
 
 <task> is `large` (cellmap_organelle_semantic) or `fewshot` (cellmap_organelle_semantic_fewshot), <res> `8nm` or
 `native` (each dataset's raw voxel size). It prints what each filter removed and every test crop's coverage.
@@ -50,9 +51,14 @@ CHECKPOINTS = {
     "affinity_simmim_lvd": V2_RUNS / "lmd2__2f_affinity_unetr_simmim_lvd_20261020_200659/checkpoints/step_100000",
 }
 SCHEDULES = {
-    "large": dict(steps=100_000, warmup=5_000, every=25_000),
-    "fewshot": dict(steps=25_000, warmup=2_000, every=5_000),
+    "large": dict(steps=100_000, warmup=5_000, every=25_000, batch=1, trainer_extra=""),
+    "fewshot": dict(steps=25_000, warmup=2_000, every=5_000, batch=1, trainer_extra=""),
 }
+# Series b32 (2026-11-04): every pretrained arm's test score fell from its first checkpoint (25k) on, so the large
+# task again for 15k steps, checkpointed every 1k, at 4 crops per GPU (global batch 32). The start-up FLOP count runs
+# the step eagerly and ran out of a B300's memory at 4 crops (an 18.75 GiB float32 copy of the 75-class scores).
+B32 = dict(steps=15_000, warmup=1_000, every=1_000, batch=4,
+           trainer_extra="\nmeasure_mfu = false       # its eager FLOP count overflows a B300 at 4 crops per GPU")
 # Series 1: the encoder's starting point, at the default recipe (8 nm, cross-entropy, seed 0). Series 2: one change
 # each to 1e, the arm whose encoder lmd_ssl_v2 found best for affinities.
 ARMS = {
@@ -308,7 +314,7 @@ defer_image_ops = true
 
 [trainer]
 max_steps = {steps}
-batch_size = 1
+batch_size = {batch}
 lr = 0.0003
 warmup_steps = {warmup}
 min_lr_ratio = 0.001
@@ -324,7 +330,7 @@ log_every = 1000
 val_every = 0
 checkpoint_every = {every}
 num_workers = 8
-seed = {seed}
+seed = {seed}{trainer_extra}
 
 [parallelism]
 dp_replicate = 1
@@ -393,17 +399,18 @@ image faces and a whole number of half-window steps long at the level miao reads
 every crop voxel. No label_key: predict with --no-truth; the scorer reads the store's labels.""",
                        "lczyx", pred)
 
-    for arm, spec in ARMS.items():
+    runs = [(arm, task, "" if task == "large" else "_fewshot", SCHEDULES[task]) for arm in ARMS for task in TASKS]
+    runs += [(arm, "large", "_b32", B32) for arm in ARMS]
+    for arm, task, suffix, schedule in runs:
+        spec = ARMS[arm]
         res = spec.get("res", "8nm")
-        for task, name in TASKS.items():
-            suffix = "" if task == "large" else "_fewshot"
-            text = TOML.format(
-                arm=arm, suffix=suffix, task_name=name, note=spec["note"],
-                res_text="8 nm" if res == "8nm" else "native voxel size", init=INIT[spec["init"]],
-                dice=spec.get("dice", 0.0), label_sets=label_sets,
-                data=HERE / "data" / f"train_{task}_{res}.yaml", seed=spec.get("seed", 0), **SCHEDULES[task])
-            (HERE / f"{arm}{suffix}.toml").write_text(text)
-    print(f"\n[make_configs] wrote {2 * len(ARMS)} run configs")
+        text = TOML.format(
+            arm=arm, suffix=suffix, task_name=TASKS[task], note=spec["note"],
+            res_text="8 nm" if res == "8nm" else "native voxel size", init=INIT[spec["init"]],
+            dice=spec.get("dice", 0.0), label_sets=label_sets,
+            data=HERE / "data" / f"train_{task}_{res}.yaml", seed=spec.get("seed", 0), **schedule)
+        (HERE / f"{arm}{suffix}.toml").write_text(text)
+    print(f"\n[make_configs] wrote {len(runs)} run configs")
     check_run_configs()
 
 

@@ -26,9 +26,9 @@ GPUS=${GPUS:-8}                     # the real run's GPUs: must equal the config
 SLOTS=$((12 * GPUS))                # 12 slots/GPU on gpu_b300
 SMOKE_GPUS=${SMOKE_GPUS:-1}         # the smoke's GPUs; its derived config gets dp_shard = SMOKE_GPUS
 # The miao the job imports: a read-only copy of one commit of our fork (github.com/eminorhan/miao), first on
-# PYTHONPATH; the job stops unless it is the miao imported. 62b3746 = v0.4.2 + label_fill (which these configs
-# need) + nearest-exact label resampling + label_margin.
-MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/62b3746/src}
+# PYTHONPATH; the job stops unless it is the miao imported. 4ef0d8c = our fork's master on 2026-11-04 (the user's rule:
+# always the fork master); the first round (16 runs, 2026-10-26) ran 62b3746.
+MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/4ef0d8c/src}
 THREADS="export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4"
 # inductor's layout optimisation can hand cuDNN SDPA a query with a non-unit last stride under compile, killing the
 # run at step 1; every compiled run here sets this.

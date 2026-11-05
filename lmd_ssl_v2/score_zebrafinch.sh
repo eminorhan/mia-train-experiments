@@ -111,7 +111,8 @@ if [[ ,$STAGES, == *,convert,* && $CONVERT -eq 1 ]]; then
   if [[ $algorithm == promptable_seg ]]; then
     args=(-q local -n 16 -W 2:00)                                  # a labelling: gather, mask, relabel
   else
-    args=(-q local -n 96 -R "span[hosts=1]" -W 12:00)              # exact mws on 2.4 G lattice voxels: 2a 796 GB
+    args=(-q local -n 96 -R "span[hosts=1]" -W 48:00)              # exact mws on 2.4 G lattice voxels: 2a 796 GB,
+                                                                   # 2-8 h; 2c passed 12 h and 1.0 TB (2026-10-28)
   fi
   cmd="$PYENV mkdir -p '$ART/test' && $NUMA '$VENV/bin/python' '$HERE/zf_convert.py' '$PRED/$VOLUME.zarr' '$ART/test/$VOLUME.zarr'"
   readarray -t w < <(chain)

@@ -6,7 +6,7 @@
 set -euo pipefail
 export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4
 export PYTHONPYCACHEPREFIX=/scratch/$USER/pyc_$LSB_JOBID
-export PYTHONPATH=/nrs/scicompsoft/orhane/probes/miao-pinned/62b3746/src
+export PYTHONPATH=/nrs/scicompsoft/orhane/probes/miao-pinned/4ef0d8c/src   # our fork's master (user, 11-01)
 HERE="$(cd "$(dirname "$0")" && pwd)"
 /groups/scicompsoft/home/orhane/myvenv/bin/python -u "$HERE/make_configs.py"
 rm -rf "$PYTHONPYCACHEPREFIX"

@@ -56,7 +56,44 @@ Runs, job logs, predictions and probes land in `/nrs/scicompsoft/orhane/mia-trai
 - `make_configs.py` (run with `make_configs.sh` in a bsub job): writes every data and run config; edit there.
 - `data/train_<task>_<res>.yaml`, `data/predict_<task>_<res>.yaml`: `<task>` large or fewshot, `<res>` 8nm or native.
 - `submit.sh`, `tensorboard.sh`.
+- `score.sh`: predict an arm's checkpoints on a task's test crops and score them into mia-evals' leaderboard
+  (identity route), one prediction job per checkpoint.
+- `<arm>_b32.toml`: series b32, the large task again for 15k steps (warmup 1k, a checkpoint every 1k) at 4 crops per
+  GPU, a global batch of 32; otherwise the arm's first-round config.
 
 ## Status
 
-2026-10-26: configs built and checked; nothing launched.
+2026-10-26: all 16 runs launched. 2026-10-31: 15 done (2c large past 75k); every large-task checkpoint (8 arms x 4)
+being predicted (H100s) and scored with `score.sh`, all 32 into mia-evals' leaderboard.
+2026-11-04: the first round's checkpoints and predictions deleted (420 GB; configs, logs and records kept). Series
+b32 launched (8 arms, large task), on mia-train 4e71956, whose semantic_seg cross-entropy is the mean of its windows'
+means (at 4 crops per GPU, pooling voxels would weigh windows by their labelled fraction), and miao 4ef0d8c.
+
+## Next iteration
+
+Results came out worse than expected (2026-10-31). To fix next time:
+
+1. **Intensity windows.** Every CellMap crop is uint8 / 255 here; several stores use a narrow band of grey levels
+   (e.g. macrophage-2 210-249, jurkat-1 212-255). Take each store's p0.1-99.9 (or p1-99) window from lmd-configs'
+   `corpus/windows.yaml` into `make_configs.py` (train + predict) and mia-evals' CellMap task data.
+2. **NaN metrics in the training logs** (the loss is fine): `mean_iou` is NaN on ~69% of large-task log steps
+   (composite-only windows) and `pixel_accuracy` on ~25% (windows with no annotated voxel; find those crops). Average
+   metrics across ranks ignoring NaN.
+3. **Overfitting.** Test mean IoU falls with training in every pretrained arm (1d holds level 25k-50k, then falls);
+   only scratch (1a) improves. Best: 1c at 25k, 0.415. Train ~25k steps.
+
+   | arm | 25k | 50k | 75k | 100k |
+   |---|---|---|---|---|
+   | 1a scratch | 0.072 | 0.114 | 0.155 | 0.179 |
+   | 1b lvd | 0.369 | 0.300 | 0.217 | 0.182 |
+   | 1c simmim_lvd | 0.415 | 0.398 | 0.327 | 0.284 |
+   | 1d simmim_scratch | 0.323 | 0.324 | 0.267 | 0.247 |
+   | 1e affinity_simmim_lvd | 0.335 | 0.232 | 0.135 | 0.145 |
+   | 2a ... native | 0.366 | 0.332 | 0.310 | 0.251 |
+   | 2b ... dice | 0.328 | 0.226 | 0.182 | 0.141 |
+   | 2c ... seed1 | 0.390 | 0.321 | 0.224 | 0.178 |
+
+   1e and 2c differ only in seed and are 0.03-0.09 apart, so single-run gaps of a few hundredths are noise.
+4. **Larger batch** than the global 8 used here (8 GPUs x 1); at most ~4 per B300 at 256^3, so more nodes beyond 32.
+5. **A native version of the best arm (1c),** trained on native-resolution data as 2a is to 1e. Here 2a (native)
+   beat 1e (8 nm) at every checkpoint, by more than the seed spread from 50k on.
