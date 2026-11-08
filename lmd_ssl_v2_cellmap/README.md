@@ -4,7 +4,7 @@ Each arm fine-tunes one encoder starting point with `semantic_seg` on the fit cr
 organelle tasks and is scored on their test crops (mean IoU over 48 classes):
 `cellmap_organelle_semantic` (228 fit crops, 43 test) and `cellmap_organelle_semantic_fewshot` (17 fit crops, one
 per dataset; 193 test). Series 1 varies the starting point; series 2 changes one thing each about 1e, the encoder
-lmd_ssl_v2 found best for affinities.
+lmd_ssl_v2 found best for affinities; series 3 changes one thing about 1c, the best CellMap arm.
 
 ## Arms
 
@@ -20,6 +20,7 @@ Every arm has a large-task run (`<arm>.toml`) and a fewshot run (`<arm>_fewshot.
 | `2a_affinity_simmim_lvd_native` | as 1e, trained and predicted at each dataset's native voxel size | 1e: resolution |
 | `2b_affinity_simmim_lvd_dice` | as 1e, cross-entropy + Dice 1:1 | 1e: loss |
 | `2c_affinity_simmim_lvd_seed1` | as 1e, seed 1: run-to-run spread | 1e: seed |
+| `3a_simmim_lvd_native` | as 1c, trained and predicted at each dataset's native voxel size (series 25k only) | 1c: resolution |
 
 All take the encoder only (`[init] prefix = "model."` for lmd_ssl_v2 checkpoints); the head starts fresh.
 
@@ -60,6 +61,8 @@ Runs, job logs, predictions and probes land in `/nrs/scicompsoft/orhane/mia-trai
   (identity route), one prediction job per checkpoint.
 - `<arm>_b32.toml`: series b32, the large task again for 15k steps (warmup 1k, a checkpoint every 1k) at 4 crops per
   GPU, a global batch of 32; otherwise the arm's first-round config.
+- `<arm>_25k.toml`: series 25k, the arm's first-round large-task config for 25k steps (warmup 3k, a checkpoint every
+  5k), one crop per GPU as there. `3a_simmim_lvd_native_25k.toml` is `1c_simmim_lvd_25k.toml` on the native data.
 
 ## Status
 
@@ -68,6 +71,20 @@ being predicted (H100s) and scored with `score.sh`, all 32 into mia-evals' leade
 2026-11-04: the first round's checkpoints and predictions deleted (420 GB; configs, logs and records kept). Series
 b32 launched (8 arms, large task), on mia-train 4e71956, whose semantic_seg cross-entropy is the mean of its windows'
 means (at 4 crops per GPU, pooling voxels would weigh windows by their labelled fraction), and miao 4ef0d8c.
+2026-11-05: all 120 b32 checkpoints scored into this experiment's board (`eval/board`, not mia-evals' leaderboard);
+then b32's checkpoints and predictions deleted. Series 25k launched, each run's 5 checkpoints predicted and scored
+into `eval/board_25k` by jobs chained on its training job (`score.sh --after`).
+2026-11-06: that launch (warmup 2k) cancelled at steps 4k-6k, 2b's loss NaN from step 4k; its run folders and
+checkpoints deleted, nothing scored. Relaunched at warmup 3k, with semantic_seg's logged metrics pooled over ranks
+(mia-train 4e71956 plus that change). All 40 checkpoints scored into `eval/board_25k`, then put on mia-evals'
+leaderboard in place of round 1's 32 rows (re-scored there to keep the scored copies its views show). Best: 2a at 15k
+0.453, 2b at 10k 0.441, 1c at 20k 0.424. 2c diverged: loss NaN from step 14k (grad norm 5.8 at 13k), so its 15k-25k
+checkpoints score 0. The experiment's three divergences (1e_b32, 2b's first 25k launch, 2c here) all start from the
+2f encoder.
+2026-11-07: 3a (1c at native voxel size) launched on series 25k's recipe and code, its 5 checkpoints chained into
+`eval/board_25k` (`jobs/launch_3a_*.log`). The diverged 2c deleted (run, predictions, records on both boards) and
+rerun unchanged (seed 1), scored straight into mia-evals' leaderboard behind a gate that stops the chain if its
+training logged a NaN loss (`jobs/eval/gate_finite_training.sh`, `jobs/launch_2c_rerun_*.log`).
 
 ## Next iteration
 
@@ -77,8 +94,9 @@ Results came out worse than expected (2026-10-31). To fix next time:
    (e.g. macrophage-2 210-249, jurkat-1 212-255). Take each store's p0.1-99.9 (or p1-99) window from lmd-configs'
    `corpus/windows.yaml` into `make_configs.py` (train + predict) and mia-evals' CellMap task data.
 2. **NaN metrics in the training logs** (the loss is fine): `mean_iou` is NaN on ~69% of large-task log steps
-   (composite-only windows) and `pixel_accuracy` on ~25% (windows with no annotated voxel; find those crops). Average
-   metrics across ranks ignoring NaN.
+   (composite-only windows) and `pixel_accuracy` on ~25% (windows with no annotated voxel; find those crops). Fixed
+   2026-11-06 from the 25k relaunch on: semantic_seg sums the metrics' counts over ranks before taking ratios, so one
+   rank's empty window no longer turns the logged value into NaN. Still open: which crops give those windows.
 3. **Overfitting.** Test mean IoU falls with training in every pretrained arm (1d holds level 25k-50k, then falls);
    only scratch (1a) improves. Best: 1c at 25k, 0.415. Train ~25k steps.
 
@@ -96,4 +114,4 @@ Results came out worse than expected (2026-10-31). To fix next time:
    1e and 2c differ only in seed and are 0.03-0.09 apart, so single-run gaps of a few hundredths are noise.
 4. **Larger batch** than the global 8 used here (8 GPUs x 1); at most ~4 per B300 at 256^3, so more nodes beyond 32.
 5. **A native version of the best arm (1c),** trained on native-resolution data as 2a is to 1e. Here 2a (native)
-   beat 1e (8 nm) at every checkpoint, by more than the seed spread from 50k on.
+   beat 1e (8 nm) at every checkpoint, by more than the seed spread from 50k on. Running as 3a since 2026-11-07.

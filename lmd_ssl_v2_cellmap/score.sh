@@ -64,10 +64,19 @@ submit () {      # submit <name> <script> <bsub args...>   -> job id, or DRYRUN
 }
 
 ARM=${ARGS[0]:?usage: score.sh <arm> [--fewshot] [--steps N,N,..] [--after <job>] [--predict-only|--score-only] [--dry-run]}
-run=$(ls -dt "$EXP/runs/lmd2cm__${ARM}${SUFFIX}_20"*/ 2>/dev/null | head -1 || true); run=${run%/}
-[[ -n "$run" ]] || { echo "no run directory lmd2cm__${ARM}${SUFFIX}_20* under $EXP/runs" >&2; exit 1; }
-RES=$(grep -o "train_${SIZE}_\(8nm\|native\)\.yaml" "$run/config.toml" | head -1 | sed 's/.*_\(8nm\|native\)\.yaml/\1/')
-[[ -n "$RES" ]] || { echo "$run/config.toml names no data/train_${SIZE}_<res>.yaml" >&2; exit 1; }
+PATTERN=$EXP/runs/lmd2cm__${ARM}${SUFFIX}_20   # + the rest of its start stamp: the run's directory
+run=$(ls -dt "$PATTERN"*/ 2>/dev/null | head -1 || true); run=${run%/}
+if [[ -n "$run" ]]; then
+  cfg=$run/config.toml
+else
+  # A run job $AFTER has not started yet: its directory is looked up when the jobs run, and its settings come from
+  # the experiment's own config, which train.py copies into the run.
+  [[ -n "$AFTER" ]] || { echo "no run directory ${PATTERN}* (--after <training job> for a run not started yet)" >&2; exit 1; }
+  [[ -n "$STEPS" ]] || { echo "a run not started yet has no checkpoints to default to: pass --steps" >&2; exit 2; }
+  cfg=$HERE/$ARM$SUFFIX.toml
+fi
+RES=$(grep -o "train_${SIZE}_\(8nm\|native\)\.yaml" "$cfg" | head -1 | sed 's/.*_\(8nm\|native\)\.yaml/\1/')
+[[ -n "$RES" ]] || { echo "$cfg names no data/train_${SIZE}_<res>.yaml" >&2; exit 1; }
 DATA=$HERE/data/predict_${SIZE}_${RES}.yaml
 [[ -n "$STEPS" ]] || STEPS=$(ls -d "$run"/checkpoints/step_* | sed 's|.*step_||' | sort -n | tail -1)
 for step in $STEPS; do
@@ -80,14 +89,14 @@ case $SIZE/$RES in              # 762, 1,613, 3,273 and 6,936 tiles at ~18 s, do
   fewshot/native) WALL=72:00 ;;
 esac
 WALL=${PREDICT_WALL:-$WALL}     # e.g. more on a queue whose hosts are slower
-RUN_NAME=$(basename "$run")
+RUN_NAME=$(basename "${run:-${PATTERN}<stamp>}")
 TASK_DIR=/nrs/scicompsoft/orhane/mia-evals/$TASK
 JOBS=$EXP/jobs/eval/${STAMP}_$ARM$SUFFIX
 [[ $DRY -eq 1 ]] && JOBS=$(mktemp -d)
 mkdir -p "$JOBS"
 if [[ $DRY -eq 0 && -n "$BOARD" ]]; then mkdir -p "$BOARD" "$EXP/eval/scratch"
 elif [[ $DRY -eq 0 ]]; then mkdir -p "$TASK_DIR/scored" "$TASK_DIR/scorescratch"; fi
-echo "run $run ($RES), steps $STEPS"
+echo "run ${run:-${PATTERN}* once job $AFTER starts it} ($RES), steps $STEPS"
 
 for step in $STEPS; do
   art=$EXP/eval/$ARM$SUFFIX/step$step/test
@@ -108,8 +117,10 @@ trap 'rm -rf "\$TMPDIR"' EXIT
 $VENV/bin/python -c "import miao; assert miao.__file__.startswith('$MIAO_SRC'), miao.__file__; print('[miao]', miao.__file__)"
 cd $MIA_TRAIN
 echo "[mia-train] \$(git rev-parse --short HEAD), uncommitted: \$(git status --short --untracked-files=no | tr '\n' ' ')"
+RUN=\$(ls -dt $PATTERN*/ | head -1); RUN=\${RUN%/}
+test -n "\$RUN"
 mkdir -p $art
-$VENV/bin/python src/predict.py $run --step $step --data-config $DATA --out $art --argmax --no-truth --cover-box
+$VENV/bin/python src/predict.py \$RUN --step $step --data-config $DATA --out $art --argmax --no-truth --cover-box
 touch $art/.done
 EOF
     args=(-q "$PREDICT_QUEUE" -gpu "num=1" -n 12 -W "$WALL")
@@ -118,15 +129,17 @@ EOF
     echo "  predict $step on $PREDICT_QUEUE, wall $WALL: job $pid -> $art"
   fi
   if [[ $SCORE -eq 1 ]]; then
-    if [[ -n "$BOARD" ]]; then dest="--leaderboard $BOARD --no-scored --scratch $EXP/eval/scratch/$rec"
-    else dest="--scored-out $TASK_DIR/scored/$rec --scratch $TASK_DIR/scorescratch/$rec"; fi
+    if [[ -n "$BOARD" ]]; then dest="--leaderboard $BOARD --no-scored --scratch $EXP/eval/scratch/\$REC"
+    else dest="--scored-out $TASK_DIR/scored/\$REC --scratch $TASK_DIR/scorescratch/\$REC"; fi
     cat > "$JOBS/score_$step.sh" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
 export OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8
 test -e $art/.done
+RUN=\$(ls -dt $PATTERN*/ | head -1); RUN=\${RUN%/}
+REC=\$(basename "\$RUN").step$step.identity
 cd $EVALS
-$VENV/bin/mia-evals score configs/$TASK/identity.toml --test $art --run-dir $run \\
+$VENV/bin/mia-evals score configs/$TASK/identity.toml --test $art --run-dir \$RUN \\
   $dest
 EOF
     args=(-n 8 -W 1:00)

@@ -17,6 +17,7 @@ Writes, next to this file:
                                   scorer reads the truth from the store.
   <arm>.toml, <arm>_fewshot.toml  one run per arm and task (ARMS)
   <arm>_b32.toml                  series b32: the large task again, 15k steps at a global batch of 32 (B32)
+  <arm>_25k.toml                  series 25k: the first round's large-task runs, 25k steps instead of 100k (S25K)
 
 <task> is `large` (cellmap_organelle_semantic) or `fewshot` (cellmap_organelle_semantic_fewshot), <res> `8nm` or
 `native` (each dataset's raw voxel size). It prints what each filter removed and every test crop's coverage.
@@ -59,8 +60,12 @@ SCHEDULES = {
 # the step eagerly and ran out of a B300's memory at 4 crops (an 18.75 GiB float32 copy of the 75-class scores).
 B32 = dict(steps=15_000, warmup=1_000, every=1_000, batch=4,
            trainer_extra="\nmeasure_mfu = false       # its eager FLOP count overflows a B300 at 4 crops per GPU")
+# Series 25k (2026-11-05): the first round's large-task runs again for 25k steps (a checkpoint every 5k, warmup 3k),
+# one crop per GPU as there. Its first launch, at warmup 2k, was cancelled on 2026-11-06 (2b's loss NaN from step 4k).
+S25K = dict(steps=25_000, warmup=3_000, every=5_000, batch=1, trainer_extra="")
 # Series 1: the encoder's starting point, at the default recipe (8 nm, cross-entropy, seed 0). Series 2: one change
-# each to 1e, the arm whose encoder lmd_ssl_v2 found best for affinities.
+# each to 1e, the arm whose encoder lmd_ssl_v2 found best for affinities. Series 3: one change to 1c, the best CellMap
+# arm (added 2026-11-07, run in series 25k only).
 ARMS = {
     "1a_scratch": dict(init=None, note="encoder from random initialisation"),
     "1b_lvd": dict(init="lvd", note="encoder from the released DINOv3 LVD-1689M weights"),
@@ -73,6 +78,7 @@ ARMS = {
         init="affinity_simmim_lvd", res="native", note="1e at each dataset's native voxel size"),
     "2b_affinity_simmim_lvd_dice": dict(init="affinity_simmim_lvd", dice=1.0, note="1e with cross-entropy + Dice 1:1"),
     "2c_affinity_simmim_lvd_seed1": dict(init="affinity_simmim_lvd", seed=1, note="1e with seed 1"),
+    "3a_simmim_lvd_native": dict(init="simmim_lvd", res="native", note="1c at each dataset's native voxel size"),
 }
 
 
@@ -401,6 +407,7 @@ every crop voxel. No label_key: predict with --no-truth; the scorer reads the st
 
     runs = [(arm, task, "" if task == "large" else "_fewshot", SCHEDULES[task]) for arm in ARMS for task in TASKS]
     runs += [(arm, "large", "_b32", B32) for arm in ARMS]
+    runs += [(arm, "large", "_25k", S25K) for arm in ARMS]
     for arm, task, suffix, schedule in runs:
         spec = ARMS[arm]
         res = spec.get("res", "8nm")
