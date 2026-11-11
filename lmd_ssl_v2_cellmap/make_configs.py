@@ -64,8 +64,8 @@ B32 = dict(steps=15_000, warmup=1_000, every=1_000, batch=4,
 # one crop per GPU as there. Its first launch, at warmup 2k, was cancelled on 2026-11-06 (2b's loss NaN from step 4k).
 S25K = dict(steps=25_000, warmup=3_000, every=5_000, batch=1, trainer_extra="")
 # Series 1: the encoder's starting point, at the default recipe (8 nm, cross-entropy, seed 0). Series 2: one change
-# each to 1e, the arm whose encoder lmd_ssl_v2 found best for affinities. Series 3: one change to 1c, the best CellMap
-# arm (added 2026-11-07, run in series 25k only).
+# each to 1e, the arm whose encoder lmd_ssl_v2 found best for affinities. Series 3: changes to 1c, the best 8 nm
+# CellMap arm (3a added 2026-11-07, 3b = 3a + Dice 2026-11-10; run in series 25k only).
 ARMS = {
     "1a_scratch": dict(init=None, note="encoder from random initialisation"),
     "1b_lvd": dict(init="lvd", note="encoder from the released DINOv3 LVD-1689M weights"),
@@ -79,6 +79,8 @@ ARMS = {
     "2b_affinity_simmim_lvd_dice": dict(init="affinity_simmim_lvd", dice=1.0, note="1e with cross-entropy + Dice 1:1"),
     "2c_affinity_simmim_lvd_seed1": dict(init="affinity_simmim_lvd", seed=1, note="1e with seed 1"),
     "3a_simmim_lvd_native": dict(init="simmim_lvd", res="native", note="1c at each dataset's native voxel size"),
+    "3b_simmim_lvd_native_dice": dict(
+        init="simmim_lvd", res="native", dice=1.0, note="3a with cross-entropy + Dice 1:1"),
 }
 
 

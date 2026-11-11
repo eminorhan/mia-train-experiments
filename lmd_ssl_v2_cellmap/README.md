@@ -4,7 +4,8 @@ Each arm fine-tunes one encoder starting point with `semantic_seg` on the fit cr
 organelle tasks and is scored on their test crops (mean IoU over 48 classes):
 `cellmap_organelle_semantic` (228 fit crops, 43 test) and `cellmap_organelle_semantic_fewshot` (17 fit crops, one
 per dataset; 193 test). Series 1 varies the starting point; series 2 changes one thing each about 1e, the encoder
-lmd_ssl_v2 found best for affinities; series 3 changes one thing about 1c, the best CellMap arm.
+lmd_ssl_v2 found best for affinities; series 3 changes 1c, the best 8 nm CellMap arm: 3a its resolution, 3b its
+loss as well.
 
 ## Arms
 
@@ -21,6 +22,7 @@ Every arm has a large-task run (`<arm>.toml`) and a fewshot run (`<arm>_fewshot.
 | `2b_affinity_simmim_lvd_dice` | as 1e, cross-entropy + Dice 1:1 | 1e: loss |
 | `2c_affinity_simmim_lvd_seed1` | as 1e, seed 1: run-to-run spread | 1e: seed |
 | `3a_simmim_lvd_native` | as 1c, trained and predicted at each dataset's native voxel size (series 25k only) | 1c: resolution |
+| `3b_simmim_lvd_native_dice` | as 3a, cross-entropy + Dice 1:1 (series 25k only) | 3a: loss |
 
 All take the encoder only (`[init] prefix = "model."` for lmd_ssl_v2 checkpoints); the head starts fresh.
 
@@ -34,10 +36,10 @@ Runs, job logs, predictions and probes land in `/nrs/scicompsoft/orhane/mia-trai
 
 - **Model**: lmd_ssl_v2's 3D DINOv3 ViT-L (256^3 windows, patch 8, axial RoPE, `attn_max_score` 1e5) with lmd_ssl_v2
   2a's UNETR head (skips after blocks 8/16/24, widths 16/32/64, raw-image skip), 75 outputs: CellMap ids 0-74.
-- **Loss**: cross-entropy (2b: + Dice). 0, unannotated, is ignored. A composite id (a whole organelle painted
+- **Loss**: cross-entropy (2b, 3b: + Dice). 0, unannotated, is ignored. A composite id (a whole organelle painted
   without its parts, e.g. 50 = mitochondrion) is supervised as the set of its parts (`label_sets`: minus the log
   of the probability on the set), from `classes.csv`.
-- **Data**: the task's fit crops at 8 nm (2a: native), without bounding boxes; a window is centred on a crop and
+- **Data**: the task's fit crops at 8 nm (2a, 3a, 3b: native), without bounding boxes; a window is centred on a crop and
   its labels outside the crop are -1 (`label_fill`), which the loss ignores. Crops holding only composite ids
   (60 of the large task's: whole nuclei, mitochondria, peroxisomes, lipid droplets, mostly on 32 nm grids) are
   drawn at weight 0.25, about 9% of windows. Crops miao cannot centre a 256^3 window on inside the image are
@@ -62,7 +64,8 @@ Runs, job logs, predictions and probes land in `/nrs/scicompsoft/orhane/mia-trai
 - `<arm>_b32.toml`: series b32, the large task again for 15k steps (warmup 1k, a checkpoint every 1k) at 4 crops per
   GPU, a global batch of 32; otherwise the arm's first-round config.
 - `<arm>_25k.toml`: series 25k, the arm's first-round large-task config for 25k steps (warmup 3k, a checkpoint every
-  5k), one crop per GPU as there. `3a_simmim_lvd_native_25k.toml` is `1c_simmim_lvd_25k.toml` on the native data.
+  5k), one crop per GPU as there. `3a_simmim_lvd_native_25k.toml` is `1c_simmim_lvd_25k.toml` on the native data;
+  `3b_simmim_lvd_native_dice_25k.toml` is 3a's with `dice_weight = 1.0`.
 
 ## Status
 
@@ -85,6 +88,11 @@ checkpoints score 0. The experiment's three divergences (1e_b32, 2b's first 25k 
 `eval/board_25k` (`jobs/launch_3a_*.log`). The diverged 2c deleted (run, predictions, records on both boards) and
 rerun unchanged (seed 1), scored straight into mia-evals' leaderboard behind a gate that stops the chain if its
 training logged a NaN loss (`jobs/eval/gate_finite_training.sh`, `jobs/launch_2c_rerun_*.log`).
+2026-11-08: 3a scored 0.311, 0.403, 0.461, 0.461, 0.444 at 5k-25k (1c: 0.318, 0.415, 0.409, 0.424, 0.404), the
+board's best row; its 5 rows are on mia-evals' leaderboard, and its 20k checkpoint replaced 1c's on Hugging Face
+(`ai-hhmi/lmd-vitl-p8-cellmap-lvd`). The 2c rerun stayed finite: 0.116, 0.236, 0.257, 0.285, 0.280.
+2026-11-10: 3b (3a + Dice) launched on the same code (mia-train 73d9226 = 4e71956 plus the metrics change), behind
+the NaN gate, its 5 checkpoints scored straight into mia-evals' leaderboard (`jobs/launch_3b_*.log`).
 
 ## Next iteration
 
@@ -115,3 +123,33 @@ Results came out worse than expected (2026-10-31). To fix next time:
 4. **Larger batch** than the global 8 used here (8 GPUs x 1); at most ~4 per B300 at 256^3, so more nodes beyond 32.
 5. **A native version of the best arm (1c),** trained on native-resolution data as 2a is to 1e. Here 2a (native)
    beat 1e (8 nm) at every checkpoint, by more than the seed spread from 50k on. Running as 3a since 2026-11-07.
+6. **Composite-only crops supervise positives only** (found 2026-11-10, `probes/class_balance/` on /nrs). In such a
+   window the organelle is all that is supervised and nothing says where it is not (0 is ignored), which multiplies
+   the organelle's share of the loss: peroxisomes 8.1x, lipid droplets 2.0x, nuclei 1.9x, mitochondria 1.16x. On
+   test, 3a at 20k predicts 1.80, 1.13, 1.39 and 1.08 times the labelled volume of these four, and 0.48-0.98 times
+   that of the seven organelles with no composite-only crops. To test: train without the 60 crops; to fix: label
+   their background as "any class but this organelle's" (a label set).
+7. **mito_mem over-predicted 1.24x** by 3a at 20k (1.19-1.26x in the other arms; 2b with Dice 1.05x in series 25k,
+   1.15x in b32). Eight crops carry it (mouse liver and kidney, ut21, sum159-1: 2.2x, precision 0.40; liver-zon-1
+   crops 313 and 267 hold 57% of the excess), where it is cytosol (34% of the predicted voxels) and ER (12%) called
+   mito_mem; the other 16 crops with mito_mem are at 1.04x. Cause open.
+8. **Where 3a at 20k fails** (2026-11-10, `probes/class_balance/report_failures.txt`): two datasets hold the score
+   down -- ut21 (4 crops, 21% of all wrong voxels; extracellular space called nucleoplasm on 13% of its voxels, the
+   board's largest confusion; mean IoU 0.488 without it) and liver-zon-1 (5 crops, 18%; cytosol called mito_mem;
+   0.481 without it). About 70% of the nucleus over-prediction in item 6 is that one ut21 confusion, so item 6's
+   evidence for nuclei is weaker than its table suggests. Elsewhere the wrong voxels are ER (24%) and mitochondrial
+   (18%) membrane-lumen-cytosol boundaries and plasma membrane (9%; fly-vnc-1 worst).
+9. **The mito_mem flooding of item 7 is late-training overfitting** (2026-11-10, `probes/class_balance/report_across.txt`,
+   `report_by_step.txt`, pictures in `liver_mito/`). 3a's cytosol called mito_mem is 0.44, 0.47, 0.38, 0.77, 1.17% of
+   the test voxels at 5k-25k (mito_mem IoU 0.627, 0.648, 0.665, 0.595, 0.547); crop 267 goes 0.91, 1.80, 1.38, 2.54,
+   4.43x while the well-predicted liver crops stay at 1.0-1.2x at every step; 1c does the same. Not a halo (over half
+   of the predicted mito_mem lies outside every labelled mitochondrion, median 47-71 nm away), not thinner labels
+   (20-25 nm in those crops, 24 nm median in the dataset's training crops), no consistent grey-level signature. At 15k
+   3a has the same board score as at 20k (0.4606 vs 0.4608) and half the flooding. The recipe trains the whole ViT-L
+   at lr 3e-4 with `layerwise_lr_decay = 1.0` and `drop_path_rate = 0.0`, and has no held-out split to stop on.
+
+2026-11-11: 3b (3a + Dice) scored 0.312, 0.460, 0.506, 0.472, 0.458 at 5k-25k against 3a's 0.311, 0.403, 0.461, 0.461,
+0.444: the board's best row (3b at 15k), on mia-evals' leaderboard (50 rows). At 15k Dice raises 37 of the 48
+classes and brings the under-predicted leaf classes from 0.43 to 0.80 of their labelled volume; it does not stop the
+late mito_mem flooding (cytosol called mito_mem 0.47% of voxels at 15k, 0.72% at 20k; 3a 0.38%, 0.77%). The Hugging
+Face model is 3a at 15k since 2026-11-10 (it replaced 3a at 20k).
