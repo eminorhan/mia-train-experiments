@@ -5,7 +5,7 @@ organelle tasks and is scored on their test crops (mean IoU over 48 classes):
 `cellmap_organelle_semantic` (228 fit crops, 43 test) and `cellmap_organelle_semantic_fewshot` (17 fit crops, one
 per dataset; 193 test). Series 1 varies the starting point; series 2 changes one thing each about 1e, the encoder
 lmd_ssl_v2 found best for affinities; series 3 changes 1c, the best 8 nm CellMap arm: 3a its resolution, 3b its
-loss as well.
+loss as well, 3c the encoder's learning rates on top of 3b.
 
 ## Arms
 
@@ -23,6 +23,7 @@ Every arm has a large-task run (`<arm>.toml`) and a fewshot run (`<arm>_fewshot.
 | `2c_affinity_simmim_lvd_seed1` | as 1e, seed 1: run-to-run spread | 1e: seed |
 | `3a_simmim_lvd_native` | as 1c, trained and predicted at each dataset's native voxel size (series 25k only) | 1c: resolution |
 | `3b_simmim_lvd_native_dice` | as 3a, cross-entropy + Dice 1:1 (series 25k only) | 3a: loss |
+| `3c_simmim_lvd_native_dice_llrd` | as 3b, `layerwise_lr_decay = 0.75` (series 25k only; no substantial effect, not on the leaderboard) | 3b: encoder learning rates |
 
 All take the encoder only (`[init] prefix = "model."` for lmd_ssl_v2 checkpoints); the head starts fresh.
 
@@ -65,7 +66,8 @@ Runs, job logs, predictions and probes land in `/nrs/scicompsoft/orhane/mia-trai
   GPU, a global batch of 32; otherwise the arm's first-round config.
 - `<arm>_25k.toml`: series 25k, the arm's first-round large-task config for 25k steps (warmup 3k, a checkpoint every
   5k), one crop per GPU as there. `3a_simmim_lvd_native_25k.toml` is `1c_simmim_lvd_25k.toml` on the native data;
-  `3b_simmim_lvd_native_dice_25k.toml` is 3a's with `dice_weight = 1.0`.
+  `3b_simmim_lvd_native_dice_25k.toml` is 3a's with `dice_weight = 1.0`; `3c_simmim_lvd_native_dice_llrd_25k.toml` is 3b's
+  with `layerwise_lr_decay = 0.75`.
 
 ## Status
 
@@ -153,3 +155,25 @@ Results came out worse than expected (2026-10-31). To fix next time:
 classes and brings the under-predicted leaf classes from 0.43 to 0.80 of their labelled volume; it does not stop the
 late mito_mem flooding (cytosol called mito_mem 0.47% of voxels at 15k, 0.72% at 20k; 3a 0.38%, 0.77%). The Hugging
 Face model is 3a at 15k since 2026-11-10 (it replaced 3a at 20k).
+2026-11-11: 3c (3b + `layerwise_lr_decay = 0.75`: each encoder block's learning rate is 0.75 of the next one's, so
+the first block trains at about a thousandth of the head's) launched to test whether slowing the encoder stops the
+late overfitting; same code as 3b, behind the NaN gate, scored into mia-evals' leaderboard (`jobs/launch_3c_*.log`).
+2026-11-12: 3c scored 0.380, 0.489, 0.502, 0.474, 0.450 at 5k-25k against 3b's 0.312, 0.460, 0.506, 0.472, 0.458.
+Layer-wise learning-rate decay did not change the scores substantially (ahead at 5k and 10k by 0.069 and 0.029, the
+same from 15k on: the same best score within noise and the same fall to 25k, -0.052 against 3b's -0.048) and did not
+solve the mito_mem over-prediction (cytosol called mito_mem 0.36, 0.56, 0.60% of test voxels at 15k-25k; 3b 0.47,
+0.72, 0.71%). Its five rows were therefore taken off mia-evals' leaderboard the same day (50 rows again; they were
+never committed). These scores and `probes/class_balance/report_llrd_3c.txt` on /nrs are the record of them.
+
+10. **The late fall sits in the organelles with composite-only crops** (2026-11-12,
+   `probes/class_balance/report_late_fall_all_arms.txt`, `report_late_fall_families.txt`). 22 of the 48 scored
+   classes belong to the nucleus, peroxisome, lipid-droplet or mitochondrion family. From its best step to 25k, 3b
+   loses 0.115 mean IoU on those 22 and gains 0.009 on the other 26 (3c -0.109 and -0.003; 3a -0.037 and -0.001; 1b
+   -0.078 and +0.015; the affinity-initialized arms 1e, 2a, 2b -0.14 to -0.18 and -0.05 to -0.07). Peroxisomes are
+   over-predicted more at 25k than at 15k in every pretrained arm (3b 1.38 -> 4.58 times the labeled volume, 3c
+   1.34 -> 2.70, 1e 8.1 -> 20.6), nuclei in most (3b 1.03 -> 1.39). So the late fall is not the whole model
+   overfitting, as item 9 read it; it follows item 6's organelles, which is why a regularizer on the encoder (3c) did
+   not touch it. An association, not a test: the test is item 6's run without the 60 crops, on 3b's recipe.
+   The mitochondrion family is the least affected (3b 0.703 -> 0.672 from 15k to 25k; peroxisomes 0.537 -> 0.189,
+   nucleus 0.503 -> 0.405), and composite-only crops carry 14% of the mitochondrial training loss against 88% of the
+   peroxisomes' (item 6's table), so this does not explain item 7's mito_mem flooding; its cause stays open.

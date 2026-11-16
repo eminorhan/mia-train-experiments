@@ -65,7 +65,8 @@ B32 = dict(steps=15_000, warmup=1_000, every=1_000, batch=4,
 S25K = dict(steps=25_000, warmup=3_000, every=5_000, batch=1, trainer_extra="")
 # Series 1: the encoder's starting point, at the default recipe (8 nm, cross-entropy, seed 0). Series 2: one change
 # each to 1e, the arm whose encoder lmd_ssl_v2 found best for affinities. Series 3: changes to 1c, the best 8 nm
-# CellMap arm (3a added 2026-11-07, 3b = 3a + Dice 2026-11-10; run in series 25k only).
+# CellMap arm (3a added 2026-11-07, 3b = 3a + Dice 2026-11-10, 3c = 3b + layer-wise lr decay 2026-11-11; run in
+# series 25k only).
 ARMS = {
     "1a_scratch": dict(init=None, note="encoder from random initialisation"),
     "1b_lvd": dict(init="lvd", note="encoder from the released DINOv3 LVD-1689M weights"),
@@ -81,6 +82,8 @@ ARMS = {
     "3a_simmim_lvd_native": dict(init="simmim_lvd", res="native", note="1c at each dataset's native voxel size"),
     "3b_simmim_lvd_native_dice": dict(
         init="simmim_lvd", res="native", dice=1.0, note="3a with cross-entropy + Dice 1:1"),
+    "3c_simmim_lvd_native_dice_llrd": dict(
+        init="simmim_lvd", res="native", dice=1.0, llrd=0.75, note="3b with layerwise_lr_decay 0.75"),
 }
 
 
@@ -328,7 +331,7 @@ warmup_steps = {warmup}
 min_lr_ratio = 0.001
 weight_decay = 0.05
 grad_clip_norm = 1.0
-layerwise_lr_decay = 1.0
+layerwise_lr_decay = {llrd}
 patch_embed_lr_mult = 1.0
 lr_schedule = "linear"
 precision = "bf16"
@@ -416,7 +419,7 @@ every crop voxel. No label_key: predict with --no-truth; the scorer reads the st
         text = TOML.format(
             arm=arm, suffix=suffix, task_name=TASKS[task], note=spec["note"],
             res_text="8 nm" if res == "8nm" else "native voxel size", init=INIT[spec["init"]],
-            dice=spec.get("dice", 0.0), label_sets=label_sets,
+            dice=spec.get("dice", 0.0), llrd=spec.get("llrd", 1.0), label_sets=label_sets,
             data=HERE / "data" / f"train_{task}_{res}.yaml", seed=spec.get("seed", 0), **schedule)
         (HERE / f"{arm}{suffix}.toml").write_text(text)
     print(f"\n[make_configs] wrote {len(runs)} run configs")

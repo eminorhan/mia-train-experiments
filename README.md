@@ -39,6 +39,7 @@ is in that repo.
 - [`lmd_ssl_v2_cellmap/`](lmd_ssl_v2_cellmap/): which lmd_ssl_v2 encoder transfers best to CellMap organelle semantic segmentation?
 - [`lora_vs_fullft/`](lora_vs_fullft/): can a 3.4%-trainable fine-tune match a full one on NISB?
 - [`lsd_aux_v1/`](lsd_aux_v1/): do local shape descriptors help the affinity head?
+- [`mixed_local_cloud_data_reads/`](mixed_local_cloud_data_reads/): can a training run read some of its volumes straight from a public bucket?
 - [`new_ssl_recipe/`](new_ssl_recipe/): does a two-phase SSL recipe beat plain joint SSL, and does either beat no SSL at all?
 - [`promptable_seg_v1/`](promptable_seg_v1/): promptable ("segment this") instance segmentation, v1.
 - [`pseudo_labeling/`](pseudo_labeling/): NoisyStudent-style pseudo-labelling from five labelled NISB cubes to a hundred unlabelled ones.
