@@ -1,0 +1,178 @@
+# Can a larger, more diverse, and higher-quality pretraining dataset improve downstream evaluation results?
+
+lmd_ssl_v3 pretrains on a new corpus and asks whether the downstream evaluation results improve on
+lmd_ssl_v2's. The corpus differs from v2's in three ways:
+
+- **Larger.** Training draws from 354 TVox instead of 92: 0.317 mm³ of tissue instead of 0.070.
+- **More diverse.** 76 of its 338 volumes come from outside LMD (v2: 1 of 243): the labs' own volumes, which
+  LMD holds only crops of or not at all. The largest volume takes 2.8% of an epoch (v2: 6.5%), and the
+  effective number of volumes doubles, from 54 to 106.
+- **Higher quality.** v3 addresses two problems of v2's corpus:
+  - *Blank crops.* About 8% of v2's training crops were blank. v3 holds 99 volumes to tissue boxes, which
+    leave out most of the blank regions.
+  - *Uneven normalization.* v2 divided every 8-bit volume by 255, whatever range its tissue used: some
+    volumes filled the input range, others a tenth of it. v3 maps each volume's own p1-p99 range to [0, 1].
+
+The Data section compares the two corpora in full. The planned runs follow it; their configs are not written
+yet.
+
+## Data: lmd_ssl_v2 against lmd_ssl_v3
+
+- **v2**: [`lmd_ssl_v2/data/8nm_p256_swe0.4_min1e8_up8_census20261015.yaml`](../lmd_ssl_v2/data/8nm_p256_swe0.4_min1e8_up8_census20261015.yaml),
+  the corpus of arms 1a-1c.
+- **v3**: lmd-configs `configs/lmd_ssl_v3/unlabeled/ext_8nm_p256_swe0.4_min1e8_up8_win1-99_noclip_census20261116.yaml`
+  at commit d79d463 (2026-11-17). One card per volume, with a picture and a neuroglancer view:
+  [the volume page](https://fileglancer.int.janelia.org/files/dLLjve-fpPGXhnVi/nrs/scicompsoft/orhane/probes/lmd_census/config_page/lmd_ssl_v3_default.html).
+
+Terms:
+
+- A *volume* is one LMD store or one volume outside LMD. LMD is `/groups/miaai/miaai/lmd-v0.0.1/data`. The
+  volumes outside it stay in the folders of the labs and project teams that own them.
+- TVox is 10^12 voxels at the finest stored level.
+- A *share of an epoch* is the probability that a training crop comes from that volume or group.
+
+| | lmd_ssl_v2 | lmd_ssl_v3 |
+| --- | --- | --- |
+| **Corpus** | | |
+| LMD census | 2026-10-15 (1,078 stores) | 2026-11-16 (1,187 stores) |
+| Volumes | 243 | 338 |
+| ... from LMD | 242 | 262 |
+| ... from outside LMD | 1 (zebra finch j0126, added by hand) | 76 (of 79 listed in lmd-configs `corpus/external.yaml`) |
+| Share of an epoch, LMD / outside | 98.6% / 1.4% | 29.8% / 70.2% |
+| Whole volumes | 92 TVox | 1,314 TVox |
+| Region training draws from | 92 TVox (all but j0126's margins) | 354 TVox (27% of the whole volumes) |
+| ... LMD / outside | 91.5 / 0.6 TVox | 19.4 / 334.2 TVox |
+| ... as tissue volume | 0.070 mm³ | 0.317 mm³ |
+| **EM and ExM** | | |
+| Volumes, EM / ExM | 177 / 66 | 248 / 90 |
+| Region drawn from, EM / ExM | 53.9 / 38.2 TVox | 310.4 / 43.1 TVox |
+| Share of an epoch, EM / ExM | 70.2% / 29.8% | 78.7% / 21.3% |
+| **Composition** | | |
+| Species | 12 | 14, plus 2 volumes of unrecorded species |
+| Largest species, by share of an epoch | mouse 36%, Drosophila 32%, C. elegans 8%, zebrafish 7%, human 6% | mouse 40%, Drosophila 37%, zebrafish 5%, C. elegans 5%, human 4% |
+| Largest sources, by share of an epoch | CellMap 26%, flyliconn 17%, liconn 12%, flyem 9% | CellMap 38%, flyem 17%, flyliconn 13%, liconn 7% |
+| **Sampling** | | |
+| Rule | a volume is drawn in proportion to its size ** 0.4 | same |
+| Largest volume | 6.5% of an epoch (FlyID49 mirrorscope lobe, ExM) | 2.8% (D. yakuba CNS, EM) |
+| Ten largest volumes | 32.6% of an epoch | 20.0% |
+| Effective number of volumes | 54 | 106 |
+| **Blank crops** | | |
+| Volumes held to a tissue box | 1 (j0126) | 99; 5 of them as 5 boxes each (358 config entries) |
+| Blank crops | 8.1% (325 of 4,000 drawn as in training) | not measured on the whole config yet |
+| **Resolution** | | |
+| Patch and voxel size | 256³ at 8 nm | same |
+| Size floor, upsampling cap | 10^8 voxels, 8x | same |
+| Volumes read on a finer grid | 5 | 7 |
+| Share of an epoch read at native resolution | 38% | 51% |
+| ... upsampled along some axis | 51% | 38% |
+| ... upsampled 2x or more | 42% | 30% |
+| **Normalization** | | |
+| 8-bit volumes | stored value / 255 (180 volumes, 72% of an epoch) | p1-p99 window (219 volumes, 69% of an epoch) |
+| Input range an 8-bit volume's p1-p99 fills | 11% to 100% of it, median 92% | all of it, for every volume |
+| Other dtypes | p0.1-p99.9 window (63 volumes) | p1-p99 window (119 volumes), about half as wide |
+| Window measured | over the whole store | inside the tissue box (ten boxes made in October keep whole-store windows) |
+| Values past the window | clipped | kept (`normalize_clip: false`) |
+| **Storage** | | |
+| Formats | zarr3 240, zarr2 3 | zarr3 270, zarr2 46, N5 17, precomputed 5 |
+| dtypes | uint8 180, uint16 59, int16 1, float32 3 | uint8 219, uint16 105, int16 11, float32 3 |
+| Expected read per sample | 20 MB | 20 MB |
+| miao | 0.4.2 | 0.4.2+fork.4 (reads N5 and precomputed) |
+| **Labeled volumes** | | |
+| Labeled config (a separate file) | 16 volumes, split 8 / 8 | 21 volumes: v2's without Jiefu's cerebellum, plus 6; no split yet |
+| Their images in the SSL corpus | all 16 | all 21: 15 as LMD stores, 6 inside full volumes |
+
+How to read some rows:
+
+- **Region training draws from**: a volume's tissue box, or the whole volume where it has none. Counted at the
+  pyramid level training reads, as the volume page does ("TVox sampled"), it is 310 TVox for v3 and 90 for v2.
+- **Size** in the sampling rule is that same region, counted at the level training reads. The boxes of one
+  volume share its weight.
+- **Effective number of volumes** is 1 / sum(p^2) over the volumes' shares of an epoch: the number of equally
+  likely volumes that would give the same concentration.
+- **Volumes read on a finer grid** are too small to hold a 256³ patch at 8 nm.
+- **Sources** are the third token of a volume's name.
+
+### What became of v2's 243 volumes
+
+- **210 are still entries.** They were 70% of a v2 epoch. 16 of them are now held to a tissue box, among them
+  the two FlyID49 mirrorscope crops, which fell from 10.1% of an epoch to 1.9%.
+- **30 were replaced by the full volume they were cut from.** They were 29% of a v2 epoch: ten CellMap tissue
+  crops (liver-zon-1 and -2 among them), eight hemibrain crops, six fish2 crops and the six CREMI crops, which
+  lie in FAFB v14.
+- **j0126** is now one of the volumes outside LMD, with a slightly smaller box.
+- **2 dropped out**: two pancreas cells (MitoVerse muller21) whose tissue boxes are under the size floor.
+
+New in v3: 52 LMD stores (6% of an epoch) and 75 volumes outside LMD besides j0126. By share of an epoch the
+volumes outside LMD are CellMap (39 volumes, 33%), FlyEM (14, 15%), fly LICONN (8, 8%) and 15 others (14%).
+
+### Notes
+
+- **Blank crops in v2.** Of 4,000 crops drawn as v2's SimMIM arms drew them, 325 were blank: their standard
+  deviation as trained was under 0.02. 109 of them were all zero. The two FlyID49 mirrorscope crops gave 176
+  of the 325. Five cultured-cell volumes gave 62 more, and those crops were not empty: divided by 255, their
+  contrast range was under a tenth of the input range. In v3 the FlyID49 crops are held to tissue boxes, and
+  the windows stretch the low-contrast volumes. The same count has not been made for v3 as a whole.
+- **The windows change what the network sees.** In v2 an 8-bit volume reached the network as value / 255, so
+  its own p1-p99 range filled between 11% and 100% of the input range, and 15% of the 8-bit crops came from
+  volumes that used less than half of it. In v3 every volume is stretched to its own p1-p99 range: by 1.2x
+  for the median 8-bit volume, and by more than 2x for 28% of the 8-bit crops. By construction about 1% of a
+  volume's measured voxels fall below 0 and 1% above 1. A v2 encoder therefore sees differently scaled inputs
+  on v3 data, and fine-tuning, validation and prediction have to use the windows of pretraining.
+- **Evaluation images are in both corpora.** Neither config holds the labeled volumes out.
+- **Reversed contrast.** Nine v3 volumes, 1.7% of an epoch, have bright membranes, judged by eye. All nine are
+  16-bit stores, and nothing in the config or in miao inverts them. One of them (funceworm HPF-TAOTO) was
+  already in v2. They are kept as they are for now. Twenty other 16-bit EM volumes have not been judged.
+- **Assumed expansion factors.** Four LICONN volumes outside LMD, 2.9% of an epoch, use an expansion factor of
+  18x that is not confirmed by their labs. Their voxel sizes, and so their resampling to 8 nm, depend on it.
+- **Volumes outside LMD are read in place.** Nothing is copied. Fourteen are read through metadata wrappers
+  in `/groups/miaai/miaai/lmd-external-wrappers/`, which hold our metadata and links to the owner's arrays.
+- **Not measured yet:** loader throughput on the v3 config. The expected read per sample is unchanged, but
+  the stores are not: in a crop screen of 14 volumes the AbG volume (1.4% of an epoch) took 3.4 s per crop on
+  a busy node, against 0.2 to 0.7 s for the other 13.
+
+### Where the numbers come from
+
+lmd-configs' `describe.py --exact` on both configs, and `compare.py` on its output, in
+`/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v3/probes/data_v2_vs_v3/` (`describe.sh`, `compare.sh`,
+`numbers.json`). Two things were adjusted for v2: one store was renamed on disk on 2026-11-13, so the copy
+described there names its new path; and the j0126 entry's shape and voxel size come from the comment on it in
+the config, because the tool cannot read that store's metadata.
+
+Two numbers come from elsewhere. v2's blank crops were counted on 2026-10-23 by `census.py` in
+`/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v2/probes/blank_crops/`. The input range that v2's
+8-bit volumes filled is from `uint8_range.sh` in the folder above, which reads the p1-p99 windows on record
+in lmd-configs today.
+
+## Planned runs
+
+Every run changes one thing about the base config: the cell in bold. The base config is SimMIM on a DINOv3
+ViT-L, trained on the default data config described above.
+
+### Data config changes
+
+Algorithm and model stay those of the base config.
+
+| Config | Resolution | Input size | Modality | Data | Size exponent |
+| --- | --- | --- | --- | --- | --- |
+| Base config | 8 nm | 256³ | EM/ExM | all | 0.4 |
+| EM config | 8 nm | 256³ | **EM** | all | 0.4 |
+| ExM config | 8 nm | 256³ | **ExM** | all | 0.4 |
+| Resolution variability | **4-16 nm** | 256³ | EM/ExM | all | 0.4 |
+| Native resolution | **native** | 256³ | EM/ExM | all | 0.4 |
+| Larger inputs | 8 nm | **384³** | EM/ExM | all | 0.4 |
+| Data scaling (10%) | 8 nm | 256³ | EM/ExM | **10% of base** | 0.4 |
+| Data scaling (1%) | 8 nm | 256³ | EM/ExM | **1% of base** | 0.4 |
+| Size exp (0.2) | 8 nm | 256³ | EM/ExM | all | **0.2** |
+| Size exp (0.6) | 8 nm | 256³ | EM/ExM | all | **0.6** |
+| Size exp (0.8) | 8 nm | 256³ | EM/ExM | all | **0.8** |
+| Cloud data | 8 nm | 256³ | EM/ExM | **whole volumes** | 0.4 |
+
+### Algorithm and model changes
+
+These runs train on the base data config.
+
+| Config | Algorithm | Model |
+| --- | --- | --- |
+| Base config | SimMIM | DINOv3 ViT-L |
+| DINOv3 algorithm | **DINOv3, 3D version** | DINOv3 ViT-L |
+| Larger model | SimMIM | **DINOv3 ViT-H+ (840M parameters)** |

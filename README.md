@@ -37,6 +37,7 @@ is in that repo.
 - [`lmd_ssl_v1/`](lmd_ssl_v1/): does SSL on the lmd corpus beat a pretrained checkpoint?
 - [`lmd_ssl_v2/`](lmd_ssl_v2/): does SimMIM on the 2026-10-15 lmd corpus beat the LVD checkpoint for affinity prediction, and do LSDs or a SAM model help?
 - [`lmd_ssl_v2_cellmap/`](lmd_ssl_v2_cellmap/): which lmd_ssl_v2 encoder transfers best to CellMap organelle semantic segmentation?
+- [`lmd_ssl_v3/`](lmd_ssl_v3/): can a larger, more diverse, and higher-quality pretraining dataset improve downstream evaluation results?
 - [`lora_vs_fullft/`](lora_vs_fullft/): can a 3.4%-trainable fine-tune match a full one on NISB?
 - [`lsd_aux_v1/`](lsd_aux_v1/): do local shape descriptors help the affinity head?
 - [`mixed_local_cloud_data_reads/`](mixed_local_cloud_data_reads/): can a training run read some of its volumes straight from a public bucket?
