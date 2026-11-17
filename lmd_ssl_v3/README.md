@@ -8,8 +8,8 @@ lmd_ssl_v2's. The corpus differs from v2's in three ways:
   LMD holds only crops of or not at all. The largest volume takes 2.8% of an epoch (v2: 6.5%), and the
   effective number of volumes doubles, from 54 to 106.
 - **Higher quality.** v3 addresses two problems of v2's corpus:
-  - *Blank crops.* About 8% of v2's training crops were blank. v3 holds 99 volumes to tissue boxes, which
-    leave out most of the blank regions.
+  - *Blank crops.* About 8% of v2's training crops were blank, and about 1% of v3's are. v3 holds 99 volumes
+    to tissue boxes, which leave out most of the blank regions.
   - *Uneven normalization.* v2 divided every 8-bit volume by 255, whatever range its tissue used: some
     volumes filled the input range, others a tenth of it. v3 maps each volume's own p1-p99 range to [0, 1].
 
@@ -58,7 +58,8 @@ Terms:
 | Effective number of volumes | 54 | 106 |
 | **Blank crops** | | |
 | Volumes held to a tissue box | 1 (j0126) | 99; 5 of them as 5 boxes each (358 config entries) |
-| Blank crops | 8.1% (325 of 4,000 drawn as in training) | not measured on the whole config yet |
+| Blank crops | 8.1% (325 of 4,000 drawn as in training) | 1.1% (45 of 4,000) |
+| ... of them all zero | 109 | 30 |
 | **Resolution** | | |
 | Patch and voxel size | 256³ at 8 nm | same |
 | Size floor, upsampling cap | 10^8 voxels, 8x | same |
@@ -107,11 +108,19 @@ volumes outside LMD are CellMap (39 volumes, 33%), FlyEM (14, 15%), fly LICONN (
 
 ### Notes
 
-- **Blank crops in v2.** Of 4,000 crops drawn as v2's SimMIM arms drew them, 325 were blank: their standard
-  deviation as trained was under 0.02. 109 of them were all zero. The two FlyID49 mirrorscope crops gave 176
-  of the 325. Five cultured-cell volumes gave 62 more, and those crops were not empty: divided by 255, their
-  contrast range was under a tenth of the input range. In v3 the FlyID49 crops are held to tissue boxes, and
-  the windows stretch the low-contrast volumes. The same count has not been made for v3 as a whole.
+- **Blank crops.** A crop is blank when its standard deviation as trained is under 0.02. Of 4,000 crops drawn
+  as training draws them, 325 were blank in v2 and 45 are in v3.
+  - *In v2* the two FlyID49 mirrorscope crops gave 176 of the 325. Five cultured-cell volumes gave 62 more,
+    and those crops were not empty: divided by 255, their contrast range was under a tenth of the input range.
+  - *In v3* 30 of the 45 are all zero, 9 are empty gel in ExM volumes, and the other 6 are fill or plain
+    resin in EM volumes.
+  - *The two counts do not use the same yardstick*, because "as trained" changed: v3's windows stretch every
+    crop. With v2's normalization applied to v3's crops, 160 of them (4.0%) would be blank. So the tissue
+    boxes and the new volumes halve the share, and the windows account for the rest.
+  - *1.1% understates the featureless crops in v3.* The 115 crops in between are of two kinds. Most are plain
+    resin or lumen whose noise the window lifts past the threshold: 78 have a standard deviation under 0.05.
+    The others are tissue of low stored contrast that v2's rule flattened. At a threshold of 0.05 the shares
+    are 14.6% for v2 and 4.6% for v3.
 - **The windows change what the network sees.** In v2 an 8-bit volume reached the network as value / 255, so
   its own p1-p99 range filled between 11% and 100% of the input range, and 15% of the 8-bit crops came from
   volumes that used less than half of it. In v3 every volume is stretched to its own p1-p99 range: by 1.2x
@@ -128,7 +137,8 @@ volumes outside LMD are CellMap (39 volumes, 33%), FlyEM (14, 15%), fly LICONN (
   in `/groups/miaai/miaai/lmd-external-wrappers/`, which hold our metadata and links to the owner's arrays.
 - **Not measured yet:** loader throughput on the v3 config. The expected read per sample is unchanged, but
   the stores are not: in a crop screen of 14 volumes the AbG volume (1.4% of an epoch) took 3.4 s per crop on
-  a busy node, against 0.2 to 0.7 s for the other 13.
+  a busy node, against 0.2 to 0.7 s for the other 13. In the blank-crop count a crop of v3 took 0.16 s to
+  read at the median and 0.23 s on average, with 14 readers at once; AbG, the slowest volume, averaged 1.1 s.
 
 ### Where the numbers come from
 
@@ -138,10 +148,12 @@ lmd-configs' `describe.py --exact` on both configs, and `compare.py` on its outp
 described there names its new path; and the j0126 entry's shape and voxel size come from the comment on it in
 the config, because the tool cannot read that store's metadata.
 
-Two numbers come from elsewhere. v2's blank crops were counted on 2026-10-23 by `census.py` in
-`/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v2/probes/blank_crops/`. The input range that v2's
-8-bit volumes filled is from `uint8_range.sh` in the folder above, which reads the p1-p99 windows on record
-in lmd-configs today.
+Three numbers come from elsewhere. v2's blank crops were counted on 2026-10-23 by `census.py` in
+`/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v2/probes/blank_crops/`. v3's were counted the same way
+on 2026-11-17 by `census_v3.py` in `/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v3/probes/blank_crops/`,
+which also applies v2's normalization to the same crops; its montages show the crops. The input range that
+v2's 8-bit volumes filled is from `uint8_range.sh` in the `data_v2_vs_v3` folder, which reads the p1-p99
+windows on record in lmd-configs today.
 
 ## Planned runs
 
@@ -163,7 +175,6 @@ Algorithm and model stay those of the base config.
 | Data scaling (10%) | 8 nm | 256³ | EM/ExM | **10% of base** | 0.4 |
 | Data scaling (1%) | 8 nm | 256³ | EM/ExM | **1% of base** | 0.4 |
 | Size exp (0.2) | 8 nm | 256³ | EM/ExM | all | **0.2** |
-| Size exp (0.6) | 8 nm | 256³ | EM/ExM | all | **0.6** |
 | Size exp (0.8) | 8 nm | 256³ | EM/ExM | all | **0.8** |
 | Cloud data | 8 nm | 256³ | EM/ExM | **whole volumes** | 0.4 |
 
