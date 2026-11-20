@@ -1,31 +1,31 @@
-# lmd_ssl_v3 data config: ExM config (README, "Planned runs"). Copied on 2026-11-18 from lmd-configs,
-#   /groups/miaai/miaai/lmd-v0.0.1/configs/configs/lmd_ssl_v3/unlabeled/ext_sel-exm_8nm_p256_swe0.4_min1e8_up8_win1-99_noclip_census20261116.yaml
-# as rebuilt on 2026-11-18 on top of commit d79d463, after the pause on the two cuttlefish volumes was lifted (not
-# yet committed there at the time of the copy). Everything below this header is that file, byte for byte. The
+# lmd_ssl_v3 data config: ExM config (README, "Planned runs"). Copied on 2026-11-20 from lmd-configs,
+#   /groups/miaai/miaai/lmd-v0.0.1/configs/configs/lmd_ssl_v3/unlabeled/ext_sel-exm_8nm_p256_swe0.4_min1e8_up8_census20261116.yaml
+# as rebuilt on 2026-11-20 on top of commit 2b89bc1 with the tissue boxes re-derived that day (not yet
+# committed there at the time of the copy). Everything below this header is that file, byte for byte. The
 # header below is lmd-configs' own: its rebuild command and recipe paths refer to that repo.
 #
-# lmd-v0.0.1 pretraining — lmd_ssl_v3 ExM only with external volumes — single scale (8 nm) — p1-99 windows, unclipped
+# lmd-v0.0.1 pretraining — lmd_ssl_v3 ExM only with external volumes — single scale (8 nm) — p0.1-99.9 windows, clipped
 #
 # GENERATED FILE — do not edit by hand. Every setting that decides what is in here
 # lives in the recipe below; there are no command-line options that change content.
 #
-#   rebuild   python build.py recipes/lmd_ssl_v3/unlabeled/ext_sel-exm_8nm_p256_swe0.4_min1e8_up8_win1-99_noclip.yaml
+#   rebuild   python build.py recipes/lmd_ssl_v3/unlabeled/ext_sel-exm_8nm_p256_swe0.4_min1e8_up8.yaml
 #   verify    python build.py --check          # regenerates, diffs, writes nothing
 #
-#   recipe    recipes/lmd_ssl_v3/unlabeled/ext_sel-exm_8nm_p256_swe0.4_min1e8_up8_win1-99_noclip.yaml  sha256:756889950218c973
+#   recipe    recipes/lmd_ssl_v3/unlabeled/ext_sel-exm_8nm_p256_swe0.4_min1e8_up8.yaml  sha256:98cfd7a60c122365
 #   corpus    corpus/census-20261116.csv  sha256:35297dc51ce97b02  (1187 stores + 79 external volumes)
-#   input     corpus/windows_p1-99.yaml  sha256:9ae4ca8f11497fe6
+#   input     corpus/windows.yaml  sha256:8054c17e11d14935
 #   input     corpus/quarantine.yaml  sha256:9c20dd17ae9a5c25
-#   input     corpus/tissue_boxes.yaml  sha256:34eb57d28d85ddce
+#   input     corpus/tissue_boxes.yaml  sha256:4afa1543d45ef4fb
 #   input     corpus/external.yaml  sha256:1fbc6d5051f06418
 #   builder   lmd/build_unlabeled.py  sha256:bf16921d3bb871c5
 #   miao      0.4.2+fork.5
 #
-# 90 volumes: 0 with a per-volume `resolutions` override, 90 with an intensity window, 16 held to a tissue box.
+# 128 volumes: 0 with a per-volume `resolutions` override, 128 with an intensity window, 54 held to a tissue box.
 # 1176 of 1266 censused stores were dropped.
 # size floor    100,000,000 level-0 spatial voxels (0.1 G)
 # resolution cap max_upsample 8x8x8 (x, y, z): native voxel / finest rung may not exceed this; 2 volume(s) dropped as "too coarse", named below.
-# window        p1-99 of each volume's stored values -> 0 and 1, NOT clipped (`normalize_clip: false` on every volume): values outside the window fall outside [0, 1]; from corpus/windows_p1-99.yaml
+# window        p0.1-99.9 of each volume's stored values -> [0, 1]; from corpus/windows.yaml
 #
 # `python describe.py <this file>` reports what the surviving set adds up to: size distribution,
 # species / modality mix, sampling concentration, and bytes read per epoch.
@@ -37,8 +37,8 @@
 #              A selection is this recipe's choice of data, not a judgement about the data:
 #              a store no recipe should use belongs in corpus/quarantine.yaml.
 #
-# external      12 of the 90 entries are outside data/: 12 volume(s) of corpus/external.yaml,
-#               0 of them as several tissue boxes, one entry per box (`<name>_box<k>`), with a `weight`
+# external      50 of the 128 entries are outside data/: 12 volume(s) of corpus/external.yaml,
+#               11 of them as several tissue boxes, one entry per box (`<name>_box<k>`), with a `weight`
 #               that makes its boxes together count as one volume of their total size.
 #
 # 81 store(s) of data/ are left out as "covered": each is a crop of an external volume this
@@ -91,23 +91,61 @@
 #     corpus/external.yaml, which this pattern leaves alone, and a config that holds it leaves
 #     these crops out as covered.
 #
-# 16 volume(s) held to a box by corpus/tissue_boxes.yaml, where the rest of the store is not tissue:
+# 54 volume(s) held to a box by corpus/tissue_boxes.yaml, where the rest of the store is not tissue:
 # sampled, sized and weighted inside it. Share of the store each box keeps:
-#    10.7%  exm-drosophila-flyliconn-keller-fly-brain-3/full
-#    12.0%  exm-drosophila-flyliconn-matt-brain-dual-20260814/full
-#    12.3%  exm-unknown-liconn-lillvis-bis-gasket-20240702/full
-#    12.9%  exm-drosophila-flyliconn-matt-brain-20260611/full
+#     0.7%  exm-drosophila-flyliconn-keller-fly-brain-3/full_box5
+#     0.7%  exm-drosophila-flyliconn-vnc-josh-20260713/full_box5
+#     0.8%  exm-drosophila-flyliconn-matt-brain-20260611/full_box4
+#     0.8%  exm-drosophila-flyliconn-FlyID45-fly4-optic-lobe-20260619/full_box4
+#     0.9%  exm-drosophila-flyliconn-matt-brain-20260611/full_box5
+#     0.9%  exm-drosophila-flyliconn-FlyID45-fly4-optic-lobe-20260619/full_box5
+#     1.0%  exm-drosophila-flyliconn-matt-brain-20260611/full_box3
+#     1.0%  exm-drosophila-flyliconn-keller-fly-brain-3/full_box4
+#     1.0%  exm-drosophila-flyliconn-vnc-josh-20260713/full_box4
+#     1.1%  exm-drosophila-flyliconn-matt-brain-dual-20260814/full_box5
+#     1.1%  exm-drosophila-flyliconn-matt-brain-dual-20260814/full_box4
+#     1.1%  exm-aphid-liconn-lillvis-aphid4/full_box4
+#     1.2%  exm-drosophila-flyliconn-vnc-josh-20260713/full_box3
+#     1.2%  exm-mouse-liconn-tavakoli-mouse2/full_box3
+#     1.2%  exm-unknown-liconn-lillvis-bis-gasket-20240702/full_box4
+#     1.2%  exm-drosophila-flyliconn-keller-fly-brain-3/full_box3
+#     1.3%  exm-drosophila-flyliconn-vnc-josh-20260713/full_box2
+#     1.4%  exm-drosophila-flyliconn-FlyID45-fly4-optic-lobe-20260619/full_box3
+#     1.5%  exm-drosophila-flyliconn-matt-brain-dual-20260814/full_box3
+#     1.6%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop2/full_box5
+#     1.8%  exm-mouse-liconn-tavakoli-mouse2/full_box2
+#     2.0%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop1/full_box4
+#     2.0%  exm-aphid-liconn-lillvis-aphid4/full_box3
+#     2.1%  exm-drosophila-flyliconn-matt-brain-dual-20260814/full_box2
+#     2.3%  exm-unknown-liconn-lillvis-bis-gasket-20240702/full_box3
+#     2.3%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop1/full_box3
+#     2.4%  exm-unknown-liconn-lillvis-bis-gasket-20240702/full_box2
+#     2.4%  exm-aphid-liconn-lillvis-aphid4/full_box2
+#     2.4%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop2/full_box3
+#     2.5%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop3/full_box4
+#     2.6%  exm-drosophila-flyliconn-FlyID45-fly4-optic-lobe-20260619/full_box2
+#     2.8%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop2/full_box2
+#     2.8%  exm-drosophila-flyliconn-keller-fly-brain-3/full_box2
+#     2.9%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop2/full_box4
+#     3.6%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop3/full_box3
+#     4.9%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop3/full_box2
+#     5.6%  exm-drosophila-flyliconn-matt-brain-dual-20260814/full_box1
+#     6.0%  exm-drosophila-flyliconn-matt-brain-20260611/full_box2
+#     6.0%  exm-drosophila-flyliconn-matt-brain-20260611/full_box1
+#     6.2%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop1/full_box2
+#     6.5%  exm-drosophila-flyliconn-keller-fly-brain-3/full_box1
+#     7.5%  exm-unknown-liconn-lillvis-bis-gasket-20240702/full_box1
+#     9.4%  exm-drosophila-flyliconn-FlyID45-fly4-optic-lobe-20260619/full_box1
+#    10.3%  exm-mouse-mirrorscope-hippocampus-3ch-20250902/full
+#    11.2%  exm-drosophila-flyliconn-vnc-josh-20260713/full_box1
 #    13.0%  exm-drosophila-flyliconn-FlyID49-mirrorscope-lobe-20260702/crop-001_lobe
-#    13.9%  exm-drosophila-flyliconn-FlyID45-fly4-optic-lobe-20260619/full
-#    14.2%  exm-mouse-mirrorscope-hippocampus-3ch-20250902/full
-#    16.6%  exm-drosophila-flyliconn-vnc-josh-20260713/full
-#    21.9%  exm-aphid-liconn-lillvis-aphid4/full
-#    23.1%  exm-mouse-liconn-tavakoli-mouse2/full
+#    14.2%  exm-aphid-liconn-lillvis-aphid4/full_box1
+#    14.5%  exm-mouse-liconn-tavakoli-mouse2/full_box1
+#    24.0%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop2/full_box1
 #    25.2%  exm-drosophila-flyliconn-FlyID49-mirrorscope-central-20260702/crop-001_central
-#    32.6%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop2/full
-#    46.9%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop3/full
+#    36.2%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop3/full_box1
+#    42.3%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop1/full_box1
 #    48.6%  exm-mouse-liconn-RID19-retina-lightsheet/crop-001_RID19_32x
-#    54.4%  exm-drosophila-flyliconn-FlyID25-mirrorscope-crop1/full
 #    75.1%  exm-mouse-liconn-ExPID82-1/crop-001_fullvol
 #
 # Dropped, by cause:
@@ -405,219 +443,189 @@ output_axes: lcxyz
 samples_per_epoch: 1000
 
 # ---------------------------------------------------------------------------
-# Volumes (90). Per-volume keys override the globals above.
+# Volumes (128). Per-volume keys override the globals above.
 # ---------------------------------------------------------------------------
 volumes:
 - name: exm-danionella-tavakolischulze-DID15/crop-001_3hr_40XW001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-danionella-tavakolischulze-DID15/crop-001_3hr_40XW001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 842
-  normalize_min: 291
-  normalize_clip: false
+  normalize_max: 1351
+  normalize_min: 258
 - name: exm-danionella-tavakolischulze-DID15/crop-002_micro_3hr_40XW
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-danionella-tavakolischulze-DID15/crop-002_micro_3hr_40XW.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 911
-  normalize_min: 304
-  normalize_clip: false
+  normalize_max: 1454
+  normalize_min: 265
 - name: exm-drosophila-flyliconn-ExPID06B-Brain2-PFA-AA-epox/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-ExPID06B-Brain2-PFA-AA-epox/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 366
-  normalize_min: 139
-  normalize_clip: false
+  normalize_max: 478
+  normalize_min: 123
 - name: exm-drosophila-flyliconn-FlyID10-20250923_2ndGel_PBS_MES_B1_Atto488_40XW_002/crop-001_normalized
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID10-20250923_2ndGel_PBS_MES_B1_Atto488_40XW_002/crop-001_normalized.zarr
   image_key: raw
   zarr_version: zarr2
-  normalize_max: 442
-  normalize_min: 199
-  normalize_clip: false
+  normalize_max: 633
+  normalize_min: 177
 - name: exm-drosophila-flyliconn-FlyID10-20250923_2ndGel_PBS_MES_B1_Atto488_40XW_002/crop-001_raw
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID10-20250923_2ndGel_PBS_MES_B1_Atto488_40XW_002/crop-001_raw.zarr
   image_key: raw
   zarr_version: zarr2
-  normalize_max: 363
-  normalize_min: 152
-  normalize_clip: false
+  normalize_max: 523
+  normalize_min: 135
 - name: exm-drosophila-flyliconn-FlyID10-20250923_2ndGel_PBS_MES_B2_Atto488_40XW_002/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID10-20250923_2ndGel_PBS_MES_B2_Atto488_40XW_002/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 417
-  normalize_min: 167
-  normalize_clip: false
+  normalize_max: 526
+  normalize_min: 146
 - name: exm-drosophila-flyliconn-FlyID10-20250923_2ndGel_PBS_PIPES_B2_Atto488_40XW_002/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID10-20250923_2ndGel_PBS_PIPES_B2_Atto488_40XW_002/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 357
-  normalize_min: 133
-  normalize_clip: false
+  normalize_max: 456
+  normalize_min: 119
 - name: exm-drosophila-flyliconn-FlyID22-20260203_2ndGel_0.0655BIS_40XW004/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID22-20260203_2ndGel_0.0655BIS_40XW004/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 961
-  normalize_min: 314
-  normalize_clip: false
+  normalize_max: 1486
+  normalize_min: 277
 - name: exm-drosophila-flyliconn-FlyID25-20260216_HEPES_2ndGel_B1_40XW001/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID25-20260216_HEPES_2ndGel_B1_40XW001/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 680
-  normalize_min: 281
-  normalize_clip: false
+  normalize_max: 845
+  normalize_min: 243
 - name: exm-drosophila-flyliconn-FlyID25-20260216_MESFix_2ndGel_B1_40XW/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID25-20260216_MESFix_2ndGel_B1_40XW/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 560
-  normalize_min: 205
-  normalize_clip: false
+  normalize_max: 953
+  normalize_min: 181
 - name: exm-drosophila-flyliconn-FlyID25-20260216_MESFix_2ndGel_B1_40XW003/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID25-20260216_MESFix_2ndGel_B1_40XW003/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 559
-  normalize_min: 223
-  normalize_clip: false
+  normalize_max: 891
+  normalize_min: 198
 - name: exm-drosophila-flyliconn-FlyID25-20260216_MOPS_2ndGel_B1_40XW/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID25-20260216_MOPS_2ndGel_B1_40XW/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 707
-  normalize_min: 272
-  normalize_clip: false
+  normalize_max: 1164
+  normalize_min: 237
 - name: exm-drosophila-flyliconn-FlyID25-mitochondria-20260216_MOPS_2ndGel_B1_40XW003/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID25-mitochondria-20260216_MOPS_2ndGel_B1_40XW003/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 620
-  normalize_min: 245
-  normalize_clip: false
+  normalize_max: 828
+  normalize_min: 217
 - name: exm-drosophila-flyliconn-FlyID26-20260221_2ndgel_S4_B1_40XW/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID26-20260221_2ndgel_S4_B1_40XW/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 673
-  normalize_min: 243
-  normalize_clip: false
+  normalize_max: 954
+  normalize_min: 215
 - name: exm-drosophila-flyliconn-FlyID26-20260221_2ndgel_S4_B1_40XW002/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID26-20260221_2ndgel_S4_B1_40XW002/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 626
-  normalize_min: 224
-  normalize_clip: false
+  normalize_max: 872
+  normalize_min: 196
 - name: exm-drosophila-flyliconn-FlyID26-20260221_2ndgel_S4_B1_40XW003/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID26-20260221_2ndgel_S4_B1_40XW003/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 613
-  normalize_min: 234
-  normalize_clip: false
+  normalize_max: 919
+  normalize_min: 207
 - name: exm-drosophila-flyliconn-FlyID26-20260221_2ndgel_S4_B1_40XW004/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID26-20260221_2ndgel_S4_B1_40XW004/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1002
-  normalize_min: 361
-  normalize_clip: false
+  normalize_max: 1713
+  normalize_min: 318
 - name: exm-drosophila-flyliconn-FlyID47-2ndgel-DUP-S7-40XW003-20260619/crop-001_clahe
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID47-2ndgel-DUP-S7-40XW003-20260619/crop-001_clahe.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1383
-  normalize_min: 411
-  normalize_clip: false
+  normalize_max: 2512
+  normalize_min: 356
 - name: exm-drosophila-flyliconn-FlyID47-2ndgel-DUP-S7-40XW003-20260619/crop-001_raw
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID47-2ndgel-DUP-S7-40XW003-20260619/crop-001_raw.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1144
-  normalize_min: 403
-  normalize_clip: false
+  normalize_max: 2512
+  normalize_min: 356
 - name: exm-drosophila-flyliconn-FlyID47-2ndgel-DUP-S7-B2-40XW-20260620/crop-001_clahe
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID47-2ndgel-DUP-S7-B2-40XW-20260620/crop-001_clahe.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 73
-  normalize_min: 24
-  normalize_clip: false
+  normalize_max: 170
+  normalize_min: 20
 - name: exm-drosophila-flyliconn-FlyID47-2ndgel-DUP-S7-B2-40XW-20260620/crop-001_raw
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID47-2ndgel-DUP-S7-B2-40XW-20260620/crop-001_raw.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 70
-  normalize_min: 23
-  normalize_clip: false
+  normalize_max: 170
+  normalize_min: 20
 - name: exm-drosophila-flyliconn-FlyID47-2ndgel-S2-40XW007-20260619/crop-001_clahe
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID47-2ndgel-S2-40XW007-20260619/crop-001_clahe.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 690
-  normalize_min: 205
-  normalize_clip: false
+  normalize_max: 879
+  normalize_min: 181
 - name: exm-drosophila-flyliconn-FlyID47-2ndgel-S2-40XW007-20260619/crop-001_raw
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID47-2ndgel-S2-40XW007-20260619/crop-001_raw.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 542
-  normalize_min: 208
-  normalize_clip: false
+  normalize_max: 879
+  normalize_min: 183
 - name: exm-drosophila-flyliconn-FlyID47-2ndgel-S2-40XW009-20260619/crop-001_clahe
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID47-2ndgel-S2-40XW009-20260619/crop-001_clahe.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 719
-  normalize_min: 218
-  normalize_clip: false
+  normalize_max: 1121
+  normalize_min: 189
 - name: exm-drosophila-flyliconn-FlyID47-2ndgel-S2-40XW009-20260619/crop-001_raw
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID47-2ndgel-S2-40XW009-20260619/crop-001_raw.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 591
-  normalize_min: 216
-  normalize_clip: false
+  normalize_max: 1121
+  normalize_min: 189
 - name: exm-drosophila-flyliconn-FlyID47-2ndgel-S7-40XW004-20260619/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID47-2ndgel-S7-40XW004-20260619/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1402
-  normalize_min: 491
-  normalize_clip: false
+  normalize_max: 2488
+  normalize_min: 443
 - name: exm-drosophila-flyliconn-FlyID49-2ndgel-BIS-40XW001-20260625/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID49-2ndgel-BIS-40XW001-20260625/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 714
-  normalize_min: 238
-  normalize_clip: false
+  normalize_max: 1223
+  normalize_min: 206
 - name: exm-drosophila-flyliconn-FlyID49-2ndgel-BIS-40XW002-20260625/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID49-2ndgel-BIS-40XW002-20260625/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 781
-  normalize_min: 252
-  normalize_clip: false
+  normalize_max: 1489
+  normalize_min: 221
 - name: exm-drosophila-flyliconn-FlyID49-2ndgel-DUP-BIS-40XW005-20260625/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID49-2ndgel-DUP-BIS-40XW005-20260625/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 753
-  normalize_min: 236
-  normalize_clip: false
+  normalize_max: 1613
+  normalize_min: 206
 - name: exm-drosophila-flyliconn-FlyID49-2ndgel-DUP-BIS-40XW006-20260625/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID49-2ndgel-DUP-BIS-40XW006-20260625/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 756
-  normalize_min: 238
-  normalize_clip: false
+  normalize_max: 1475
+  normalize_min: 210
 - name: exm-drosophila-flyliconn-FlyID49-mirrorscope-central-20260702/crop-001_central
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID49-mirrorscope-central-20260702/crop-001_central.zarr
   image_key: raw
@@ -629,9 +637,8 @@ volumes:
     - 29760
   - - 832
     - 6272
-  normalize_max: 2911
-  normalize_min: 409
-  normalize_clip: false
+  normalize_max: 4988
+  normalize_min: 650
 - name: exm-drosophila-flyliconn-FlyID49-mirrorscope-lobe-20260702/crop-001_lobe
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID49-mirrorscope-lobe-20260702/crop-001_lobe.zarr
   image_key: raw
@@ -643,198 +650,170 @@ volumes:
     - 32832
   - - 2464
     - 6240
-  normalize_max: 2952
-  normalize_min: 500
-  normalize_clip: false
+  normalize_max: 5476
+  normalize_min: 635
 - name: exm-drosophila-flyliconn-FlyID69-2ndgel-S19-40XW001-20261024/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID69-2ndgel-S19-40XW001-20261024/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 714
-  normalize_min: 287
-  normalize_clip: false
+  normalize_max: 1177
+  normalize_min: 257
 - name: exm-drosophila-flyliconn-FlyID69-2ndgel-S9-40XW001-20261024/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID69-2ndgel-S9-40XW001-20261024/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 780
-  normalize_min: 374
-  normalize_clip: false
+  normalize_max: 1069
+  normalize_min: 338
 - name: exm-drosophila-flyliconn-FlyID69-2ndgel-S9-40XW002-20261024/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID69-2ndgel-S9-40XW002-20261024/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 851
-  normalize_min: 367
-  normalize_clip: false
+  normalize_max: 1336
+  normalize_min: 330
 - name: exm-drosophila-flyliconn-FlyID69-2ndgel-S9-40XW003-20261024/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-FlyID69-2ndgel-S9-40XW003-20261024/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1010
-  normalize_min: 394
-  normalize_clip: false
+  normalize_max: 1953
+  normalize_min: 356
 - name: exm-drosophila-flyliconn-matt-260601-60X-B2-1-027/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-260601-60X-B2-1-027/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1893
-  normalize_min: 820
-  normalize_clip: false
+  normalize_max: 2961
+  normalize_min: 727
 - name: exm-drosophila-flyliconn-matt-260601-60X-B2-1-028/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-260601-60X-B2-1-028/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1855
-  normalize_min: 816
-  normalize_clip: false
+  normalize_max: 2928
+  normalize_min: 722
 - name: exm-drosophila-flyliconn-matt-260601-60X-B2-1-029/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-260601-60X-B2-1-029/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1289
-  normalize_min: 541
-  normalize_clip: false
+  normalize_max: 1915
+  normalize_min: 469
 - name: exm-drosophila-flyliconn-matt-260601-60X-B2-2-030/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-260601-60X-B2-2-030/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1227
-  normalize_min: 487
-  normalize_clip: false
+  normalize_max: 1940
+  normalize_min: 414
 - name: exm-drosophila-flyliconn-matt-260601-60X-B2-2-031/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-260601-60X-B2-2-031/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1092
-  normalize_min: 478
-  normalize_clip: false
+  normalize_max: 1707
+  normalize_min: 415
 - name: exm-drosophila-flyliconn-matt-260601-60X-B2-2-032/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-260601-60X-B2-2-032/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1870
-  normalize_min: 806
-  normalize_clip: false
+  normalize_max: 2882
+  normalize_min: 708
 - name: exm-drosophila-flyliconn-matt-260601-60X-B4-1-040/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-260601-60X-B4-1-040/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1423
-  normalize_min: 593
-  normalize_clip: false
+  normalize_max: 2371
+  normalize_min: 520
 - name: exm-drosophila-flyliconn-matt-260601-60X-B4-1-041/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-260601-60X-B4-1-041/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1900
-  normalize_min: 836
-  normalize_clip: false
+  normalize_max: 3063
+  normalize_min: 748
 - name: exm-drosophila-flyliconn-matt-260601-60X-B4-1-042/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-260601-60X-B4-1-042/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1886
-  normalize_min: 828
-  normalize_clip: false
+  normalize_max: 3089
+  normalize_min: 735
 - name: exm-drosophila-flyliconn-matt-260601-60X-B4-2-043/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-260601-60X-B4-2-043/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1045
-  normalize_min: 403
-  normalize_clip: false
+  normalize_max: 1576
+  normalize_min: 344
 - name: exm-drosophila-flyliconn-matt-260601-60X-B4-2-044/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-260601-60X-B4-2-044/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1893
-  normalize_min: 813
-  normalize_clip: false
+  normalize_max: 2834
+  normalize_min: 721
 - name: exm-drosophila-flyliconn-matt-260601-60X-B4-2-045/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-260601-60X-B4-2-045/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1892
-  normalize_min: 805
-  normalize_clip: false
+  normalize_max: 2857
+  normalize_min: 701
 - name: exm-drosophila-flyliconn-matt-PPS-261015-002-OpticLobe-30x/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-PPS-261015-002-OpticLobe-30x/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 5436
-  normalize_min: 2311
-  normalize_clip: false
+  normalize_max: 7830
+  normalize_min: 2195
 - name: exm-drosophila-flyliconn-matt-phDye19-Gel2-OpticLobes-60x/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-phDye19-Gel2-OpticLobes-60x/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 2096.39
-  normalize_min: 570.032
-  normalize_clip: false
+  normalize_max: 5281.46
+  normalize_min: 503.352
 - name: exm-drosophila-flyliconn-matt-phDye20-Gel12-OpticLobe-32x/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-flyliconn-matt-phDye20-Gel12-OpticLobe-32x/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1038
-  normalize_min: 386
-  normalize_clip: false
+  normalize_max: 2096
+  normalize_min: 352
 - name: exm-drosophila-rubinlab-30X_lobeTm1_NHS546_687um_lower-laser_n2/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-rubinlab-30X_lobeTm1_NHS546_687um_lower-laser_n2/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1139
-  normalize_min: 389
-  normalize_clip: false
+  normalize_max: 1585
+  normalize_min: 336
 - name: exm-drosophila-rubinlab-Valentina-iSIM-Hari-101626/crop-001_16X_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-rubinlab-Valentina-iSIM-Hari-101626/crop-001_16X_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 8568.33
-  normalize_min: 414.758
-  normalize_clip: false
+  normalize_max: 18179.7
+  normalize_min: 8.0
 - name: exm-drosophila-rubinlab-Valentina-iSIM-Hari-101626/crop-002_30X_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-drosophila-rubinlab-Valentina-iSIM-Hari-101626/crop-002_30X_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 757.583
-  normalize_min: 82.655
-  normalize_clip: false
+  normalize_max: 1479.9
+  normalize_min: 35.55
 - name: exm-mouse-liconn-DG-20250809_ExPID19-02_2ndGel_C5_Atto488_40XW_002/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-DG-20250809_ExPID19-02_2ndGel_C5_Atto488_40XW_002/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 891
-  normalize_min: 338
-  normalize_clip: false
+  normalize_max: 1085
+  normalize_min: 295
 - name: exm-mouse-liconn-ExPID108-cortex-spinningdisk/crop-001_CortexL3_32x_40XW003
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID108-cortex-spinningdisk/crop-001_CortexL3_32x_40XW003.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 430
-  normalize_min: 161
-  normalize_clip: false
+  normalize_max: 659
+  normalize_min: 142
 - name: exm-mouse-liconn-ExPID124/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID124/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 251
-  normalize_min: 20
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 2
 - name: exm-mouse-liconn-ExPID146/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID146/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 241
-  normalize_min: 32
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 11
 - name: exm-mouse-liconn-ExPID150/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID150/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 248
-  normalize_min: 13
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: exm-mouse-liconn-ExPID82-1/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID82-1/crop-001_fullvol.zarr
   image_key: raw
@@ -846,107 +825,92 @@ volumes:
     - 9336
   - - 136
     - 1400
-  normalize_max: 251
-  normalize_min: 14
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 1
 - name: exm-mouse-liconn-ExPID82-1/crop-002_sub
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID82-1/crop-002_sub.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 251
-  normalize_min: 20
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 2
 - name: exm-mouse-liconn-ExPID96-hippocampus-mirrorscope/crop-001_S1_18x
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID96-hippocampus-mirrorscope/crop-001_S1_18x.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 752
-  normalize_min: 264
-  normalize_clip: false
+  normalize_max: 1012
+  normalize_min: 208
 - name: exm-mouse-liconn-ExPID96-hippocampus-mirrorscope/crop-002_S2_22x
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID96-hippocampus-mirrorscope/crop-002_S2_22x.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1073
-  normalize_min: 344
-  normalize_clip: false
+  normalize_max: 1568
+  normalize_min: 260
 - name: exm-mouse-liconn-ExPID96-hippocampus-mirrorscope/crop-003_S3_28x
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID96-hippocampus-mirrorscope/crop-003_S3_28x.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1130
-  normalize_min: 270
-  normalize_clip: false
+  normalize_max: 1719
+  normalize_min: 221
 - name: exm-mouse-liconn-ExPID96-hippocampus-mirrorscope/crop-004_S4_32x
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID96-hippocampus-mirrorscope/crop-004_S4_32x.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 813
-  normalize_min: 223
-  normalize_clip: false
+  normalize_max: 1308
+  normalize_min: 199
 - name: exm-mouse-liconn-ExPID96-hippocampus-spinningdisk/crop-001_S1_18x_40XW002
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID96-hippocampus-spinningdisk/crop-001_S1_18x_40XW002.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 419
-  normalize_min: 161
-  normalize_clip: false
+  normalize_max: 551
+  normalize_min: 142
 - name: exm-mouse-liconn-ExPID96-hippocampus-spinningdisk/crop-002_S3_28x_40XW
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID96-hippocampus-spinningdisk/crop-002_S3_28x_40XW.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 302
-  normalize_min: 130
-  normalize_clip: false
+  normalize_max: 410
+  normalize_min: 115
 - name: exm-mouse-liconn-ExPID96-hippocampus-spinningdisk/crop-003_S4_32x_40XW003
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID96-hippocampus-spinningdisk/crop-003_S4_32x_40XW003.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 569
-  normalize_min: 216
-  normalize_clip: false
+  normalize_max: 893
+  normalize_min: 192
 - name: exm-mouse-liconn-ExPID99-cerebellum-mirrorscope/crop-001_BIS_32x
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID99-cerebellum-mirrorscope/crop-001_BIS_32x.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 899
-  normalize_min: 216
-  normalize_clip: false
+  normalize_max: 1277
+  normalize_min: 199
 - name: exm-mouse-liconn-ExPID99-cerebellum-spinningdisk/crop-001_BIS0.03_32x_Cerebellum_40XW001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID99-cerebellum-spinningdisk/crop-001_BIS0.03_32x_Cerebellum_40XW001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 545
-  normalize_min: 194
-  normalize_clip: false
+  normalize_max: 798
+  normalize_min: 170
 - name: exm-mouse-liconn-ExPID99-cerebellum-spinningdisk/crop-002_BIS0.06_18x_Cerebellum_40XW002
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-ExPID99-cerebellum-spinningdisk/crop-002_BIS0.06_18x_Cerebellum_40XW002.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1360
-  normalize_min: 519
-  normalize_clip: false
+  normalize_max: 1785
+  normalize_min: 437
 - name: exm-mouse-liconn-RID16-retina-spinningdisk/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-RID16-retina-spinningdisk/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 932
-  normalize_min: 337
-  normalize_clip: false
+  normalize_max: 1579
+  normalize_min: 288
 - name: exm-mouse-liconn-RID19-retina-confocal/crop-001_s11_neuropil_32x
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-RID19-retina-confocal/crop-001_s11_neuropil_32x.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 276
-  normalize_min: 123
-  normalize_clip: false
+  normalize_max: 384
+  normalize_min: 111
 - name: exm-mouse-liconn-RID19-retina-confocal/crop-002_stitched_32x
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-RID19-retina-confocal/crop-002_stitched_32x.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 560
-  normalize_min: 257
-  normalize_clip: false
+  normalize_max: 834
+  normalize_min: 237
 - name: exm-mouse-liconn-RID19-retina-lightsheet/crop-001_RID19_32x
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-RID19-retina-lightsheet/crop-001_RID19_32x.zarr
   image_key: raw
@@ -958,195 +922,722 @@ volumes:
     - 7936
   - - 0
     - 1096
-  normalize_max: 4047
-  normalize_min: 187
-  normalize_clip: false
+  normalize_max: 5500
+  normalize_min: 350
 - name: exm-mouse-liconn-cortex-20250822_ExPID09_2ndGel_30percentSucrose-Glycerol_40XW_003/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-cortex-20250822_ExPID09_2ndGel_30percentSucrose-Glycerol_40XW_003/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 457
-  normalize_min: 188
-  normalize_clip: false
+  normalize_max: 585
+  normalize_min: 165
 - name: exm-mouse-liconn-hippocampus-202507013_ExPID10-02_2percentAA_S2_Atto488_40XW_004/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-hippocampus-202507013_ExPID10-02_2percentAA_S2_Atto488_40XW_004/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 669
-  normalize_min: 256
-  normalize_clip: false
+  normalize_max: 943
+  normalize_min: 220
 - name: exm-mouse-liconn-hippocampus-multiview-sim-20260613_18x_0.025BIS_Acq2_Pos8_shrofflab/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/exm-mouse-liconn-hippocampus-multiview-sim-20260613_18x_0.025BIS_Acq2_Pos8_shrofflab/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 708
-  normalize_min: 6
-  normalize_clip: false
-- name: exm-drosophila-flyliconn-keller-fly-brain-3/full
+  normalize_max: 1450
+  normalize_min: 0
+- name: exm-drosophila-flyliconn-keller-fly-brain-3/full_box1
   path: /groups/miaai/miaai/lmd-external-wrappers/flybrain3_keller.n5
   image_key: ''
   format: n5
   bounding_box:
-  - - 12928
-    - 30592
-  - - 18240
-    - 57792
+  - - 14144
+    - 27200
+  - - 18304
+    - 56320
+  - - 1280
+    - 2800
+  normalize_max: 1158
+  normalize_min: 245
+  weight: 0.684471
+- name: exm-drosophila-flyliconn-keller-fly-brain-3/full_box2
+  path: /groups/miaai/miaai/lmd-external-wrappers/flybrain3_keller.n5
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 27200
+    - 35968
+  - - 13696
+    - 41088
   - - 1120
-    - 2880
-  normalize_max: 843
-  normalize_min: 259
-  normalize_clip: false
-- name: exm-mouse-liconn-tavakoli-mouse2/full
+    - 2480
+  normalize_max: 1158
+  normalize_min: 245
+  weight: 0.41421
+- name: exm-drosophila-flyliconn-keller-fly-brain-3/full_box3
+  path: /groups/miaai/miaai/lmd-external-wrappers/flybrain3_keller.n5
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 8640
+    - 14144
+  - - 32320
+    - 46528
+  - - 1280
+    - 3120
+  normalize_max: 1158
+  normalize_min: 245
+  weight: 0.25328
+- name: exm-drosophila-flyliconn-keller-fly-brain-3/full_box4
+  path: /groups/miaai/miaai/lmd-external-wrappers/flybrain3_keller.n5
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 35968
+    - 43584
+  - - 12480
+    - 22848
+  - - 1584
+    - 3040
+  normalize_max: 1158
+  normalize_min: 245
+  weight: 0.221377
+- name: exm-drosophila-flyliconn-keller-fly-brain-3/full_box5
+  path: /groups/miaai/miaai/lmd-external-wrappers/flybrain3_keller.n5
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 15168
+    - 30592
+  - - 56320
+    - 60544
+  - - 1984
+    - 3200
+  normalize_max: 1158
+  normalize_min: 245
+  weight: 0.17705
+- name: exm-mouse-liconn-tavakoli-mouse2/full_box1
   path: /groups/miaai/miaai/lmd-external-wrappers/mouse_liconn_tavakoli.n5
   image_key: ''
   format: n5
   bounding_box:
-  - - 7360
-    - 99968
+  - - 9792
+    - 102400
   - - 0
+    - 30016
+  - - 2048
+    - 3104
+  normalize_max: 2204
+  normalize_min: 45
+  weight: 0.892166
+- name: exm-mouse-liconn-tavakoli-mouse2/full_box2
+  path: /groups/miaai/miaai/lmd-external-wrappers/mouse_liconn_tavakoli.n5
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 4224
+    - 57600
+  - - 30016
     - 35712
-  - - 1920
-    - 3328
-  normalize_max: 1950
-  normalize_min: 25
-  normalize_clip: false
-- name: exm-aphid-liconn-lillvis-aphid4/full
+  - - 2304
+    - 3520
+  normalize_max: 2204
+  normalize_min: 45
+  weight: 0.257369
+- name: exm-mouse-liconn-tavakoli-mouse2/full_box3
+  path: /groups/miaai/miaai/lmd-external-wrappers/mouse_liconn_tavakoli.n5
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 64576
+    - 99968
+  - - 30016
+    - 35712
+  - - 1856
+    - 3072
+  normalize_max: 2204
+  normalize_min: 45
+  weight: 0.201137
+- name: exm-aphid-liconn-lillvis-aphid4/full_box1
   path: /groups/miaai/miaai/lmd-external-wrappers/aphid_lillvis.n5
   image_key: ''
   format: n5
   bounding_box:
-  - - 3168
-    - 11232
+  - - 4256
+    - 10112
   - - 192
-    - 10560
-  - - 1782
-    - 5148
-  normalize_max: 597
-  normalize_min: 0
-  normalize_clip: false
-- name: exm-unknown-liconn-lillvis-bis-gasket-20240702/full
+    - 10592
+  - - 1368
+    - 4374
+  normalize_max: 871
+  normalize_min: 49
+  weight: 0.819629
+- name: exm-aphid-liconn-lillvis-aphid4/full_box2
+  path: /groups/miaai/miaai/lmd-external-wrappers/aphid_lillvis.n5
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 10304
+    - 12416
+  - - 128
+    - 6688
+  - - 3528
+    - 5778
+  normalize_max: 871
+  normalize_min: 49
+  weight: 0.283342
+- name: exm-aphid-liconn-lillvis-aphid4/full_box3
+  path: /groups/miaai/miaai/lmd-external-wrappers/aphid_lillvis.n5
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 2304
+    - 4256
+  - - 5248
+    - 10080
+  - - 2178
+    - 4950
+  normalize_max: 871
+  normalize_min: 49
+  weight: 0.254967
+- name: exm-aphid-liconn-lillvis-aphid4/full_box4
+  path: /groups/miaai/miaai/lmd-external-wrappers/aphid_lillvis.n5
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 3328
+    - 9632
+  - - 1280
+    - 2624
+  - - 5004
+    - 6732
+  normalize_max: 871
+  normalize_min: 49
+  weight: 0.180044
+- name: exm-unknown-liconn-lillvis-bis-gasket-20240702/full_box1
   path: /groups/miaai/miaai/lmd-external-wrappers/bis_gasket_lillvis.n5
   image_key: ''
   format: n5
   bounding_box:
-  - - 10880
-    - 23680
-  - - 10240
-    - 49920
+  - - 8896
+    - 20480
+  - - 16640
+    - 43520
   - - 814
     - 2146
-  normalize_max: 24231
-  normalize_min: 3232
-  normalize_clip: false
-- name: exm-drosophila-flyliconn-vnc-josh-20260713/full
+  normalize_max: 33463
+  normalize_min: 3296
+  weight: 0.707831
+- name: exm-unknown-liconn-lillvis-bis-gasket-20240702/full_box2
+  path: /groups/miaai/miaai/lmd-external-wrappers/bis_gasket_lillvis.n5
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 14016
+    - 26240
+  - - 7680
+    - 16640
+  - - 814
+    - 1998
+  normalize_max: 33463
+  normalize_min: 3296
+  weight: 0.352353
+- name: exm-unknown-liconn-lillvis-bis-gasket-20240702/full_box3
+  path: /groups/miaai/miaai/lmd-external-wrappers/bis_gasket_lillvis.n5
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 10816
+    - 24320
+  - - 43520
+    - 52480
+  - - 1406
+    - 2442
+  normalize_max: 33463
+  normalize_min: 3296
+  weight: 0.345249
+- name: exm-unknown-liconn-lillvis-bis-gasket-20240702/full_box4
+  path: /groups/miaai/miaai/lmd-external-wrappers/bis_gasket_lillvis.n5
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 20480
+    - 23808
+  - - 16640
+    - 36352
+  - - 814
+    - 1850
+  normalize_max: 33463
+  normalize_min: 3296
+  weight: 0.239121
+- name: exm-drosophila-flyliconn-vnc-josh-20260713/full_box1
   path: /groups/miaai/miaai/lmd-external-wrappers/flyvnc_josh.zarr
   image_key: ''
   zarr_version: zarr3
   bounding_box:
-  - - 8064
-    - 39168
-  - - 13056
+  - - 9088
+    - 36864
+  - - 14976
     - 84864
-  - - 1760
-    - 4640
-  normalize_max: 319
-  normalize_min: 5
-  normalize_clip: false
-- name: exm-drosophila-flyliconn-matt-brain-20260611/full
+  - - 2080
+    - 4320
+  normalize_max: 479
+  normalize_min: 2
+  weight: 0.827422
+- name: exm-drosophila-flyliconn-vnc-josh-20260713/full_box2
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyvnc_josh.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 9088
+    - 38144
+  - - 10880
+    - 26112
+  - - 960
+    - 2080
+  normalize_max: 479
+  normalize_min: 2
+  weight: 0.224834
+- name: exm-drosophila-flyliconn-vnc-josh-20260713/full_box3
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyvnc_josh.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 14720
+    - 38016
+  - - 34816
+    - 52224
+  - - 4320
+    - 5440
+  normalize_max: 479
+  normalize_min: 2
+  weight: 0.213346
+- name: exm-drosophila-flyliconn-vnc-josh-20260713/full_box4
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyvnc_josh.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 36864
+    - 42624
+  - - 12800
+    - 45696
+  - - 2080
+    - 4160
+  normalize_max: 479
+  normalize_min: 2
+  weight: 0.195935
+- name: exm-drosophila-flyliconn-vnc-josh-20260713/full_box5
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyvnc_josh.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 18176
+    - 35968
+  - - 67072
+    - 80640
+  - - 4320
+    - 5440
+  normalize_max: 479
+  normalize_min: 2
+  weight: 0.156282
+- name: exm-drosophila-flyliconn-matt-brain-20260611/full_box1
   path: /groups/miaai/miaai/lmd-external-wrappers/flybrain_matt.zarr
   image_key: ''
   zarr_version: zarr3
   bounding_box:
-  - - 15360
-    - 40960
-  - - 20608
-    - 101376
-  - - 2176
-    - 4352
-  normalize_max: 3790
-  normalize_min: 674
-  normalize_clip: false
-- name: exm-drosophila-flyliconn-matt-brain-dual-20260814/full
+  - - 19072
+    - 42368
+  - - 57472
+    - 99072
+  - - 2560
+    - 4736
+  normalize_max: 5736
+  normalize_min: 755
+  weight: 0.58713
+- name: exm-drosophila-flyliconn-matt-brain-20260611/full_box2
+  path: /groups/miaai/miaai/lmd-external-wrappers/flybrain_matt.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 15232
+    - 35840
+  - - 13824
+    - 53632
+  - - 1536
+    - 4096
+  normalize_max: 5736
+  normalize_min: 755
+  weight: 0.585682
+- name: exm-drosophila-flyliconn-matt-brain-20260611/full_box3
+  path: /groups/miaai/miaai/lmd-external-wrappers/flybrain_matt.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 7552
+    - 15232
+  - - 11392
+    - 30336
+  - - 1280
+    - 3584
+  normalize_max: 5736
+  normalize_min: 755
+  weight: 0.194761
+- name: exm-drosophila-flyliconn-matt-brain-20260611/full_box4
+  path: /groups/miaai/miaai/lmd-external-wrappers/flybrain_matt.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 16384
+    - 41344
+  - - 57600
+    - 66816
+  - - 1408
+    - 2560
+  normalize_max: 5736
+  normalize_min: 755
+  weight: 0.169144
+- name: exm-drosophila-flyliconn-matt-brain-20260611/full_box5
+  path: /groups/miaai/miaai/lmd-external-wrappers/flybrain_matt.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 42368
+    - 50048
+  - - 57472
+    - 78720
+  - - 2944
+    - 4864
+  normalize_max: 5736
+  normalize_min: 755
+  weight: 0.187026
+- name: exm-drosophila-flyliconn-matt-brain-dual-20260814/full_box1
   path: /groups/miaai/miaai/lmd-external-wrappers/flybrain_dual_matt.zarr
   image_key: ''
   zarr_version: zarr3
   bounding_box:
-  - - 16512
-    - 44800
-  - - 12800
+  - - 19200
+    - 40960
+  - - 13056
     - 78464
-  - - 1280
-    - 3584
-  normalize_max: 1674
-  normalize_min: 201
-  normalize_clip: false
-- name: exm-drosophila-flyliconn-FlyID45-fly4-optic-lobe-20260619/full
+  - - 1792
+    - 3200
+  normalize_max: 3396
+  normalize_min: 202
+  weight: 0.65322
+- name: exm-drosophila-flyliconn-matt-brain-dual-20260814/full_box2
+  path: /groups/miaai/miaai/lmd-external-wrappers/flybrain_dual_matt.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 9984
+    - 33408
+  - - 80000
+    - 93696
+  - - 608
+    - 2944
+  normalize_max: 3396
+  normalize_min: 202
+  weight: 0.362044
+- name: exm-drosophila-flyliconn-matt-brain-dual-20260814/full_box3
+  path: /groups/miaai/miaai/lmd-external-wrappers/flybrain_dual_matt.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 40960
+    - 48768
+  - - 30464
+    - 71936
+  - - 1664
+    - 3328
+  normalize_max: 3396
+  normalize_min: 202
+  weight: 0.297025
+- name: exm-drosophila-flyliconn-matt-brain-dual-20260814/full_box4
+  path: /groups/miaai/miaai/lmd-external-wrappers/flybrain_dual_matt.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 20352
+    - 39680
+  - - 10624
+    - 30464
+  - - 768
+    - 1792
+  normalize_max: 3396
+  normalize_min: 202
+  weight: 0.245664
+- name: exm-drosophila-flyliconn-matt-brain-dual-20260814/full_box5
+  path: /groups/miaai/miaai/lmd-external-wrappers/flybrain_dual_matt.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 16640
+    - 40960
+  - - 39168
+    - 50560
+  - - 3200
+    - 4608
+  normalize_max: 3396
+  normalize_min: 202
+  weight: 0.244694
+- name: exm-drosophila-flyliconn-FlyID45-fly4-optic-lobe-20260619/full_box1
   path: /groups/miaai/miaai/lmd-external-wrappers/flyid45_fly4.zarr
   image_key: ''
   zarr_version: zarr3
   bounding_box:
-  - - 18304
-    - 56960
-  - - 1152
-    - 40320
+  - - 21248
+    - 58368
+  - - 9216
+    - 36864
   - - 1344
     - 4416
-  normalize_max: 1945
-  normalize_min: 533
-  normalize_clip: false
+  normalize_max: 3925
+  normalize_min: 511
+  weight: 0.752309
+- name: exm-drosophila-flyliconn-FlyID45-fly4-optic-lobe-20260619/full_box2
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid45_fly4.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 9088
+    - 47744
+  - - 384
+    - 9216
+  - - 1712
+    - 4256
+  normalize_max: 3925
+  normalize_min: 511
+  weight: 0.347101
+- name: exm-drosophila-flyliconn-FlyID45-fly4-optic-lobe-20260619/full_box3
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid45_fly4.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 27392
+    - 55424
+  - - 36864
+    - 44928
+  - - 1520
+    - 3648
+  normalize_max: 3925
+  normalize_min: 511
+  weight: 0.243493
+- name: exm-drosophila-flyliconn-FlyID45-fly4-optic-lobe-20260619/full_box4
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid45_fly4.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 58368
+    - 64512
+  - - 16000
+    - 35712
+  - - 1920
+    - 4032
+  normalize_max: 3925
+  normalize_min: 511
+  weight: 0.166689
+- name: exm-drosophila-flyliconn-FlyID45-fly4-optic-lobe-20260619/full_box5
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid45_fly4.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 13824
+    - 21248
+  - - 9216
+    - 33024
+  - - 1712
+    - 3456
+  normalize_max: 3925
+  normalize_min: 511
+  weight: 0.186434
 - name: exm-mouse-mirrorscope-hippocampus-3ch-20250902/full
   path: /groups/miaai/miaai/lmd-external-wrappers/mouse_hipp_3ch.zarr
   image_key: ''
   zarr_version: zarr3
   bounding_box:
-  - - 6400
-    - 51264
-  - - 1728
-    - 53824
-  - - 2160
-    - 3120
-  normalize_max: 1269
-  normalize_min: 11
-  normalize_clip: false
-- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop1/full
+  - - 6527
+    - 51263
+  - - 3392
+    - 51968
+  - - 2208
+    - 2960
+  normalize_max: 1810
+  normalize_min: 6
+- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop1/full_box1
   path: /groups/miaai/miaai/lmd-external-wrappers/flyid25_crop1.zarr
   image_key: ''
   zarr_version: zarr3
   bounding_box:
   - - 384
-    - 14656
+    - 14976
   - - 128
     - 8960
-  - - 4912
-    - 25344
-  normalize_max: 1410
+  - - 6304
+    - 21840
+  normalize_max: 2163
   normalize_min: 205
-  normalize_clip: false
-- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop2/full
+  weight: 0.875831
+- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop1/full_box2
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid25_crop1.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 448
+    - 10880
+  - - 128
+    - 4480
+  - - 21840
+    - 28272
+  normalize_max: 2163
+  normalize_min: 205
+  weight: 0.275901
+- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop1/full_box3
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid25_crop1.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 320
+    - 11008
+  - - 6912
+    - 8960
+  - - 21840
+    - 26816
+  normalize_max: 2163
+  normalize_min: 205
+  weight: 0.152678
+- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop1/full_box4
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid25_crop1.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 1408
+    - 10368
+  - - 5184
+    - 8960
+  - - 3520
+    - 6304
+  normalize_max: 2163
+  normalize_min: 205
+  weight: 0.139932
+- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop2/full_box1
   path: /groups/miaai/miaai/lmd-external-wrappers/flyid25_crop2.zarr
   image_key: ''
   zarr_version: zarr3
   bounding_box:
-  - - 4224
+  - - 5376
     - 14976
-  - - 256
+  - - 1728
     - 10880
   - - 7744
-    - 23936
-  normalize_max: 1232
-  normalize_min: 200
-  normalize_clip: false
-- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop3/full
+    - 23232
+  normalize_max: 1836
+  normalize_min: 207
+  weight: 0.815329
+- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop2/full_box2
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid25_crop2.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 3072
+    - 5376
+  - - 4608
+    - 10752
+  - - 9856
+    - 21120
+  normalize_max: 1836
+  normalize_min: 207
+  weight: 0.225237
+- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop2/full_box3
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid25_crop2.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 9600
+    - 15040
+  - - 4864
+    - 10880
+  - - 3504
+    - 7744
+  normalize_max: 1836
+  normalize_min: 207
+  weight: 0.207218
+- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop2/full_box4
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid25_crop2.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 7936
+    - 15424
+  - - 192
+    - 1728
+  - - 9808
+    - 23984
+  normalize_max: 1836
+  normalize_min: 207
+  weight: 0.22827
+- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop2/full_box5
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid25_crop2.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 6144
+    - 15104
+  - - 6144
+    - 10880
+  - - 23232
+    - 25360
+  normalize_max: 1836
+  normalize_min: 207
+  weight: 0.160132
+- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop3/full_box1
   path: /groups/miaai/miaai/lmd-external-wrappers/flyid25_crop3.zarr
   image_key: ''
   zarr_version: zarr3
   bounding_box:
-  - - 704
+  - - 1280
     - 11328
-  - - 192
-    - 8640
-  - - 9600
-    - 26848
-  normalize_max: 1235
-  normalize_min: 204
-  normalize_clip: false
+  - - 384
+    - 8576
+  - - 10976
+    - 25488
+  normalize_max: 1986
+  normalize_min: 194
+  weight: 0.852671
+- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop3/full_box2
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid25_crop3.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 5888
+    - 11392
+  - - 1536
+    - 8576
+  - - 6784
+    - 10976
+  normalize_max: 1986
+  normalize_min: 194
+  weight: 0.257553
+- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop3/full_box3
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid25_crop3.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 1664
+    - 11456
+  - - 5120
+    - 8576
+  - - 25488
+    - 29008
+  normalize_max: 1986
+  normalize_min: 194
+  weight: 0.213824
+- name: exm-drosophila-flyliconn-FlyID25-mirrorscope-crop3/full_box4
+  path: /groups/miaai/miaai/lmd-external-wrappers/flyid25_crop3.zarr
+  image_key: ''
+  zarr_version: zarr3
+  bounding_box:
+  - - 256
+    - 1280
+  - - 2304
+    - 8704
+  - - 13024
+    - 25520
+  normalize_max: 1986
+  normalize_min: 194
+  weight: 0.170771

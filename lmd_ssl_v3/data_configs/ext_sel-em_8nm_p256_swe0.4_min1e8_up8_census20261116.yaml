@@ -1,31 +1,31 @@
-# lmd_ssl_v3 data config: EM config (README, "Planned runs"). Copied on 2026-11-18 from lmd-configs,
-#   /groups/miaai/miaai/lmd-v0.0.1/configs/configs/lmd_ssl_v3/unlabeled/ext_sel-em_8nm_p256_swe0.4_min1e8_up8_win1-99_noclip_census20261116.yaml
-# as rebuilt on 2026-11-18 on top of commit d79d463, after the pause on the two cuttlefish volumes was lifted (not
-# yet committed there at the time of the copy). Everything below this header is that file, byte for byte. The
+# lmd_ssl_v3 data config: EM config (README, "Planned runs"). Copied on 2026-11-20 from lmd-configs,
+#   /groups/miaai/miaai/lmd-v0.0.1/configs/configs/lmd_ssl_v3/unlabeled/ext_sel-em_8nm_p256_swe0.4_min1e8_up8_census20261116.yaml
+# as rebuilt on 2026-11-20 on top of commit 2b89bc1 with the tissue boxes re-derived that day (not yet
+# committed there at the time of the copy). Everything below this header is that file, byte for byte. The
 # header below is lmd-configs' own: its rebuild command and recipe paths refer to that repo.
 #
-# lmd-v0.0.1 pretraining — lmd_ssl_v3 EM only with external volumes — single scale (8 nm) — p1-99 windows, unclipped
+# lmd-v0.0.1 pretraining — lmd_ssl_v3 EM only with external volumes — single scale (8 nm) — p0.1-99.9 windows, clipped
 #
 # GENERATED FILE — do not edit by hand. Every setting that decides what is in here
 # lives in the recipe below; there are no command-line options that change content.
 #
-#   rebuild   python build.py recipes/lmd_ssl_v3/unlabeled/ext_sel-em_8nm_p256_swe0.4_min1e8_up8_win1-99_noclip.yaml
+#   rebuild   python build.py recipes/lmd_ssl_v3/unlabeled/ext_sel-em_8nm_p256_swe0.4_min1e8_up8.yaml
 #   verify    python build.py --check          # regenerates, diffs, writes nothing
 #
-#   recipe    recipes/lmd_ssl_v3/unlabeled/ext_sel-em_8nm_p256_swe0.4_min1e8_up8_win1-99_noclip.yaml  sha256:e7b88dffc9603762
+#   recipe    recipes/lmd_ssl_v3/unlabeled/ext_sel-em_8nm_p256_swe0.4_min1e8_up8.yaml  sha256:059872bf7450df67
 #   corpus    corpus/census-20261116.csv  sha256:35297dc51ce97b02  (1187 stores + 79 external volumes)
-#   input     corpus/windows_p1-99.yaml  sha256:9ae4ca8f11497fe6
+#   input     corpus/windows.yaml  sha256:8054c17e11d14935
 #   input     corpus/quarantine.yaml  sha256:9c20dd17ae9a5c25
-#   input     corpus/tissue_boxes.yaml  sha256:34eb57d28d85ddce
+#   input     corpus/tissue_boxes.yaml  sha256:4afa1543d45ef4fb
 #   input     corpus/external.yaml  sha256:1fbc6d5051f06418
 #   builder   lmd/build_unlabeled.py  sha256:bf16921d3bb871c5
 #   miao      0.4.2+fork.5
 #
-# 270 volumes: 7 with a per-volume `resolutions` override, 270 with an intensity window, 105 held to a tissue box.
+# 297 volumes: 7 with a per-volume `resolutions` override, 297 with an intensity window, 132 held to a tissue box.
 # 1016 of 1266 censused stores were dropped.
 # size floor    100,000,000 level-0 spatial voxels (0.1 G)
 # resolution cap max_upsample 8x8x8 (x, y, z): native voxel / finest rung may not exceed this; 4 volume(s) dropped as "too coarse", named below.
-# window        p1-99 of each volume's stored values -> 0 and 1, NOT clipped (`normalize_clip: false` on every volume): values outside the window fall outside [0, 1]; from corpus/windows_p1-99.yaml
+# window        p0.1-99.9 of each volume's stored values -> [0, 1]; from corpus/windows.yaml
 #
 # `python describe.py <this file>` reports what the surviving set adds up to: size distribution,
 # species / modality mix, sampling concentration, and bytes read per epoch.
@@ -37,8 +37,8 @@
 #              A selection is this recipe's choice of data, not a judgement about the data:
 #              a store no recipe should use belongs in corpus/quarantine.yaml.
 #
-# external      86 of the 270 entries are outside data/: 66 volume(s) of corpus/external.yaml,
-#               5 of them as several tissue boxes, one entry per box (`<name>_box<k>`), with a `weight`
+# external      113 of the 297 entries are outside data/: 66 volume(s) of corpus/external.yaml,
+#               13 of them as several tissue boxes, one entry per box (`<name>_box<k>`), with a `weight`
 #               that makes its boxes together count as one volume of their total size.
 #
 # 114 store(s) of data/ are left out as "covered": each is a crop of an external volume this
@@ -128,29 +128,56 @@
 #     corpus/external.yaml, which this pattern leaves alone, and a config that holds it leaves
 #     these crops out as covered.
 #
-# 105 volume(s) held to a box by corpus/tissue_boxes.yaml, where the rest of the store is not tissue:
+# 132 volume(s) held to a box by corpus/tissue_boxes.yaml, where the rest of the store is not tissue:
 # sampled, sized and weighted inside it. Share of the store each box keeps:
 #     0.2%  em-drosophila-flyem-malecns-16nm/full_box5
 #     0.4%  em-drosophila-flyem-malecns-16nm/full_box4
+#     0.6%  em-drosophila-flyem-optic-lobe/full_box5
 #     0.7%  em-drosophila-fafb-v14/full_box5
 #     0.8%  em-drosophila-flyem-malecns-16nm/full_box3
+#     0.8%  em-drosophila-flyem-optic-lobe/full_box4
+#     1.0%  em-drosophila-flyem-optic-lobe/full_box3
+#     1.0%  em-drosophila-fibsem-yakuba-neck/full_box4
 #     1.1%  em-drosophila-flyem-mb-z0613-06/full_box5
+#     1.1%  em-zebrafish-fish2/full_box4
+#     1.2%  em-zebrafish-fish2/full_box3
 #     1.2%  em-drosophila-flyem-mb-z0613-06/full_box4
+#     1.2%  em-drosophila-flyem-yakuba-cns-z0422-17/full_box4
 #     1.2%  em-drosophila-flyem-ocellar-z0422-05/full_box5
+#     1.3%  em-zebrafish-fish2/full_box2
+#     1.4%  em-drosophila-CellMap-jrc-fly-larva-1/full_box5
+#     1.4%  em-drosophila-CellMap-jrc-fly-larva-1/full_box4
+#     1.6%  em-celegans-mengwang-jrc-P3-E5-D1-N2-2/full_box3
+#     1.6%  em-celegans-mengwang-jrc-P3-E5-D1-N2-2/full_box4
+#     1.6%  em-drosophila-flyem-yakuba-cns-z0422-17/full_box3
 #     1.7%  em-drosophila-flyem-mb-z0613-06/full_box3
+#     1.7%  em-drosophila-flyem-optic-lobe/full_box2
 #     1.7%  em-drosophila-fafb-v14/full_box3
 #     1.7%  em-drosophila-flyem-ocellar-z0422-05/full_box4
+#     1.7%  em-drosophila-CellMap-jrc-fly-larva-1/full_box3
 #     1.7%  em-drosophila-flyem-mb-alpha-lobe-z0419-25/full_box1
+#     1.9%  em-drosophila-flyem-hemibrain/full_box5
 #     1.9%  em-drosophila-flyem-ocellar-z0422-05/full_box3
+#     2.1%  em-zebrafish-CellMap-jrc-zf-cardiac-1/full_box4
 #     2.3%  em-drosophila-flyem-malecns-16nm/full_box2
 #     2.4%  em-drosophila-fafb-v14/full_box4
+#     2.5%  em-drosophila-fibsem-yakuba-neck/full_box3
+#     2.5%  em-drosophila-CellMap-jrc-fly-larva-1/full_box2
 #     2.8%  em-drosophila-fafb-v14/full_box2
+#     2.8%  em-drosophila-flyem-hemibrain/full_box3
+#     2.8%  em-drosophila-fibsem-yakuba-neck/full_box2
+#     2.9%  em-drosophila-flyem-hemibrain/full_box4
 #     3.0%  em-drosophila-flyem-ocellar-z0422-05/full_box2
 #     3.0%  em-greenmonkey-CellMap-jrc-cos7-11/crop-001
 #     3.4%  em-drosophila-flyem-malecns-16nm/full_box1
+#     3.4%  em-drosophila-flyem-yakuba-cns-z0422-17/full_box2
 #     3.4%  em-drosophila-flyem-mb-alpha-lobe-z0419-25/full_box5
+#     3.5%  em-celegans-mengwang-jrc-P3-E5-D1-N2-2/full_box2
 #     3.5%  em-drosophila-flyem-mb-alpha-lobe-z0419-25/full_box3
+#     3.6%  em-zebrafish-CellMap-jrc-zf-cardiac-1/full_box3
 #     3.7%  em-drosophila-flyem-ocellar-z0422-05/full_box1
+#     4.1%  em-zebrafish-CellMap-jrc-zf-cardiac-1/full_box2
+#     6.2%  em-drosophila-flyem-hemibrain/full_box2
 #     7.5%  em-drosophila-flyem-mb-z0613-06/full_box2
 #     7.8%  em-mouse-MitoVerse-conrad23-salivary-gland/crop-001_salivary_gland
 #     8.2%  em-drosophila-fafb-v14/full_box1
@@ -158,73 +185,75 @@
 #     8.5%  em-drosophila-flyem-mb-alpha-lobe-z0419-25/full_box4
 #     8.6%  em-drosophila-flyem-mb-alpha-lobe-z0419-25/full_box2
 #     8.6%  em-human-CellMap-jrc-sum159-1/crop-001_fullvol_tissuecrop
+#     9.0%  em-drosophila-flyem-optic-lobe/full_box1
 #     9.6%  em-celegans-funceworm-jrc-comma-1/crop-001_ch0-jrc_c-elegans-comma-1-two-chann
+#     9.9%  em-drosophila-fibsem-yakuba-neck/full_box1
+#    10.3%  em-zebrafish-fish2/full_box1
+#    10.7%  em-mouse-CellMap-jrc-mus-meissner-corpuscle-2/full
 #    11.1%  em-drosophila-flyem-mb-z0613-06/full_box1
 #    11.4%  em-celegans-funceworm-jrc-20250908/crop-001
-#    13.5%  em-mouse-CellMap-jrc-mus-meissner-corpuscle-2/full
-#    13.7%  em-drosophila-flyem-optic-lobe/full
-#    13.9%  em-zebrafish-fish2/full
+#    12.1%  em-zebrafish-CellMap-jrc-zf-cardiac-1/full_box1
 #    16.9%  em-celegans-funceworm-jrc-P3-E5-D1-N2/crop-001_ch0-jrc_P3_E5_D1_N2_trimmed_ali
 #    17.2%  em-celegans-funceworm-jrc-20250414/crop-001
 #    17.2%  em-mouse-MitoVerse-muller21-pancreas/crop-006_lowglucose_cell2
+#    18.3%  em-drosophila-flyem-yakuba-cns-z0422-17/full_box1
+#    21.7%  em-drosophila-CellMap-jrc-fly-larva-1/full_box1
+#    22.3%  em-celegans-mengwang-jrc-P3-E5-D1-N2-2/full_box1
 #    23.1%  em-mouse-MitoVerse-muller21-pancreas/crop-003_highglucose_cell3
 #    23.2%  em-mouse-MitoVerse-muller21-pancreas/crop-002_highglucose_cell2
 #    24.2%  em-mouse-MitoVerse-muller21-pancreas/crop-005_lowglucose_cell1
+#    24.2%  em-drosophila-flyem-hemibrain/full_box1
+#    24.5%  em-drosophila-CellMap-jrc-fly-mb-1a/full
 #    24.9%  em-mouse-MitoVerse-muller21-pancreas/crop-001_highglucose_cell1
-#    29.8%  em-drosophila-CellMap-jrc-fly-larva-1/full
-#    33.0%  em-drosophila-flyem-hemibrain/full
-#    34.3%  em-drosophila-CellMap-jrc-fly-mb-1a/full
-#    36.2%  em-mouse-CellMap-jrc-mus-sc-zp104a/full
-#    37.4%  em-drosophila-CellMap-jrc-fly-mb-z0419-20/full
-#    41.0%  em-zebrafish-CellMap-jrc-zf-cardiac-1/full
-#    48.6%  em-mouse-CellMap-jrc-mus-heart-1/full
-#    49.2%  em-mouse-CellMap-jrc-mus-guard-hair-follicle/full
+#    27.9%  em-mouse-CellMap-jrc-mus-sc-zp104a/full
+#    30.0%  em-drosophila-CellMap-jrc-fly-mb-z0419-20/full
+#    36.1%  em-mouse-CellMap-jrc-mus-pancreas-4/full
+#    38.3%  em-mouse-CellMap-jrc-mus-guard-hair-follicle/full
+#    38.7%  em-mouse-CellMap-jrc-mus-heart-1/full
+#    39.3%  em-drosophila-flyem-yakuba-z0521-31/full
+#    45.6%  em-mouse-CellMap-jrc-mus-cortex-4/full
+#    47.7%  em-mouse-CellMap-jrc-mus-hippocampus-1/full
+#    50.6%  em-mouse-CellMap-jrc-mus-liver-zon-1/full
+#    54.1%  em-mouse-CellMap-jrc-mus-skin-1/full
+#    55.5%  em-mouse-CellMap-jrc-mus-liver-zon-2/full
 #    56.0%  em-greenmonkey-CellMap-jrc-ccl81-covid-1/crop-001
-#    56.3%  em-mouse-CellMap-jrc-mus-cortex-4/full
-#    57.9%  em-mouse-CellMap-jrc-mus-hippocampus-1/full
 #    58.1%  em-drosophila-flyem-abg/full
-#    59.2%  em-celegans-mengwang-jrc-P3-E5-D1-N2-2/full
-#    64.3%  em-mouse-CellMap-jrc-mus-skin-1/full
-#    64.5%  em-drosophila-flyem-yakuba-cns-z0422-17/full
+#    61.2%  em-steinernema-funceworm-head-20251017/full
+#    63.9%  em-drosophila-CellMap-jrc-fly-fsb-1/full
+#    64.1%  em-unknown-hess-msem-sample68/full
+#    64.3%  em-celegans-funceworm-jrc-adult-d6a/full
 #    65.9%  em-mouse-CellMap-jrc-mus-heart-6/full
+#    66.8%  em-celegans-funceworm-mcnally-20241007/full
 #    67.4%  em-mouse-CellMap-jrc-mus-skin-2a/full
 #    69.6%  em-drosophila-flyem-z0721-04c/full
-#    70.4%  em-steinernema-funceworm-head-20251017/full
+#    70.2%  em-mouse-CellMap-jrc-mus-thymus-1/full
 #    70.8%  em-human-CellMap-jrc-ut21-1413-003/full
+#    70.8%  em-cuttlefish-reiser-mpi-s-dec-5a/full
 #    71.3%  em-mouse-CellMap-jrc-mus-granule-neurons-2/crop-001
 #    71.8%  em-drosophila-CellMap-jrc-fly-acc-calyx-1/full
-#    72.3%  em-drosophila-CellMap-jrc-fly-fsb-1/full
-#    73.4%  em-unknown-hess-msem-sample68/full
-#    73.4%  em-mouse-CellMap-jrc-mus-liver-zon-2/full
-#    73.8%  em-celegans-funceworm-jrc-adult-d6a/full
-#    74.2%  em-mouse-CellMap-jrc-mus-liver-zon-1/full
+#    72.1%  em-mouse-CellMap-jrc-mus-salivary-1/full
 #    74.7%  em-celegans-funceworm-mcnally-20240612/full
-#    76.2%  em-celegans-funceworm-mcnally-20241007/full
 #    76.3%  em-mouse-CellMap-jrc-mus-nacc-2/crop-001
-#    76.4%  em-cuttlefish-reiser-mpi-s-dec-5a/full
+#    77.3%  em-mouse-CellMap-jrc-mus-kidney-2/full
 #    77.3%  em-mouse-CellMap-jrc-ctl-id8-2/crop-001
 #    78.2%  em-mouse-CellMap-jrc-mus-pacinian-corpuscle/full
-#    79.0%  em-drosophila-fibsem-yakuba-neck/full
+#    78.6%  em-mouse-CellMap-jrc-mus-liver-3/full
+#    78.8%  em-mouse-CellMap-jrc-mus-kidney-3/full
 #    79.0%  em-drosophila-flyem-z1221-19/full
-#    79.4%  em-mouse-CellMap-jrc-mus-thymus-1/full
+#    79.4%  em-drosophila-flyem-z1221-05/full
+#    79.7%  em-mouse-CellMap-jrc-mus-kidney/full
+#    80.0%  em-drosophila-flyem-z0721-13/full
 #    80.8%  em-salamander-jrc-axolotl-heart/crop-002_nucleus005
 #    81.8%  em-zebrafinch-FFN-j0126-areaX/full
-#    82.4%  em-mouse-CellMap-jrc-mus-salivary-1/full
 #    82.6%  em-celegans-funceworm-jrc_HPF-TAOTO-ME-S2_6x6nm_RegAffine-flattened/crop-001
 #    82.8%  em-mouse-CellMap-jrc-mus-thymus-2a/full
 #    82.8%  em-mouse-CellMap-jrc-mus-liver-8/full
 #    83.6%  em-mouse-CellMap-jrc-mus-kidney-4/full
 #    84.3%  em-salamander-jrc-axolotl-heart/crop-003_nucleus006
 #    85.8%  em-cuttlefish-reiser-mpi-s1a/full
-#    86.4%  em-mouse-CellMap-jrc-mus-kidney-2/full
-#    86.4%  em-mouse-CellMap-jrc-mus-liver-3/full
-#    86.7%  em-mouse-CellMap-jrc-mus-kidney-3/full
 #    87.0%  em-mouse-CellMap-jrc-mus-heart-4/full
 #    87.2%  em-mouse-CellMap-jrc-mus-liver/full
-#    87.3%  em-drosophila-flyem-yakuba-z0521-31/full
-#    87.9%  em-drosophila-flyem-z0721-13/full
-#    87.9%  em-mouse-CellMap-jrc-mus-kidney/full
-#    88.2%  em-drosophila-flyem-z1221-05/full
+#    89.8%  em-drosophila-flyem-simulans-z0421-19/full
 #    90.1%  em-mouse-CellMap-jrc-mus-liver-2/full
 #    90.2%  em-mouse-CellMap-jrc-mus-cortex-2/full
 #    91.4%  em-human-CellMap-jrc-hum-airway-14953vc/full
@@ -233,8 +262,6 @@
 #    92.5%  em-mouse-CellMap-jrc-mus-duodenum-1a/full
 #    93.7%  em-salamander-jrc-axolotl-liver/crop-003_nucleus004
 #    94.9%  em-salamander-jrc-axolotl-liver/crop-002_nucleus003
-#    95.4%  em-drosophila-flyem-simulans-z0421-19/full
-#    96.4%  em-mouse-CellMap-jrc-mus-pancreas-4/full
 #
 # 7 volume(s) are too small to hold a 256-voxel patch at 8 nm
 # and were given a finer ladder (median coarsest rung 5.05 nm). Named below.
@@ -281,7 +308,7 @@ output_axes: lcxyz
 samples_per_epoch: 1000
 
 # ---------------------------------------------------------------------------
-# Volumes (270). Per-volume keys override the globals above.
+# Volumes (297). Per-volume keys override the globals above.
 # ---------------------------------------------------------------------------
 volumes:
 - name: em-celegans-funceworm-jrc-20250414/crop-001
@@ -295,9 +322,8 @@ volumes:
     - 4144
   - - 752
     - 7104
-  normalize_max: 148
-  normalize_min: 16
-  normalize_clip: false
+  normalize_max: 155
+  normalize_min: 0
 - name: em-celegans-funceworm-jrc-20250908/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-celegans-funceworm-jrc-20250908/crop-001.zarr
   image_key: raw
@@ -309,16 +335,14 @@ volumes:
     - 4148
   - - 1275
     - 3827
-  normalize_max: 173
-  normalize_min: 31
-  normalize_clip: false
+  normalize_max: 167
+  normalize_min: 0
 - name: em-celegans-funceworm-jrc-3fold-2/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-celegans-funceworm-jrc-3fold-2/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 175
-  normalize_min: 44
-  normalize_clip: false
+  normalize_max: 184
+  normalize_min: 10
 - name: em-celegans-funceworm-jrc-P3-E5-D1-N2/crop-001_ch0-jrc_P3_E5_D1_N2_trimmed_align_v2
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-celegans-funceworm-jrc-P3-E5-D1-N2/crop-001_ch0-jrc_P3_E5_D1_N2_trimmed_align_v2.zarr
   image_key: raw
@@ -330,9 +354,8 @@ volumes:
     - 6304
   - - 1792
     - 6720
-  normalize_max: 173
-  normalize_min: 44
-  normalize_clip: false
+  normalize_max: 170
+  normalize_min: 28
 - name: em-celegans-funceworm-jrc-comma-1/crop-001_ch0-jrc_c-elegans-comma-1-two-channel_c0
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-celegans-funceworm-jrc-comma-1/crop-001_ch0-jrc_c-elegans-comma-1-two-channel_c0.zarr
   image_key: raw
@@ -344,9 +367,8 @@ volumes:
     - 4752
   - - 848
     - 6688
-  normalize_max: 33374
-  normalize_min: 32059
-  normalize_clip: false
+  normalize_max: 33512
+  normalize_min: 31676
 - name: em-celegans-funceworm-jrc_HPF-TAOTO-ME-S2_6x6nm_RegAffine-flattened/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-celegans-funceworm-jrc_HPF-TAOTO-ME-S2_6x6nm_RegAffine-flattened/crop-001.zarr
   image_key: raw
@@ -358,44 +380,38 @@ volumes:
     - 9200
   - - 0
     - 4876
-  normalize_max: -185
-  normalize_min: -1378
-  normalize_clip: false
+  normalize_max: 300
+  normalize_min: -1577
 - name: em-drosophila-CellMap-jrc-fly-vnc-1/crop-001_fullvol_tissuecrop
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-CellMap-jrc-fly-vnc-1/crop-001_fullvol_tissuecrop.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 219
-  normalize_min: 170
-  normalize_clip: false
+  normalize_max: 225
+  normalize_min: 163
 - name: em-drosophila-FANC-vnc/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-FANC-vnc/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 247
-  normalize_min: 4
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-FANC-vnc/crop-002
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-FANC-vnc/crop-002.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 247
-  normalize_min: 4
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-MitoVerse-kunduri22-spermatocyte/crop-001_test01
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-MitoVerse-kunduri22-spermatocyte/crop-001_test01.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 227
-  normalize_min: 115
-  normalize_clip: false
+  normalize_max: 233
+  normalize_min: 88
 - name: em-drosophila-MitoVerse-kunduri22-spermatocyte/crop-002_train01
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-MitoVerse-kunduri22-spermatocyte/crop-002_train01.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 228
-  normalize_min: 125
-  normalize_clip: false
+  normalize_max: 234
+  normalize_min: 100
 - name: em-drosophila-MitoVerse-kunduri22-spermatocyte/crop-003_train02
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-MitoVerse-kunduri22-spermatocyte/crop-003_train02.zarr
   image_key: raw
@@ -404,58 +420,50 @@ volumes:
   - - 6.4
     - 6.4
     - 6.4
-  normalize_max: 229
-  normalize_min: 119
-  normalize_clip: false
+  normalize_max: 235
+  normalize_min: 90
 - name: em-drosophila-banc/crop-001_centralbrain
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-banc/crop-001_centralbrain.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 245
-  normalize_min: 8
-  normalize_clip: false
+  normalize_max: 254
+  normalize_min: 0
 - name: em-drosophila-banc/crop-002_centralbrain
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-banc/crop-002_centralbrain.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 245
-  normalize_min: 7
-  normalize_clip: false
+  normalize_max: 254
+  normalize_min: 0
 - name: em-drosophila-banc/crop-003_vnc
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-banc/crop-003_vnc.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 246
-  normalize_min: 6
-  normalize_clip: false
+  normalize_max: 254
+  normalize_min: 0
 - name: em-drosophila-banc/crop-004_vnc
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-banc/crop-004_vnc.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 246
+  normalize_max: 254
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-019_box018
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-019_box018.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 1
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-031_box030
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-031_box030.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 252
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-037_box036
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-037_box036.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
+  normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-039_box038
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-039_box038.zarr
   image_key: raw
@@ -464,142 +472,122 @@ volumes:
   - - 6.4
     - 6.4
     - 6.4
-  normalize_max: 253
-  normalize_min: 1
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-044_box043
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-044_box043.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
-  normalize_min: 1
-  normalize_clip: false
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-066_box065
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-066_box065.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 252
-  normalize_min: 3
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-067_box066
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-067_box066.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-068_box067
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-068_box067.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 252
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-069_box068
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-069_box068.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 3
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-074_box073
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-074_box073.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-075_box074
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-075_box074.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 252
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-083_box082
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-083_box082.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
+  normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-090_box089
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-090_box089.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-094_box093
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-094_box093.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 252
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-095_box094
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-095_box094.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
-  normalize_min: 1
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-096_box095
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-096_box095.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
+  normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-099_box098
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-099_box098.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 3
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-100_box099
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-100_box099.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-101_box100
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-101_box100.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
-  normalize_min: 2
-  normalize_clip: false
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-111_box110
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-111_box110.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-113_box112
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-113_box112.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-118_box117
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-118_box117.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-121_box120
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-121_box120.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-122_box121
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-122_box121.zarr
   image_key: raw
@@ -608,163 +596,140 @@ volumes:
   - - 6.4
     - 6.4
     - 6.4
-  normalize_max: 253
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-130_box129
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-130_box129.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-131_box130
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-131_box130.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-140_box139
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-140_box139.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-141_box140
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-141_box140.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-150_box149
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-150_box149.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
+  normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-162_box161
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-162_box161.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
-  normalize_min: 6
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-164_box163
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-164_box163.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
+  normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-166_box165
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-166_box165.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
-  normalize_min: 3
-  normalize_clip: false
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-170_box169
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-170_box169.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-172_box171
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-172_box171.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 6
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-173_box172
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-173_box172.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-174_box173
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-174_box173.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
-  normalize_min: 1
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-175_box174
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-175_box174.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-176_box175
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-176_box175.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-180_box179
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-180_box179.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
-  normalize_min: 5
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-181_box180
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-181_box180.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 252
-  normalize_min: 5
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-182_box181
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-182_box181.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
-  normalize_min: 3
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-184_box183
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-184_box183.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
-  normalize_min: 4
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-193_box192
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-193_box192.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 252
-  normalize_min: 3
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-194_box193
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-194_box193.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
-  normalize_min: 1
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-195_box194
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-195_box194.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 252
-  normalize_min: 3
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-drosophila-flyem-cns-mito-gt-v6/crop-196_box195
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-drosophila-flyem-cns-mito-gt-v6/crop-196_box195.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 252
-  normalize_min: 4
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-greenmonkey-CellMap-jrc-ccl81-covid-1/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-greenmonkey-CellMap-jrc-ccl81-covid-1/crop-001.zarr
   image_key: raw
@@ -776,9 +741,8 @@ volumes:
     - 4368
   - - 1632
     - 6120
-  normalize_max: 5721
-  normalize_min: 1743
-  normalize_clip: false
+  normalize_max: 6583
+  normalize_min: 1319
 - name: em-greenmonkey-CellMap-jrc-cos7-11/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-greenmonkey-CellMap-jrc-cos7-11/crop-001.zarr
   image_key: raw
@@ -790,23 +754,20 @@ volumes:
     - 480
   - - 0
     - 1152
-  normalize_max: 282
-  normalize_min: 169
-  normalize_clip: false
+  normalize_max: 291
+  normalize_min: 143
 - name: em-greenmonkey-CellMap-jrc-cos7-1a/crop-001_fullvol_tissuecrop
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-greenmonkey-CellMap-jrc-cos7-1a/crop-001_fullvol_tissuecrop.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 183
-  normalize_min: 85
-  normalize_clip: false
+  normalize_max: 208
+  normalize_min: 79
 - name: em-greenmonkey-CellMap-jrc-cos7-1b/crop-001_fullvol_tissuecrop
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-greenmonkey-CellMap-jrc-cos7-1b/crop-001_fullvol_tissuecrop.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 183
-  normalize_min: 87
-  normalize_clip: false
+  normalize_max: 209
+  normalize_min: 78
 - name: em-human-CellMap-aic-desmosome-3/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-aic-desmosome-3/crop-001.zarr
   image_key: raw
@@ -815,107 +776,92 @@ volumes:
   - - 5.05
     - 5.05
     - 5.05
-  normalize_max: 64736
-  normalize_min: 62814
-  normalize_clip: false
+  normalize_max: 65091
+  normalize_min: 62541
 - name: em-human-CellMap-jrc-hela-1/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-hela-1/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 152
-  normalize_min: 113
-  normalize_clip: false
+  normalize_max: 155
+  normalize_min: 98
 - name: em-human-CellMap-jrc-hela-2/crop-001_fullvol_tissuecrop
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-hela-2/crop-001_fullvol_tissuecrop.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 193
-  normalize_min: 120
-  normalize_clip: false
+  normalize_max: 200
+  normalize_min: 98
 - name: em-human-CellMap-jrc-hela-21/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-hela-21/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 203
-  normalize_min: 101
-  normalize_clip: false
+  normalize_max: 208
+  normalize_min: 79
 - name: em-human-CellMap-jrc-hela-22/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-hela-22/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 203
-  normalize_min: 130
-  normalize_clip: false
+  normalize_max: 238
+  normalize_min: 119
 - name: em-human-CellMap-jrc-hela-22/crop-002
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-hela-22/crop-002.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 205
-  normalize_min: 127
-  normalize_clip: false
+  normalize_max: 225
+  normalize_min: 119
 - name: em-human-CellMap-jrc-hela-3/crop-001_fullvol_tissuecrop
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-hela-3/crop-001_fullvol_tissuecrop.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
-  normalize_min: 22
-  normalize_clip: false
+  normalize_min: 0
 - name: em-human-CellMap-jrc-hela-bfa/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-hela-bfa/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 190
-  normalize_min: 162
-  normalize_clip: false
+  normalize_max: 194
+  normalize_min: 155
 - name: em-human-CellMap-jrc-hela-h89-1/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-hela-h89-1/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1963
-  normalize_min: 1445
-  normalize_clip: false
+  normalize_max: 2094
+  normalize_min: 1352
 - name: em-human-CellMap-jrc-hela-h89-1/crop-002
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-hela-h89-1/crop-002.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 2045
-  normalize_min: 1422
-  normalize_clip: false
+  normalize_max: 2141
+  normalize_min: 1286
 - name: em-human-CellMap-jrc-hela-h89-2/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-hela-h89-2/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 2065
-  normalize_min: 1602
-  normalize_clip: false
+  normalize_max: 2171
+  normalize_min: 1491
 - name: em-human-CellMap-jrc-hela-nz-1/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-hela-nz-1/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: -373
-  normalize_min: -2297
-  normalize_clip: false
+  normalize_max: 1225
+  normalize_min: -2856
 - name: em-human-CellMap-jrc-hela-nz-1/crop-002
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-hela-nz-1/crop-002.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: -470
-  normalize_min: -2211
-  normalize_clip: false
+  normalize_max: -131
+  normalize_min: -2524
 - name: em-human-CellMap-jrc-jurkat-1/crop-001_fullvol_tissuecrop
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-jurkat-1/crop-001_fullvol_tissuecrop.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 255
-  normalize_min: 217
-  normalize_clip: false
+  normalize_max: 238
+  normalize_min: 212
 - name: em-human-CellMap-jrc-macrophage-2/crop-001_fullvol_tissuecrop
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-macrophage-2/crop-001_fullvol_tissuecrop.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 249
-  normalize_min: 216
-  normalize_clip: false
+  normalize_min: 210
 - name: em-human-CellMap-jrc-sum159-1/crop-001_fullvol_tissuecrop
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-sum159-1/crop-001_fullvol_tissuecrop.zarr
   image_key: raw
@@ -927,142 +873,122 @@ volumes:
     - 1536
   - - 1344
     - 3648
-  normalize_max: 217
-  normalize_min: 187
-  normalize_clip: false
+  normalize_max: 221
+  normalize_min: 180
 - name: em-human-CellMap-jrc-sum159-4/crop-001_fullvol_tissuecrop
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-CellMap-jrc-sum159-4/crop-001_fullvol_tissuecrop.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 188
-  normalize_min: 161
-  normalize_clip: false
+  normalize_max: 191
+  normalize_min: 153
 - name: em-human-H01-cortex/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-H01-cortex/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-human-MitoVerse-wei20-temporal-lobe/crop-001_mitoEM-H
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-MitoVerse-wei20-temporal-lobe/crop-001_mitoEM-H.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 226
-  normalize_min: 23
-  normalize_clip: false
+  normalize_max: 252
+  normalize_min: 7
 - name: em-human-PyTC-axonem-cortex/crop-001_z0000_y0000_x0000
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-PyTC-axonem-cortex/crop-001_z0000_y0000_x0000.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 226
-  normalize_min: 33
-  normalize_clip: false
+  normalize_max: 238
+  normalize_min: 13
 - name: em-human-PyTC-axonem-cortex/crop-002_z0000_y0000_x3584
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-PyTC-axonem-cortex/crop-002_z0000_y0000_x3584.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 229
-  normalize_min: 29
-  normalize_clip: false
+  normalize_max: 254
+  normalize_min: 10
 - name: em-human-PyTC-axonem-cortex/crop-003_z0000_y3584_x0000
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-PyTC-axonem-cortex/crop-003_z0000_y3584_x0000.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 225
-  normalize_min: 27
-  normalize_clip: false
+  normalize_max: 237
+  normalize_min: 8
 - name: em-human-PyTC-axonem-cortex/crop-004_z0000_y3584_x3584
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-PyTC-axonem-cortex/crop-004_z0000_y3584_x3584.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 226
-  normalize_min: 27
-  normalize_clip: false
+  normalize_max: 243
+  normalize_min: 8
 - name: em-human-PyTC-axonem-cortex/crop-005_z0475_y1792_x1792
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-PyTC-axonem-cortex/crop-005_z0475_y1792_x1792.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 225
-  normalize_min: 18
-  normalize_clip: false
+  normalize_max: 238
+  normalize_min: 6
 - name: em-human-PyTC-axonem-cortex/crop-006_z0950_y0000_x0000
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-PyTC-axonem-cortex/crop-006_z0950_y0000_x0000.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 224
-  normalize_min: 0
-  normalize_clip: false
+  normalize_max: 236
+  normalize_min: 8
 - name: em-human-PyTC-axonem-cortex/crop-007_z0950_y0000_x3584
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-PyTC-axonem-cortex/crop-007_z0950_y0000_x3584.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 225
-  normalize_min: 0
-  normalize_clip: false
+  normalize_max: 240
+  normalize_min: 9
 - name: em-human-PyTC-axonem-cortex/crop-008_z0950_y3584_x0000
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-PyTC-axonem-cortex/crop-008_z0950_y3584_x0000.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 224
-  normalize_min: 0
-  normalize_clip: false
+  normalize_max: 238
+  normalize_min: 6
 - name: em-human-PyTC-axonem-cortex/crop-009_z0950_y3584_x3584
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-human-PyTC-axonem-cortex/crop-009_z0950_y3584_x3584.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 224
-  normalize_min: 0
-  normalize_clip: false
+  normalize_max: 237
+  normalize_min: 7
 - name: em-hydra-zhang2025/crop-001_x106212_y65861_z226
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-hydra-zhang2025/crop-001_x106212_y65861_z226.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 252
-  normalize_min: 48
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-hydra-zhang2025/crop-002_x33815_y86408_z95
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-hydra-zhang2025/crop-002_x33815_y86408_z95.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 0
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 1
 - name: em-hydra-zhang2025/crop-003_x114198_y54198_z0
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-hydra-zhang2025/crop-003_x114198_y54198_z0.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 252
-  normalize_min: 35
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-mosquito-bao2025-antennallobe/crop-001_x114369_y44359_z3105
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mosquito-bao2025-antennallobe/crop-001_x114369_y44359_z3105.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 251
+  normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-mosquito-bao2025-antennallobe/crop-002_x38748_y49136_z3426
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mosquito-bao2025-antennallobe/crop-002_x38748_y49136_z3426.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 250
+  normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-mouse-CellMap-jrc-choroid-plexus-2/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-choroid-plexus-2/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 187
-  normalize_min: 155
-  normalize_clip: false
+  normalize_max: 190
+  normalize_min: 146
 - name: em-mouse-CellMap-jrc-ctl-id8-1/crop-001_fullvol_tissuecrop
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-ctl-id8-1/crop-001_fullvol_tissuecrop.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 214
-  normalize_min: 184
-  normalize_clip: false
+  normalize_max: 217
+  normalize_min: 178
 - name: em-mouse-CellMap-jrc-ctl-id8-2/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-ctl-id8-2/crop-001.zarr
   image_key: raw
@@ -1074,23 +1000,20 @@ volumes:
     - 1072
   - - 336
     - 7868
-  normalize_max: 183
-  normalize_min: 150
-  normalize_clip: false
+  normalize_max: 188
+  normalize_min: 136
 - name: em-mouse-CellMap-jrc-ctl-id8-3/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-ctl-id8-3/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 218
-  normalize_min: 101
-  normalize_clip: false
+  normalize_max: 229
+  normalize_min: 64
 - name: em-mouse-CellMap-jrc-ctl-id8-4/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-ctl-id8-4/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 168
-  normalize_min: 105
-  normalize_clip: false
+  normalize_max: 170
+  normalize_min: 89
 - name: em-mouse-CellMap-jrc-ctl-id8-5/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-ctl-id8-5/crop-001.zarr
   image_key: raw
@@ -1102,37 +1025,32 @@ volumes:
     - 4865
   - - 24
     - 1088
-  normalize_max: 206
-  normalize_min: 160
-  normalize_clip: false
+  normalize_max: 207
+  normalize_min: 151
 - name: em-mouse-CellMap-jrc-mus-cortex-3/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-cortex-3/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 1210
-  normalize_min: 912
-  normalize_clip: false
+  normalize_max: 1272
+  normalize_min: 885
 - name: em-mouse-CellMap-jrc-mus-epididymis-1/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-epididymis-1/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 169
-  normalize_min: 34
-  normalize_clip: false
+  normalize_max: 174
+  normalize_min: 0
 - name: em-mouse-CellMap-jrc-mus-epididymis-2/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-epididymis-2/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 163
-  normalize_min: 13
-  normalize_clip: false
+  normalize_max: 170
+  normalize_min: 0
 - name: em-mouse-CellMap-jrc-mus-granule-neurons-1/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-granule-neurons-1/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 7729
-  normalize_min: 4471
-  normalize_clip: false
+  normalize_max: 8294
+  normalize_min: 4307
 - name: em-mouse-CellMap-jrc-mus-granule-neurons-2/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-granule-neurons-2/crop-001.zarr
   image_key: raw
@@ -1144,65 +1062,56 @@ volumes:
     - 528
   - - 0
     - 3946
-  normalize_max: 10637
-  normalize_min: 6820
-  normalize_clip: false
+  normalize_max: 12391
+  normalize_min: 6720
 - name: em-mouse-CellMap-jrc-mus-granule-neurons-3/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-granule-neurons-3/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 10201
-  normalize_min: 6680
-  normalize_clip: false
+  normalize_max: 10753
+  normalize_min: 6412
 - name: em-mouse-CellMap-jrc-mus-kidney-glomerulus-2/crop-001_fullvol_tissuecrop
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-kidney-glomerulus-2/crop-001_fullvol_tissuecrop.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 162
-  normalize_min: 38
-  normalize_clip: false
+  normalize_max: 170
+  normalize_min: 18
 - name: em-mouse-CellMap-jrc-mus-liver-7/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-liver-7/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 217
-  normalize_min: 52
-  normalize_clip: false
+  normalize_max: 226
+  normalize_min: 13
 - name: em-mouse-CellMap-jrc-mus-liver-7/crop-002
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-liver-7/crop-002.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 236
-  normalize_min: 46
-  normalize_clip: false
+  normalize_max: 243
+  normalize_min: 11
 - name: em-mouse-CellMap-jrc-mus-meissner-corpuscle-1/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-meissner-corpuscle-1/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 243
-  normalize_min: 27
-  normalize_clip: false
+  normalize_max: 254
+  normalize_min: 13
 - name: em-mouse-CellMap-jrc-mus-meissner-corpuscle-1/crop-002
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-meissner-corpuscle-1/crop-002.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 243
-  normalize_min: 28
-  normalize_clip: false
+  normalize_max: 254
+  normalize_min: 16
 - name: em-mouse-CellMap-jrc-mus-meissner-corpuscle-1/crop-003
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-meissner-corpuscle-1/crop-003.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 242
-  normalize_min: 23
-  normalize_clip: false
+  normalize_max: 254
+  normalize_min: 14
 - name: em-mouse-CellMap-jrc-mus-nacc-1/crop-001_fullvol
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-nacc-1/crop-001_fullvol.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 235
-  normalize_min: 75
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 21
 - name: em-mouse-CellMap-jrc-mus-nacc-2/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-nacc-2/crop-001.zarr
   image_key: raw
@@ -1218,79 +1127,68 @@ volumes:
   - - 3.625
     - 3.625
     - 3.625
-  normalize_max: 1293
-  normalize_min: 1137
-  normalize_clip: false
+  normalize_max: 1323
+  normalize_min: 1125
 - name: em-mouse-CellMap-jrc-mus-nacc-3/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-nacc-3/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 83
-  normalize_min: 41
-  normalize_clip: false
+  normalize_max: 99
+  normalize_min: 38
 - name: em-mouse-CellMap-jrc-mus-nacc-4/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-nacc-4/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 70
-  normalize_min: 40
-  normalize_clip: false
+  normalize_max: 83
+  normalize_min: 39
 - name: em-mouse-CellMap-jrc-mus-pancreas-1/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-pancreas-1/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 12741
-  normalize_min: 6291
-  normalize_clip: false
+  normalize_max: 14249
+  normalize_min: 5665
 - name: em-mouse-CellMap-jrc-mus-pancreas-2/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-pancreas-2/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 255
-  normalize_min: 235
-  normalize_clip: false
+  normalize_max: 247
+  normalize_min: 233
 - name: em-mouse-CellMap-jrc-mus-pancreas-3/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-pancreas-3/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 924
-  normalize_min: 713
-  normalize_clip: false
+  normalize_max: 993
+  normalize_min: 688
 - name: em-mouse-CellMap-jrc-mus-sc-zp105a/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-CellMap-jrc-mus-sc-zp105a/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 226
-  normalize_min: 188
-  normalize_clip: false
+  normalize_max: 228
+  normalize_min: 180
 - name: em-mouse-Jiefu-cerebellum/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-Jiefu-cerebellum/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 184
-  normalize_min: 61
-  normalize_clip: false
+  normalize_max: 192
+  normalize_min: 39
 - name: em-mouse-Kasthuri15-ac3ac4-cortex/crop-001_ac3_100slices
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-Kasthuri15-ac3ac4-cortex/crop-001_ac3_100slices.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 245
-  normalize_min: 23
-  normalize_clip: false
+  normalize_max: 252
+  normalize_min: 1
 - name: em-mouse-Kasthuri15-ac3ac4-cortex/crop-002_ac4_100slices
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-Kasthuri15-ac3ac4-cortex/crop-002_ac4_100slices.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 234
-  normalize_min: 7
-  normalize_clip: false
+  normalize_max: 249
+  normalize_min: 0
 - name: em-mouse-MICrONS-minnie65/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MICrONS-minnie65/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 157
-  normalize_min: 111
-  normalize_clip: false
+  normalize_max: 164
+  normalize_min: 42
 - name: em-mouse-MitoVerse-conrad23-salivary-gland/crop-001_salivary_gland
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-conrad23-salivary-gland/crop-001_salivary_gland.zarr
   image_key: raw
@@ -1302,65 +1200,56 @@ volumes:
     - 672
   - - 252
     - 812
-  normalize_max: 198
-  normalize_min: 66
-  normalize_clip: false
+  normalize_max: 207
+  normalize_min: 45
 - name: em-mouse-MitoVerse-han24-cerebellum-mossy-fiber/crop-001_neg0
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-han24-cerebellum-mossy-fiber/crop-001_neg0.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 231
-  normalize_min: 13
-  normalize_clip: false
+  normalize_max: 243
+  normalize_min: 1
 - name: em-mouse-MitoVerse-han24-cerebellum-mossy-fiber/crop-002_neg1
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-han24-cerebellum-mossy-fiber/crop-002_neg1.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 233
-  normalize_min: 9
-  normalize_clip: false
+  normalize_max: 244
+  normalize_min: 0
 - name: em-mouse-MitoVerse-han24-cerebellum-mossy-fiber/crop-003_pos0
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-han24-cerebellum-mossy-fiber/crop-003_pos0.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 230
-  normalize_min: 14
-  normalize_clip: false
+  normalize_max: 243
+  normalize_min: 1
 - name: em-mouse-MitoVerse-han24-cerebellum-mossy-fiber/crop-004_pos1
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-han24-cerebellum-mossy-fiber/crop-004_pos1.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 232
-  normalize_min: 10
-  normalize_clip: false
+  normalize_max: 244
+  normalize_min: 0
 - name: em-mouse-MitoVerse-han24-cerebellum-mossy-fiber/crop-005_pos2
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-han24-cerebellum-mossy-fiber/crop-005_pos2.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 232
-  normalize_min: 11
-  normalize_clip: false
+  normalize_max: 246
+  normalize_min: 0
 - name: em-mouse-MitoVerse-jiang25-brainstem/crop-001_vol0
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-jiang25-brainstem/crop-001_vol0.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 220
-  normalize_min: 14
-  normalize_clip: false
+  normalize_max: 249
+  normalize_min: 0
 - name: em-mouse-MitoVerse-jiang25-brainstem/crop-002_vol1
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-jiang25-brainstem/crop-002_vol1.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 228
-  normalize_min: 26
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-mouse-MitoVerse-jiang25-brainstem/crop-003_vol2
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-jiang25-brainstem/crop-003_vol2.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 219
-  normalize_min: 14
-  normalize_clip: false
+  normalize_max: 252
+  normalize_min: 0
 - name: em-mouse-MitoVerse-muller21-pancreas/crop-001_highglucose_cell1
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-muller21-pancreas/crop-001_highglucose_cell1.zarr
   image_key: raw
@@ -1372,9 +1261,8 @@ volumes:
     - 543
   - - 127
     - 961
-  normalize_max: 226
+  normalize_max: 248
   normalize_min: 44
-  normalize_clip: false
 - name: em-mouse-MitoVerse-muller21-pancreas/crop-002_highglucose_cell2
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-muller21-pancreas/crop-002_highglucose_cell2.zarr
   image_key: raw
@@ -1386,9 +1274,8 @@ volumes:
     - 478
   - - 0
     - 835
-  normalize_max: 226
+  normalize_max: 248
   normalize_min: 44
-  normalize_clip: false
 - name: em-mouse-MitoVerse-muller21-pancreas/crop-003_highglucose_cell3
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-muller21-pancreas/crop-003_highglucose_cell3.zarr
   image_key: raw
@@ -1400,9 +1287,8 @@ volumes:
     - 576
   - - 159
     - 703
-  normalize_max: 220
+  normalize_max: 248
   normalize_min: 44
-  normalize_clip: false
 - name: em-mouse-MitoVerse-muller21-pancreas/crop-005_lowglucose_cell1
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-muller21-pancreas/crop-005_lowglucose_cell1.zarr
   image_key: raw
@@ -1414,9 +1300,8 @@ volumes:
     - 542
   - - 159
     - 670
-  normalize_max: 218
-  normalize_min: 121
-  normalize_clip: false
+  normalize_max: 242
+  normalize_min: 109
 - name: em-mouse-MitoVerse-muller21-pancreas/crop-006_lowglucose_cell2
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-muller21-pancreas/crop-006_lowglucose_cell2.zarr
   image_key: raw
@@ -1428,128 +1313,110 @@ volumes:
     - 478
   - - 127
     - 705
-  normalize_max: 191
-  normalize_min: 21
-  normalize_clip: false
+  normalize_max: 233
+  normalize_min: 1
 - name: em-mouse-MitoVerse-turner22-pinky-v1/crop-006_pinky_stitched_vol19-vol34
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-turner22-pinky-v1/crop-006_pinky_stitched_vol19-vol34.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 1
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-mouse-MitoVerse-turner22-pinky-v1/crop-007_pinky_stitched_vol19-vol34_realigned
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-turner22-pinky-v1/crop-007_pinky_stitched_vol19-vol34_realigned.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
-  normalize_min: 1
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-mouse-MitoVerse-turner22-pinky-v1/crop-008_pinky_stitched_vol40-vol41
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-turner22-pinky-v1/crop-008_pinky_stitched_vol40-vol41.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 1
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-mouse-MitoVerse-turner22-pinky-v1/crop-013_pinky_vol401
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-turner22-pinky-v1/crop-013_pinky_vol401.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 250
+  normalize_max: 255
   normalize_min: 1
-  normalize_clip: false
 - name: em-mouse-MitoVerse-turner22-pinky-v1/crop-014_pinky_vol501
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-turner22-pinky-v1/crop-014_pinky_vol501.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 253
-  normalize_min: 10
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 1
 - name: em-mouse-MitoVerse-turner22-pinky-v1/crop-015_pinky_vol502
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-turner22-pinky-v1/crop-015_pinky_vol502.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 249
+  normalize_max: 255
   normalize_min: 1
-  normalize_clip: false
 - name: em-mouse-MitoVerse-turner22-pinky-v1/crop-016_pinky_vol503
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-MitoVerse-turner22-pinky-v1/crop-016_pinky_vol503.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 249
-  normalize_min: 4
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 1
 - name: em-mouse-PYR-ca3-hippocampus/crop-001_ca3
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-PYR-ca3-hippocampus/crop-001_ca3.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 228
-  normalize_min: 0
-  normalize_clip: false
+  normalize_max: 241
+  normalize_min: 1
 - name: em-mouse-PYR-ca3-hippocampus/crop-002_ca3
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-PYR-ca3-hippocampus/crop-002_ca3.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 227
+  normalize_max: 240
   normalize_min: 0
-  normalize_clip: false
 - name: em-mouse-PYR-ca3-hippocampus/crop-003_ca3
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-PYR-ca3-hippocampus/crop-003_ca3.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 227
-  normalize_min: 0
-  normalize_clip: false
+  normalize_max: 241
+  normalize_min: 1
 - name: em-mouse-PyTC-axonem-cortex/crop-001_z0000_y3584_x0000
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-PyTC-axonem-cortex/crop-001_z0000_y3584_x0000.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-mouse-PyTC-axonem-cortex/crop-002_z0350_y1792_x1792
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-PyTC-axonem-cortex/crop-002_z0350_y1792_x1792.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 254
+  normalize_max: 255
   normalize_min: 0
-  normalize_clip: false
 - name: em-mouse-PyTC-axonem-cortex/crop-003_z0700_y0000_x0000
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-PyTC-axonem-cortex/crop-003_z0700_y0000_x0000.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 238
+  normalize_max: 251
   normalize_min: 0
-  normalize_clip: false
 - name: em-mouse-PyTC-axonem-cortex/crop-004_z0700_y0000_x3584
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-PyTC-axonem-cortex/crop-004_z0700_y0000_x3584.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 237
+  normalize_max: 250
   normalize_min: 0
-  normalize_clip: false
 - name: em-mouse-PyTC-axonem-cortex/crop-005_z0700_y3584_x0000
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-PyTC-axonem-cortex/crop-005_z0700_y3584_x0000.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 239
+  normalize_max: 252
   normalize_min: 0
-  normalize_clip: false
 - name: em-mouse-PyTC-axonem-cortex/crop-006_z0700_y3584_x3584
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-mouse-PyTC-axonem-cortex/crop-006_z0700_y3584_x3584.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 236
+  normalize_max: 251
   normalize_min: 0
-  normalize_clip: false
 - name: em-rat-MitoVerse-wei20-visual-cortex/crop-001_mitoEM-R
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-rat-MitoVerse-wei20-visual-cortex/crop-001_mitoEM-R.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 239
-  normalize_min: 11
-  normalize_clip: false
+  normalize_max: 250
+  normalize_min: 3
 - name: em-rat-lucchi-hippocampus/crop-001_train
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-rat-lucchi-hippocampus/crop-001_train.zarr
   image_key: raw
@@ -1558,9 +1425,8 @@ volumes:
   - - 2.578125
     - 2.578125
     - 2.578125
-  normalize_max: 196
-  normalize_min: 80
-  normalize_clip: false
+  normalize_max: 205
+  normalize_min: 69
 - name: em-rat-lucchi-hippocampus/crop-002_test
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-rat-lucchi-hippocampus/crop-002_test.zarr
   image_key: raw
@@ -1569,23 +1435,20 @@ volumes:
   - - 2.578125
     - 2.578125
     - 2.578125
-  normalize_max: 196
-  normalize_min: 78
-  normalize_clip: false
+  normalize_max: 204
+  normalize_min: 66
 - name: em-salamander-jrc-amphiuma-liver/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-salamander-jrc-amphiuma-liver/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 190
-  normalize_min: 61
-  normalize_clip: false
+  normalize_max: 197
+  normalize_min: 43
 - name: em-salamander-jrc-axolotl-heart/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-salamander-jrc-axolotl-heart/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 177
-  normalize_min: 57
-  normalize_clip: false
+  normalize_max: 184
+  normalize_min: 31
 - name: em-salamander-jrc-axolotl-heart/crop-002_nucleus005
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-salamander-jrc-axolotl-heart/crop-002_nucleus005.zarr
   image_key: raw
@@ -1597,9 +1460,8 @@ volumes:
     - 4889
   - - 0
     - 10244
-  normalize_max: 168
-  normalize_min: 28
-  normalize_clip: false
+  normalize_max: 176
+  normalize_min: 3
 - name: em-salamander-jrc-axolotl-heart/crop-003_nucleus006
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-salamander-jrc-axolotl-heart/crop-003_nucleus006.zarr
   image_key: raw
@@ -1611,16 +1473,14 @@ volumes:
     - 4560
   - - 0
     - 5085
-  normalize_max: 181
-  normalize_min: 70
-  normalize_clip: false
+  normalize_max: 188
+  normalize_min: 47
 - name: em-salamander-jrc-axolotl-liver/crop-001
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-salamander-jrc-axolotl-liver/crop-001.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 186
-  normalize_min: 45
-  normalize_clip: false
+  normalize_max: 193
+  normalize_min: 21
 - name: em-salamander-jrc-axolotl-liver/crop-002_nucleus003
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-salamander-jrc-axolotl-liver/crop-002_nucleus003.zarr
   image_key: raw
@@ -1632,9 +1492,8 @@ volumes:
     - 4724
   - - 0
     - 9860
-  normalize_max: 181
-  normalize_min: 57
-  normalize_clip: false
+  normalize_max: 187
+  normalize_min: 35
 - name: em-salamander-jrc-axolotl-liver/crop-003_nucleus004
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-salamander-jrc-axolotl-liver/crop-003_nucleus004.zarr
   image_key: raw
@@ -1646,128 +1505,154 @@ volumes:
     - 3436
   - - 0
     - 4492
-  normalize_max: 175
-  normalize_min: 40
-  normalize_clip: false
+  normalize_max: 181
+  normalize_min: 11
 - name: em-zebrafish-fish1/crop-001_x27648_y32963_z3143
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-001_x27648_y32963_z3143.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 249
-  normalize_min: 7
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-zebrafish-fish1/crop-002_x58228_y25201_z3904
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-002_x58228_y25201_z3904.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 247
-  normalize_min: 1
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-zebrafish-fish1/crop-003_x98895_y29905_z4127
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-003_x98895_y29905_z4127.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 249
-  normalize_min: 4
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-zebrafish-fish1/crop-004_gt-box-8nm_x59517_y30379_z2000
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-004_gt-box-8nm_x59517_y30379_z2000.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 232
-  normalize_min: 16
-  normalize_clip: false
+  normalize_max: 244
+  normalize_min: 6
 - name: em-zebrafish-fish1/crop-005_gt-em-8nm_x74367_y33700_z2000
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-005_gt-em-8nm_x74367_y33700_z2000.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 236
-  normalize_min: 15
-  normalize_clip: false
+  normalize_max: 247
+  normalize_min: 6
 - name: em-zebrafish-fish1/crop-006_gt-em-roi14_x71500_y45000_z2000
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-006_gt-em-roi14_x71500_y45000_z2000.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 227
-  normalize_min: 19
-  normalize_clip: false
+  normalize_max: 240
+  normalize_min: 7
 - name: em-zebrafish-fish1/crop-007_gt-em-roi16_x88500_y45000_z2000
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-007_gt-em-roi16_x88500_y45000_z2000.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 223
-  normalize_min: 18
-  normalize_clip: false
+  normalize_max: 237
+  normalize_min: 6
 - name: em-zebrafish-fish1/crop-008_gt-em_x61364_y37130_z2000
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-008_gt-em_x61364_y37130_z2000.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 229
-  normalize_min: 18
-  normalize_clip: false
+  normalize_max: 242
+  normalize_min: 6
 - name: em-zebrafish-fish1/crop-009_gt-roi1_x80000_y35000_z1350
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-009_gt-roi1_x80000_y35000_z1350.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 255
-  normalize_min: 0
-  normalize_clip: false
+  normalize_max: 243
+  normalize_min: 6
 - name: em-zebrafish-fish1/crop-010_gt-roi12_x89000_y60000_z2000
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-010_gt-roi12_x89000_y60000_z2000.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 237
-  normalize_min: 16
-  normalize_clip: false
+  normalize_max: 245
+  normalize_min: 6
 - name: em-zebrafish-fish1/crop-011_gt-roi2_x80000_y60000_z1350
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-011_gt-roi2_x80000_y60000_z1350.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 255
-  normalize_min: 0
-  normalize_clip: false
+  normalize_max: 244
+  normalize_min: 6
 - name: em-zebrafish-fish1/crop-012_gt-roi3_x68000_y37500_z1350
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-012_gt-roi3_x68000_y37500_z1350.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 243
-  normalize_min: 0
-  normalize_clip: false
+  normalize_min: 6
 - name: em-zebrafish-fish1/crop-013_gt-roi4_x66500_y53500_z1350
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-013_gt-roi4_x66500_y53500_z1350.zarr
   image_key: raw
   zarr_version: zarr3
   normalize_max: 243
-  normalize_min: 0
-  normalize_clip: false
+  normalize_min: 8
 - name: em-zebrafish-fish1/crop-014_gt-roi5_x55000_y29000_z1350
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-014_gt-roi5_x55000_y29000_z1350.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 237
-  normalize_min: 0
-  normalize_clip: false
+  normalize_max: 246
+  normalize_min: 8
 - name: em-zebrafish-fish1/crop-015_gt-roi6_x55000_y63000_z1350
   path: /groups/miaai/miaai/lmd-v0.0.1/data/em-zebrafish-fish1/crop-015_gt-roi6_x55000_y63000_z1350.zarr
   image_key: raw
   zarr_version: zarr3
-  normalize_max: 237
-  normalize_min: 0
-  normalize_clip: false
-- name: em-zebrafish-fish2/full
+  normalize_max: 245
+  normalize_min: 8
+- name: em-zebrafish-fish2/full_box1
   path: /nrs/fishemf/raw-grayscale-8nm/em_sofima_240112_raw
   image_key: ''
   format: precomputed
   bounding_box:
-  - - 25856
-    - 148480
+  - - 34048
+    - 134912
   - - 38400
-    - 76800
-  - - 3072
+    - 74240
+  - - 3328
     - 10176
-  normalize_max: 232
-  normalize_min: 29
-  normalize_clip: false
+  normalize_max: 246
+  normalize_min: 12
+  weight: 0.837002
+- name: em-zebrafish-fish2/full_box2
+  path: /nrs/fishemf/raw-grayscale-8nm/em_sofima_240112_raw
+  image_key: ''
+  format: precomputed
+  bounding_box:
+  - - 47872
+    - 113152
+  - - 40960
+    - 71680
+  - - 1792
+    - 3328
+  normalize_max: 246
+  normalize_min: 12
+  weight: 0.239707
+- name: em-zebrafish-fish2/full_box3
+  path: /nrs/fishemf/raw-grayscale-8nm/em_sofima_240112_raw
+  image_key: ''
+  format: precomputed
+  bounding_box:
+  - - 65280
+    - 104448
+  - - 74240
+    - 87040
+  - - 4608
+    - 10176
+  normalize_max: 246
+  normalize_min: 12
+  weight: 0.225959
+- name: em-zebrafish-fish2/full_box4
+  path: /nrs/fishemf/raw-grayscale-8nm/em_sofima_240112_raw
+  image_key: ''
+  format: precomputed
+  bounding_box:
+  - - 60928
+    - 104448
+  - - 25600
+    - 38400
+  - - 5376
+    - 10176
+  normalize_max: 246
+  normalize_min: 12
+  weight: 0.220196
 - name: em-drosophila-fafb-v14/full_box1
   path: /groups/futusa/futusa/projects/fafb/v14_align_tps_20170818_dmg.n5/volumes/raw
   image_key: ''
@@ -1779,9 +1664,8 @@ volumes:
     - 84480
   - - 2184
     - 5460
-  normalize_max: 188
-  normalize_min: 68
-  normalize_clip: false
+  normalize_max: 200
+  normalize_min: 48
   weight: 0.675988
 - name: em-drosophila-fafb-v14/full_box2
   path: /groups/futusa/futusa/projects/fafb/v14_align_tps_20170818_dmg.n5/volumes/raw
@@ -1794,9 +1678,8 @@ volumes:
     - 87552
   - - 2964
     - 6708
-  normalize_max: 188
-  normalize_min: 68
-  normalize_clip: false
+  normalize_max: 200
+  normalize_min: 48
   weight: 0.351569
 - name: em-drosophila-fafb-v14/full_box3
   path: /groups/futusa/futusa/projects/fafb/v14_align_tps_20170818_dmg.n5/volumes/raw
@@ -1809,9 +1692,8 @@ volumes:
     - 39424
   - - 1560
     - 4680
-  normalize_max: 188
-  normalize_min: 68
-  normalize_clip: false
+  normalize_max: 200
+  normalize_min: 48
   weight: 0.263038
 - name: em-drosophila-fafb-v14/full_box4
   path: /groups/futusa/futusa/projects/fafb/v14_align_tps_20170818_dmg.n5/volumes/raw
@@ -1824,9 +1706,8 @@ volumes:
     - 78848
   - - 130
     - 2184
-  normalize_max: 188
-  normalize_min: 68
-  normalize_clip: false
+  normalize_max: 200
+  normalize_min: 48
   weight: 0.326272
 - name: em-drosophila-fafb-v14/full_box5
   path: /groups/futusa/futusa/projects/fafb/v14_align_tps_20170818_dmg.n5/volumes/raw
@@ -1839,9 +1720,8 @@ volumes:
     - 90112
   - - 2340
     - 4836
-  normalize_max: 188
-  normalize_min: 68
-  normalize_clip: false
+  normalize_max: 200
+  normalize_min: 48
   weight: 0.148372
 - name: em-drosophila-flyem-malecns-16nm/full_box1
   path: /nrs/flyem/render/n5/Z0720_07m_CNS-dvid-coords.n5
@@ -1854,9 +1734,8 @@ volumes:
     - 20736
   - - 11264
     - 19712
-  normalize_max: 164
-  normalize_min: 59
-  normalize_clip: false
+  normalize_max: 172
+  normalize_min: 30
   weight: 0.641865
 - name: em-drosophila-flyem-malecns-16nm/full_box2
   path: /nrs/flyem/render/n5/Z0720_07m_CNS-dvid-coords.n5
@@ -1869,9 +1748,8 @@ volumes:
     - 32256
   - - 36608
     - 61952
-  normalize_max: 164
-  normalize_min: 59
-  normalize_clip: false
+  normalize_max: 172
+  normalize_min: 30
   weight: 0.510176
 - name: em-drosophila-flyem-malecns-16nm/full_box3
   path: /nrs/flyem/render/n5/Z0720_07m_CNS-dvid-coords.n5
@@ -1884,9 +1762,8 @@ volumes:
     - 18816
   - - 7040
     - 11264
-  normalize_max: 164
-  normalize_min: 59
-  normalize_clip: false
+  normalize_max: 172
+  normalize_min: 30
   weight: 0.263974
 - name: em-drosophila-flyem-malecns-16nm/full_box4
   path: /nrs/flyem/render/n5/Z0720_07m_CNS-dvid-coords.n5
@@ -1899,9 +1776,8 @@ volumes:
     - 8064
   - - 11264
     - 17024
-  normalize_max: 164
-  normalize_min: 59
-  normalize_clip: false
+  normalize_max: 172
+  normalize_min: 30
   weight: 0.186906
 - name: em-drosophila-flyem-malecns-16nm/full_box5
   path: /nrs/flyem/render/n5/Z0720_07m_CNS-dvid-coords.n5
@@ -1914,66 +1790,218 @@ volumes:
     - 31360
   - - 33792
     - 36608
-  normalize_max: 164
-  normalize_min: 59
-  normalize_clip: false
+  normalize_max: 172
+  normalize_min: 30
   weight: 0.11432
-- name: em-drosophila-flyem-optic-lobe/full
+- name: em-drosophila-flyem-optic-lobe/full_box1
   path: /nrs/flyem/optic-lobe/optic-lobe-grayscale
   image_key: ''
   format: precomputed
   bounding_box:
-  - - 6784
-    - 29952
-  - - 18432
-    - 49536
-  - - 25600
-    - 43008
-  normalize_max: 253
-  normalize_min: 5
-  normalize_clip: false
-- name: em-drosophila-flyem-yakuba-cns-z0422-17/full
+  - - 6912
+    - 28416
+  - - 19584
+    - 48384
+  - - 27648
+    - 40960
+  normalize_max: 255
+  normalize_min: 0
+  weight: 0.799454
+- name: em-drosophila-flyem-optic-lobe/full_box2
+  path: /nrs/flyem/optic-lobe/optic-lobe-grayscale
+  image_key: ''
+  format: precomputed
+  bounding_box:
+  - - 15104
+    - 24064
+  - - 18176
+    - 46208
+  - - 21504
+    - 27648
+  normalize_max: 255
+  normalize_min: 0
+  weight: 0.292515
+- name: em-drosophila-flyem-optic-lobe/full_box3
+  path: /nrs/flyem/optic-lobe/optic-lobe-grayscale
+  image_key: ''
+  format: precomputed
+  bounding_box:
+  - - 11520
+    - 28416
+  - - 26496
+    - 43776
+  - - 40960
+    - 44032
+  normalize_max: 255
+  normalize_min: 0
+  weight: 0.211227
+- name: em-drosophila-flyem-optic-lobe/full_box4
+  path: /nrs/flyem/optic-lobe/optic-lobe-grayscale
+  image_key: ''
+  format: precomputed
+  bounding_box:
+  - - 28416
+    - 32384
+  - - 25088
+    - 42752
+  - - 30720
+    - 40960
+  normalize_max: 255
+  normalize_min: 0
+  weight: 0.184789
+- name: em-drosophila-flyem-optic-lobe/full_box5
+  path: /nrs/flyem/optic-lobe/optic-lobe-grayscale
+  image_key: ''
+  format: precomputed
+  bounding_box:
+  - - 11392
+    - 24448
+  - - 14848
+    - 19584
+  - - 27648
+    - 36864
+  normalize_max: 255
+  normalize_min: 0
+  weight: 0.160901
+- name: em-drosophila-flyem-yakuba-cns-z0422-17/full_box1
   path: /nrs/fibsem/render/n5/Z0422_17_VNC_1.n5/slab-align/run_20230615_200702/pass12
   image_key: ''
   format: n5
   bounding_box:
-  - - 1280
-    - 28800
-  - - 3840
-    - 26240
-  - - 4096
+  - - 6976
+    - 25024
+  - - 10176
+    - 23040
+  - - 9856
+    - 56320
+  normalize_max: 188
+  normalize_min: 32
+  weight: 0.839294
+- name: em-drosophila-flyem-yakuba-cns-z0422-17/full_box2
+  path: /nrs/fibsem/render/n5/Z0422_17_VNC_1.n5/slab-align/run_20230615_200702/pass12
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 9472
+    - 22656
+  - - 5120
+    - 10176
+  - - 20544
+    - 50752
+  normalize_max: 188
+  normalize_min: 32
+  weight: 0.306582
+- name: em-drosophila-flyem-yakuba-cns-z0422-17/full_box3
+  path: /nrs/fibsem/render/n5/Z0422_17_VNC_1.n5/slab-align/run_20230615_200702/pass12
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 10240
+    - 22400
+  - - 12800
+    - 21120
+  - - 56320
     - 65664
-  normalize_max: 175
-  normalize_min: 41
-  normalize_clip: false
-- name: em-drosophila-flyem-hemibrain/full
+  normalize_max: 188
+  normalize_min: 32
+  weight: 0.194767
+- name: em-drosophila-flyem-yakuba-cns-z0422-17/full_box4
+  path: /nrs/fibsem/render/n5/Z0422_17_VNC_1.n5/slab-align/run_20230615_200702/pass12
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 10816
+    - 23744
+  - - 12800
+    - 22400
+  - - 4224
+    - 9856
+  normalize_max: 188
+  normalize_min: 32
+  weight: 0.162495
+- name: em-drosophila-flyem-hemibrain/full_box1
   path: /nrs/flyem/data/tmp/Z0115-22.export.n5/22-34
   image_key: ''
   format: n5
   bounding_box:
-  - - 8256
-    - 35776
-  - - 8064
-    - 27840
+  - - 9024
+    - 35008
+  - - 8896
+    - 26944
   - - 0
+    - 29184
+  normalize_max: 230
+  normalize_min: 27
+  weight: 0.76312
+- name: em-drosophila-flyem-hemibrain/full_box2
+  path: /nrs/flyem/data/tmp/Z0115-22.export.n5/22-34
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 7424
+    - 35136
+  - - 26944
+    - 32256
+  - - 10432
     - 34368
-  normalize_max: 217
-  normalize_min: 48
-  normalize_clip: false
+  normalize_max: 230
+  normalize_min: 27
+  weight: 0.338074
+- name: em-drosophila-flyem-hemibrain/full_box3
+  path: /nrs/flyem/data/tmp/Z0115-22.export.n5/22-34
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 10624
+    - 27520
+  - - 8960
+    - 26944
+  - - 29184
+    - 34368
+  normalize_max: 230
+  normalize_min: 27
+  weight: 0.208558
+- name: em-drosophila-flyem-hemibrain/full_box4
+  path: /nrs/flyem/data/tmp/Z0115-22.export.n5/22-34
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 14592
+    - 28352
+  - - 4480
+    - 8896
+  - - 4736
+    - 31744
+  normalize_max: 230
+  normalize_min: 27
+  weight: 0.213751
+- name: em-drosophila-flyem-hemibrain/full_box5
+  path: /nrs/flyem/data/tmp/Z0115-22.export.n5/22-34
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 8064
+    - 35328
+  - - 32256
+    - 35904
+  - - 13248
+    - 23808
+  normalize_max: 230
+  normalize_min: 27
+  weight: 0.163535
 - name: em-cuttlefish-reiser-mpi-s-dec-5a/full
   path: /nrs/reiser/data/jrc_sepia_MPI-S-DEC_5A/jrc_sepia_MPI-S-DEC_5A.n5/em/fibsem-uint8_block_1024
   image_key: ''
   format: n5
   bounding_box:
   - - 4352
-    - 36160
-  - - 896
-    - 17472
+    - 35392
+  - - 1280
+    - 17024
   - - 0
     - 30208
-  normalize_max: 178
-  normalize_min: 48
-  normalize_clip: false
+  normalize_max: 189
+  normalize_min: 12
 - name: em-mouse-wilson2019-p7-cerebellum/full
   path: /nrs/jls/data_external/Carolyn/ng_precomputed/em_p7_mouse_wilson2019
   image_key: ''
@@ -1985,9 +2013,8 @@ volumes:
     - 34048
   - - 40
     - 1632
-  normalize_max: 249
-  normalize_min: 2
-  normalize_clip: false
+  normalize_max: 254
+  normalize_min: 0
 - name: em-cuttlefish-reiser-mpi-s1a/full
   path: /nrs/reiser/data/jrc_sepia_MPI-S1A/jrc_sepia_MPI-S1A.n5/render/jrc_sepia_MPI_S1A/v2_acquire_align_destreak_ic2d___1024_blocks
   image_key: ''
@@ -1999,9 +2026,8 @@ volumes:
     - 12480
   - - 0
     - 18944
-  normalize_max: 176
-  normalize_min: 46
-  normalize_clip: false
+  normalize_max: 186
+  normalize_min: 17
 - name: em-drosophila-flyem-ocellar-z0422-05/full_box1
   path: /groups/flyem/data/scratchspace/flyemflows/ocellar/Z0422_05_Ocellar.precomputed/v9-clahe-jpeg
   image_key: ''
@@ -2013,9 +2039,8 @@ volumes:
     - 13056
   - - 2080
     - 13728
-  normalize_max: 240
-  normalize_min: 26
-  normalize_clip: false
+  normalize_max: 252
+  normalize_min: 4
   weight: 0.505666
 - name: em-drosophila-flyem-ocellar-z0422-05/full_box2
   path: /groups/flyem/data/scratchspace/flyemflows/ocellar/Z0422_05_Ocellar.precomputed/v9-clahe-jpeg
@@ -2028,9 +2053,8 @@ volumes:
     - 11200
   - - 15360
     - 19904
-  normalize_max: 240
-  normalize_min: 26
-  normalize_clip: false
+  normalize_max: 252
+  normalize_min: 4
   weight: 0.444036
 - name: em-drosophila-flyem-ocellar-z0422-05/full_box3
   path: /groups/flyem/data/scratchspace/flyemflows/ocellar/Z0422_05_Ocellar.precomputed/v9-clahe-jpeg
@@ -2043,9 +2067,8 @@ volumes:
     - 8832
   - - 1664
     - 4576
-  normalize_max: 240
-  normalize_min: 26
-  normalize_clip: false
+  normalize_max: 252
+  normalize_min: 4
   weight: 0.336927
 - name: em-drosophila-flyem-ocellar-z0422-05/full_box4
   path: /groups/flyem/data/scratchspace/flyemflows/ocellar/Z0422_05_Ocellar.precomputed/v9-clahe-jpeg
@@ -2058,9 +2081,8 @@ volumes:
     - 14976
   - - 832
     - 4576
-  normalize_max: 240
-  normalize_min: 26
-  normalize_clip: false
+  normalize_max: 252
+  normalize_min: 4
   weight: 0.320443
 - name: em-drosophila-flyem-ocellar-z0422-05/full_box5
   path: /groups/flyem/data/scratchspace/flyemflows/ocellar/Z0422_05_Ocellar.precomputed/v9-clahe-jpeg
@@ -2073,9 +2095,8 @@ volumes:
     - 15040
   - - 2080
     - 4992
-  normalize_max: 240
-  normalize_min: 26
-  normalize_clip: false
+  normalize_max: 252
+  normalize_min: 4
   weight: 0.262196
 - name: em-drosophila-flyem-mb-alpha-lobe-z0419-25/full_box1
   path: /nrs/flyem/render/n5/flyem/z_corr/Z0419_25_Alpha3/v3_acquire_sp1_adaptive___20210622_151928
@@ -2088,9 +2109,8 @@ volumes:
     - 5024
   - - 0
     - 2144
-  normalize_max: 180
-  normalize_min: 54
-  normalize_clip: false
+  normalize_max: 190
+  normalize_min: 21
   weight: 0.198235
 - name: em-drosophila-flyem-mb-alpha-lobe-z0419-25/full_box2
   path: /nrs/flyem/render/n5/flyem/z_corr/Z0419_25_Alpha3/v3_acquire_sp1_adaptive___20210622_151928
@@ -2103,9 +2123,8 @@ volumes:
     - 6336
   - - 2144
     - 6208
-  normalize_max: 180
-  normalize_min: 54
-  normalize_clip: false
+  normalize_max: 190
+  normalize_min: 21
   weight: 0.517541
 - name: em-drosophila-flyem-mb-alpha-lobe-z0419-25/full_box3
   path: /nrs/flyem/render/n5/flyem/z_corr/Z0419_25_Alpha3/v3_acquire_sp1_adaptive___20210622_151928
@@ -2118,9 +2137,8 @@ volumes:
     - 6624
   - - 6208
     - 8640
-  normalize_max: 180
-  normalize_min: 54
-  normalize_clip: false
+  normalize_max: 190
+  normalize_min: 21
   weight: 0.302169
 - name: em-drosophila-flyem-mb-alpha-lobe-z0419-25/full_box4
   path: /nrs/flyem/render/n5/flyem/z_corr/Z0419_25_Alpha3/v3_acquire_sp1_adaptive___20210622_151928
@@ -2133,9 +2151,8 @@ volumes:
     - 8256
   - - 8640
     - 14400
-  normalize_max: 180
-  normalize_min: 54
-  normalize_clip: false
+  normalize_max: 190
+  normalize_min: 21
   weight: 0.51408
 - name: em-drosophila-flyem-mb-alpha-lobe-z0419-25/full_box5
   path: /nrs/flyem/render/n5/flyem/z_corr/Z0419_25_Alpha3/v3_acquire_sp1_adaptive___20210622_151928
@@ -2148,24 +2165,22 @@ volumes:
     - 8960
   - - 14400
     - 16576
-  normalize_max: 180
-  normalize_min: 54
-  normalize_clip: false
+  normalize_max: 190
+  normalize_min: 21
   weight: 0.298099
 - name: em-drosophila-flyem-z1221-05/full
   path: /nrs/flyem/render/n5/Z1221_05.n5/z_corr/Z1221_05/v3_acquire_align___20221013_163932
   image_key: ''
   format: n5
   bounding_box:
-  - - 224
-    - 12768
-  - - 192
-    - 10272
+  - - 512
+    - 12736
+  - - 704
+    - 10016
   - - 0
     - 15744
-  normalize_max: 188
-  normalize_min: 59
-  normalize_clip: false
+  normalize_max: 197
+  normalize_min: 43
 - name: em-drosophila-flyem-z1221-19/full
   path: /nrs/flyem/render/n5/Z1221_19.n5/z_corr/Z1221_19/v1_acquire_align___20220525_103031
   image_key: ''
@@ -2177,23 +2192,21 @@ volumes:
     - 9984
   - - 0
     - 14688
-  normalize_max: 184
-  normalize_min: 65
-  normalize_clip: false
+  normalize_max: 191
+  normalize_min: 48
 - name: em-drosophila-flyem-z0721-13/full
   path: /nrs/flyem/render/n5/Z0721_13/z_corr/female_01_day_red_eye/v1_acquire_align___20211119_140855
   image_key: ''
   format: n5
   bounding_box:
-  - - 256
-    - 12992
-  - - 416
-    - 9184
+  - - 576
+    - 12512
+  - - 448
+    - 8960
   - - 0
     - 11392
-  normalize_max: 188
-  normalize_min: 61
-  normalize_clip: false
+  normalize_max: 208
+  normalize_min: 38
 - name: em-drosophila-flyem-mb-z0613-06/full_box1
   path: /groups/flyem/data/scratchspace/flyemflows/mushroom-alpha-lobe/MB-Z0613-06.precomputed
   image_key: ''
@@ -2205,9 +2218,8 @@ volumes:
     - 6400
   - - 6368
     - 13760
-  normalize_max: 184
-  normalize_min: 58
-  normalize_clip: false
+  normalize_max: 190
+  normalize_min: 23
   weight: 0.655285
 - name: em-drosophila-flyem-mb-z0613-06/full_box2
   path: /groups/flyem/data/scratchspace/flyemflows/mushroom-alpha-lobe/MB-Z0613-06.precomputed
@@ -2220,9 +2232,8 @@ volumes:
     - 9216
   - - 1280
     - 6080
-  normalize_max: 184
-  normalize_min: 58
-  normalize_clip: false
+  normalize_max: 190
+  normalize_min: 23
   weight: 0.515182
 - name: em-drosophila-flyem-mb-z0613-06/full_box3
   path: /groups/flyem/data/scratchspace/flyemflows/mushroom-alpha-lobe/MB-Z0613-06.precomputed
@@ -2235,9 +2246,8 @@ volumes:
     - 7168
   - - 13760
     - 14624
-  normalize_max: 184
-  normalize_min: 58
-  normalize_clip: false
+  normalize_max: 190
+  normalize_min: 23
   weight: 0.209387
 - name: em-drosophila-flyem-mb-z0613-06/full_box4
   path: /groups/flyem/data/scratchspace/flyemflows/mushroom-alpha-lobe/MB-Z0613-06.precomputed
@@ -2250,9 +2260,8 @@ volumes:
     - 9984
   - - 0
     - 1280
-  normalize_max: 184
-  normalize_min: 58
-  normalize_clip: false
+  normalize_max: 190
+  normalize_min: 23
   weight: 0.171081
 - name: em-drosophila-flyem-mb-z0613-06/full_box5
   path: /groups/flyem/data/scratchspace/flyemflows/mushroom-alpha-lobe/MB-Z0613-06.precomputed
@@ -2265,9 +2274,8 @@ volumes:
     - 2560
   - - 8608
     - 11264
-  normalize_max: 184
-  normalize_min: 58
-  normalize_clip: false
+  normalize_max: 190
+  normalize_min: 23
   weight: 0.161704
 - name: em-drosophila-flyem-z0721-04c/full
   path: /nrs/flyem/render/n5/Z0721_04C/z_corr/female_01_day_08nm/v1_acquire_align___20211113_124548
@@ -2280,79 +2288,159 @@ volumes:
     - 7488
   - - 0
     - 11808
-  normalize_max: 186
-  normalize_min: 62
-  normalize_clip: false
+  normalize_max: 197
+  normalize_min: 41
 - name: em-drosophila-flyem-simulans-z0421-19/full
   path: /nrs/flyem/render/n5/Z0421_19/z_corr/simulans_08nm_06Mhz/v1_acquire_align___20211111_122132
   image_key: ''
   format: n5
   bounding_box:
-  - - 208
-    - 13952
-  - - 160
-    - 9904
+  - - 240
+    - 13808
+  - - 384
+    - 9680
   - - 0
     - 7264
-  normalize_max: 169
-  normalize_min: 52
-  normalize_clip: false
+  normalize_max: 173
+  normalize_min: 34
 - name: em-drosophila-flyem-yakuba-z0521-31/full
   path: /nrs/flyem/render/n5/Z0521_31/z_corr/yakuba_08nm_06Mhz/v1_acquire_align___20211116_102221
   image_key: ''
   format: n5
   bounding_box:
-  - - 608
-    - 13856
-  - - 352
-    - 7920
+  - - 2112
+    - 13392
+  - - 512
+    - 5296
   - - 0
-    - 7472
-  normalize_max: 171
-  normalize_min: 44
-  normalize_clip: false
+    - 6256
+  normalize_max: 178
+  normalize_min: 39
 - name: em-celegans-funceworm-jrc-adult-d6a/full
   path: /nrs/funceworm/data/jrc_celegans-adult-d6a/jrc_celegans-adult-d6a.zarr/recon-1/em/fibsem-uint16
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 608
-    - 9888
-  - - 1216
-    - 10272
+  - - 864
+    - 9664
+  - - 1280
+    - 9728
   - - 0
-    - 30784
-  normalize_max: 36019
-  normalize_min: 27426
-  normalize_clip: false
-- name: em-celegans-mengwang-jrc-P3-E5-D1-N2-2/full
+    - 30304
+  normalize_max: 36126
+  normalize_min: 30234
+- name: em-celegans-mengwang-jrc-P3-E5-D1-N2-2/full_box1
+  path: /nrs/mengwang/data/jrc_celegans_P3-E5-D1-N2-2/jrc_celegans_P3-E5-D1-N2-2.n5/render/jrc_celegans_P3_E5_D1_N2_2/v3_acquire_align_destreak___20260413_135012
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 3552
+    - 8192
+  - - 2112
+    - 6912
+  - - 544
+    - 25280
+  normalize_max: 168
+  normalize_min: 9
+  weight: 0.855594
+- name: em-celegans-mengwang-jrc-P3-E5-D1-N2-2/full_box2
+  path: /nrs/mengwang/data/jrc_celegans_P3-E5-D1-N2-2/jrc_celegans_P3-E5-D1-N2-2.n5/render/jrc_celegans_P3_E5_D1_N2_2/v3_acquire_align_destreak___20260413_135012
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 8192
+    - 9472
+  - - 2272
+    - 6912
+  - - 10880
+    - 25280
+  normalize_max: 168
+  normalize_min: 9
+  weight: 0.279814
+- name: em-celegans-mengwang-jrc-P3-E5-D1-N2-2/full_box3
+  path: /nrs/mengwang/data/jrc_celegans_P3-E5-D1-N2-2/jrc_celegans_P3-E5-D1-N2-2.n5/render/jrc_celegans_P3_E5_D1_N2_2/v3_acquire_align_destreak___20260413_135012
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 4864
+    - 8192
+  - - 960
+    - 2112
+  - - 15232
+    - 25280
+  normalize_max: 168
+  normalize_min: 9
+  weight: 0.173398
+- name: em-celegans-mengwang-jrc-P3-E5-D1-N2-2/full_box4
   path: /nrs/mengwang/data/jrc_celegans_P3-E5-D1-N2-2/jrc_celegans_P3-E5-D1-N2-2.n5/render/jrc_celegans_P3_E5_D1_N2_2/v3_acquire_align_destreak___20260413_135012
   image_key: ''
   format: n5
   bounding_box:
   - - 2304
-    - 10016
-  - - 384
-    - 7872
-  - - 0
-    - 25280
-  normalize_max: 172
-  normalize_min: 63
-  normalize_clip: false
-- name: em-drosophila-fibsem-yakuba-neck/full
+    - 3552
+  - - 3168
+    - 6368
+  - - 160
+    - 10048
+  normalize_max: 168
+  normalize_min: 9
+  weight: 0.175994
+- name: em-drosophila-fibsem-yakuba-neck/full_box1
+  path: /nrs/fibsem/data_external/FIBSEM/jrc_yakuba-neck_v1_align/v1_acquire_align___20260908_010254_review
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 5376
+    - 10752
+  - - 3328
+    - 6144
+  - - 1568
+    - 15744
+  normalize_max: 163
+  normalize_min: 25
+  weight: 0.74316
+- name: em-drosophila-fibsem-yakuba-neck/full_box2
+  path: /nrs/fibsem/data_external/FIBSEM/jrc_yakuba-neck_v1_align/v1_acquire_align___20260908_010254_review
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 640
+    - 3456
+  - - 1536
+    - 5888
+  - - 9505
+    - 14440
+  normalize_max: 163
+  normalize_min: 25
+  weight: 0.347584
+- name: em-drosophila-fibsem-yakuba-neck/full_box3
+  path: /nrs/fibsem/data_external/FIBSEM/jrc_yakuba-neck_v1_align/v1_acquire_align___20260908_010254_review
+  image_key: ''
+  format: n5
+  bounding_box:
+  - - 13824
+    - 14976
+  - - 2048
+    - 6144
+  - - 2937
+    - 14446
+  normalize_max: 163
+  normalize_min: 25
+  weight: 0.32584
+- name: em-drosophila-fibsem-yakuba-neck/full_box4
   path: /nrs/fibsem/data_external/FIBSEM/jrc_yakuba-neck_v1_align/v1_acquire_align___20260908_010254_review
   image_key: ''
   format: n5
   bounding_box:
   - - 768
-    - 15360
-  - - 1024
-    - 8448
-  - - 0
-    - 15744
-  normalize_max: 166
-  normalize_min: 51
-  normalize_clip: false
+    - 1920
+  - - 1280
+    - 8320
+  - - 6721
+    - 9505
+  normalize_max: 163
+  normalize_min: 25
+  weight: 0.192447
 - name: em-celegans-funceworm-mcnally-20240612/full
   path: /groups/funceworm/public/data_external/McNallyCollab/jrc_celegans-20240612.zarr/recon-1/em/fibsem-int16
   image_key: ''
@@ -2364,93 +2452,143 @@ volumes:
     - 13136
   - - 0
     - 5280
-  normalize_max: 5654
-  normalize_min: 3599
-  normalize_clip: false
+  normalize_max: 6882
+  normalize_min: 3076
 - name: em-celegans-funceworm-mcnally-20241007/full
   path: /groups/funceworm/public/data_external/McNallyCollab/jrc_celegans_20241007.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 400
-    - 10128
-  - - 1184
-    - 13104
+  - - 592
+    - 10096
+  - - 1792
+    - 12480
   - - 0
     - 5984
-  normalize_max: 184
-  normalize_min: 20
-  normalize_clip: false
+  normalize_max: 192
+  normalize_min: 0
 - name: em-steinernema-funceworm-head-20251017/full
   path: /nrs/funceworm/FIBSEM_data/20251017_steinernema_head/jrc_steinernema-20251017.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 1024
-    - 7424
-  - - 192
-    - 4944
+  - - 1232
+    - 7040
+  - - 336
+    - 4928
   - - 0
-    - 17168
-  normalize_max: 208
-  normalize_min: 129
-  normalize_clip: false
+    - 17024
+  normalize_max: 213
+  normalize_min: 115
 - name: em-unknown-hess-msem-sample68/full
   path: /nrs/hess/data_external/MSEM/sample68_33MFOVs_v3e_SIFT20_perc50_intra30_inter100_tkh0_trg0_anch10.zarr
   image_key: ''
   zarr_version: zarr3
   bounding_box:
-  - - 7872
-    - 96576
-  - - 6208
-    - 97536
+  - - 8128
+    - 94144
+  - - 10752
+    - 93024
   - - 0
     - 1056
-  normalize_max: 183
-  normalize_min: 32
-  normalize_clip: false
-- name: em-drosophila-CellMap-jrc-fly-larva-1/full
+  normalize_max: 216
+  normalize_min: 17
+- name: em-drosophila-CellMap-jrc-fly-larva-1/full_box1
   path: /nrs/cellmap/data/jrc_fly-larva-1/jrc_fly-larva-1.zarr/recon-1/em/tem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
   - - 27136
-    - 87808
-  - - 3072
-    - 26880
-  - - 503
-    - 3637
-  normalize_max: 238
-  normalize_min: 18
-  normalize_clip: false
+    - 83456
+  - - 4608
+    - 25344
+  - - 706
+    - 3537
+  normalize_max: 255
+  normalize_min: 0
+  weight: 0.84406
+- name: em-drosophila-CellMap-jrc-fly-larva-1/full_box2
+  path: /nrs/cellmap/data/jrc_fly-larva-1/jrc_fly-larva-1.zarr/recon-1/em/tem-uint8
+  image_key: ''
+  zarr_version: zarr2
+  bounding_box:
+  - - 25856
+    - 87552
+  - - 768
+    - 4608
+  - - 1506
+    - 3140
+  normalize_max: 255
+  normalize_min: 0
+  weight: 0.233067
+- name: em-drosophila-CellMap-jrc-fly-larva-1/full_box3
+  path: /nrs/cellmap/data/jrc_fly-larva-1/jrc_fly-larva-1.zarr/recon-1/em/tem-uint8
+  image_key: ''
+  zarr_version: zarr2
+  bounding_box:
+  - - 43776
+    - 69120
+  - - 25344
+    - 29952
+  - - 693
+    - 2947
+  normalize_max: 255
+  normalize_min: 0
+  weight: 0.184919
+- name: em-drosophila-CellMap-jrc-fly-larva-1/full_box4
+  path: /nrs/cellmap/data/jrc_fly-larva-1/jrc_fly-larva-1.zarr/recon-1/em/tem-uint8
+  image_key: ''
+  zarr_version: zarr2
+  bounding_box:
+  - - 25856
+    - 39168
+  - - 12032
+    - 27648
+  - - 3621
+    - 4655
+  normalize_max: 255
+  normalize_min: 0
+  weight: 0.163748
+- name: em-drosophila-CellMap-jrc-fly-larva-1/full_box5
+  path: /nrs/cellmap/data/jrc_fly-larva-1/jrc_fly-larva-1.zarr/recon-1/em/tem-uint8
+  image_key: ''
+  zarr_version: zarr2
+  bounding_box:
+  - - 83456
+    - 94464
+  - - 4608
+    - 15104
+  - - 790
+    - 2644
+  normalize_max: 255
+  normalize_min: 0
+  weight: 0.163411
 - name: em-drosophila-CellMap-jrc-fly-mb-z0419-20/full
   path: /nrs/cellmap/data/jrc_fly-mb-z0419-20/jrc_fly-mb-z0419-20.zarr/recon-1/em/fibsem-uint16
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 10880
+  - - 10816
     - 29440
   - - 1152
-    - 16512
-  - - 7488
+    - 16896
+  - - 11520
     - 25856
-  normalize_max: 3313
-  normalize_min: 377
-  normalize_clip: false
+  normalize_max: 4501
+  normalize_min: 214
 - name: em-mouse-CellMap-jrc-mus-hippocampus-1/full
   path: /nrs/cellmap/data/jrc_mus-hippocampus-1/jrc_mus-hippocampus-1.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
   - - 2656
-    - 17312
-  - - 3808
-    - 16512
-  - - 480
+    - 16896
+  - - 3840
+    - 15360
+  - - 2048
     - 24544
-  normalize_max: 183
-  normalize_min: 47
-  normalize_clip: false
+  normalize_max: 196
+  normalize_min: 34
 - name: em-human-CellMap-jrc-hum-airway-14953vc/full
   path: /nrs/cellmap/data/jrc_hum-airway-14953vc/jrc_hum-airway-14953vc.zarr/recon-1/em/fibsem-uint8
   image_key: ''
@@ -2462,9 +2600,8 @@ volumes:
     - 12544
   - - 0
     - 15072
-  normalize_max: 183
-  normalize_min: 55
-  normalize_clip: false
+  normalize_max: 192
+  normalize_min: 23
 - name: em-mouse-CellMap-jrc-mus-pacinian-corpuscle/full
   path: /nrs/cellmap/data/jrc_mus-pacinian-corpuscle/jrc_mus-pacinian-corpuscle.zarr/recon-1/em/fibsem-uint8
   image_key: ''
@@ -2476,51 +2613,47 @@ volumes:
     - 9984
   - - 0
     - 48384
-  normalize_max: 249
-  normalize_min: 7
-  normalize_clip: false
+  normalize_max: 255
+  normalize_min: 0
 - name: em-mouse-CellMap-jrc-mus-skin-1/full
   path: /nrs/cellmap/data/jrc_mus-skin-1/jrc_mus-skin-1.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 2656
-    - 15360
-  - - 640
+  - - 3040
+    - 14272
+  - - 1248
     - 13152
   - - 0
     - 19680
-  normalize_max: 185
-  normalize_min: 61
-  normalize_clip: false
+  normalize_max: 197
+  normalize_min: 11
 - name: em-mouse-CellMap-jrc-mus-thymus-1/full
   path: /nrs/cellmap/data/jrc_mus-thymus-1/jrc_mus-thymus-1.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 704
+  - - 1024
     - 17696
-  - - 928
-    - 13440
+  - - 1536
+    - 12800
   - - 0
     - 14496
-  normalize_max: 193
-  normalize_min: 92
-  normalize_clip: false
+  normalize_max: 208
+  normalize_min: 59
 - name: em-mouse-CellMap-jrc-mus-pancreas-4/full
   path: /nrs/cellmap/data/jrc_mus-pancreas-4/jrc_mus-pancreas-4.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 288
-    - 18272
-  - - 256
-    - 14112
+  - - 2624
+    - 13056
+  - - 640
+    - 9600
   - - 0
     - 14368
-  normalize_max: 186
-  normalize_min: 47
-  normalize_clip: false
+  normalize_max: 196
+  normalize_min: 46
 - name: em-drosophila-CellMap-jrc-fly-acc-calyx-1/full
   path: /nrs/cellmap/data/jrc_fly-acc-calyx-1/jrc_fly-acc-calyx-1.zarr/recon-1/em/fibsem-uint16
   image_key: ''
@@ -2532,23 +2665,21 @@ volumes:
     - 10016
   - - 0
     - 21869
-  normalize_max: 3705
-  normalize_min: 1467
-  normalize_clip: false
+  normalize_max: 4272
+  normalize_min: 1256
 - name: em-mouse-CellMap-jrc-mus-salivary-1/full
   path: /nrs/cellmap/data/jrc_mus-salivary-1/jrc_mus-salivary-1.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 256
-    - 13472
-  - - 224
-    - 13536
+  - - 1312
+    - 13376
+  - - 512
+    - 13280
   - - 0
     - 14880
-  normalize_max: 195
-  normalize_min: 44
-  normalize_clip: false
+  normalize_max: 207
+  normalize_min: 13
 - name: em-mouse-CellMap-jrc-mus-heart-6/full
   path: /nrs/cellmap/data/jrc_mus-heart-6/jrc_mus-heart-6.zarr/recon-1/em/fibsem-uint16
   image_key: ''
@@ -2560,51 +2691,47 @@ volumes:
     - 12576
   - - 0
     - 16320
-  normalize_max: 34876
-  normalize_min: 29861
-  normalize_clip: false
+  normalize_max: 35260
+  normalize_min: 27995
 - name: em-mouse-CellMap-jrc-mus-guard-hair-follicle/full
   path: /nrs/cellmap/data/jrc_mus-guard-hair-follicle/jrc_mus-guard-hair-follicle.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 960
-    - 13760
-  - - 2464
-    - 12672
-  - - 864
-    - 12384
-  normalize_max: 234
-  normalize_min: 33
-  normalize_clip: false
+  - - 1248
+    - 13472
+  - - 2816
+    - 12320
+  - - 1728
+    - 11808
+  normalize_max: 246
+  normalize_min: 15
 - name: em-mouse-CellMap-jrc-mus-kidney-2/full
   path: /nrs/cellmap/data/jrc_mus-kidney-2/jrc_mus-kidney-2.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 288
-    - 12864
-  - - 864
-    - 12096
+  - - 480
+    - 12672
+  - - 1152
+    - 11520
   - - 0
     - 13792
-  normalize_max: 187
-  normalize_min: 54
-  normalize_clip: false
+  normalize_max: 194
+  normalize_min: 29
 - name: em-drosophila-CellMap-jrc-fly-fsb-1/full
   path: /nrs/cellmap/data/jrc_fly-fsb-1/jrc_fly-fsb-1.zarr/recon-1/em/fibsem-uint16
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 992
-    - 10784
-  - - 1248
-    - 13120
+  - - 1216
+    - 10304
+  - - 1536
+    - 12832
   - - 0
     - 11276
-  normalize_max: 4403
-  normalize_min: 1978
-  normalize_clip: false
+  normalize_max: 4725
+  normalize_min: 414
 - name: em-mouse-CellMap-jrc-mus-liver-2/full
   path: /nrs/cellmap/data/jrc_mus-liver-2/jrc_mus-liver-2.zarr/recon-1/em/fibsem-uint8
   image_key: ''
@@ -2616,23 +2743,21 @@ volumes:
     - 11264
   - - 64
     - 10272
-  normalize_max: 180
-  normalize_min: 48
-  normalize_clip: false
+  normalize_max: 187
+  normalize_min: 22
 - name: em-mouse-CellMap-jrc-mus-cortex-4/full
   path: /nrs/cellmap/data/jrc_mus-cortex-4/jrc_mus-cortex-4.zarr/recon-1/em/fibsem-uint16
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 1728
-    - 13056
-  - - 640
+  - - 2432
+    - 12672
+  - - 1120
     - 6400
-  - - 0
+  - - 288
     - 12832
-  normalize_max: 35546
-  normalize_min: 34481
-  normalize_clip: false
+  normalize_max: 35742
+  normalize_min: 34266
 - name: em-mouse-CellMap-jrc-mus-kidney-4/full
   path: /nrs/cellmap/data/jrc_mus-kidney-4/jrc_mus-kidney-4.zarr/recon-1/em/fibsem-uint16
   image_key: ''
@@ -2644,23 +2769,21 @@ volumes:
     - 8128
   - - 0
     - 7296
-  normalize_max: 35887
-  normalize_min: 34546
-  normalize_clip: false
+  normalize_max: 35994
+  normalize_min: 34222
 - name: em-mouse-CellMap-jrc-mus-meissner-corpuscle-2/full
   path: /nrs/cellmap/data/jrc_mus-meissner-corpuscle-2/jrc_mus-meissner-corpuscle-2.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 4576
-    - 8928
-  - - 928
+  - - 4608
+    - 8640
+  - - 1152
     - 6912
-  - - 1792
-    - 8704
-  normalize_max: 237
-  normalize_min: 31
-  normalize_clip: false
+  - - 2304
+    - 8448
+  normalize_max: 247
+  normalize_min: 14
 - name: em-mouse-CellMap-jrc-mus-heart-4/full
   path: /nrs/cellmap/data/jrc_mus-heart-4/jrc_mus-heart-4.zarr/recon-1/em/fibsem-uint16
   image_key: ''
@@ -2672,9 +2795,8 @@ volumes:
     - 8736
   - - 0
     - 6688
-  normalize_max: 38374
-  normalize_min: 37656
-  normalize_clip: false
+  normalize_max: 38451
+  normalize_min: 37541
 - name: em-mouse-CellMap-jrc-mus-liver-8/full
   path: /nrs/cellmap/data/jrc_mus-liver-8/jrc_mus-liver-8.zarr/recon-1/em/fibsem-uint16
   image_key: ''
@@ -2686,9 +2808,8 @@ volumes:
     - 9984
   - - 0
     - 6208
-  normalize_max: 36009
-  normalize_min: 34760
-  normalize_clip: false
+  normalize_max: 36247
+  normalize_min: 34072
 - name: em-mouse-CellMap-jrc-mus-thymus-2a/full
   path: /nrs/cellmap/data/jrc_mus-thymus-2a/jrc_mus-thymus-2a.zarr/recon-1/em/fibsem-uint16
   image_key: ''
@@ -2700,9 +2821,8 @@ volumes:
     - 6256
   - - 0
     - 11200
-  normalize_max: 37644
-  normalize_min: 36630
-  normalize_clip: false
+  normalize_max: 37688
+  normalize_min: 36442
 - name: em-mouse-CellMap-jrc-mus-lung-2a/full
   path: /nrs/cellmap/data/jrc_mus-lung-2a/jrc_mus-lung-2a.zarr/recon-1/em/fibsem-uint16
   image_key: ''
@@ -2714,30 +2834,27 @@ volumes:
     - 7520
   - - 0
     - 7712
-  normalize_max: 34354
-  normalize_min: 32924
-  normalize_clip: false
+  normalize_max: 34467
+  normalize_min: 32658
 - name: em-mouse-CellMap-jrc-mus-sc-zp104a/full
   path: /nrs/cellmap/data/jrc_mus-sc-zp104a/jrc_mus-sc-zp104a.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 1312
-    - 6784
-  - - 1104
-    - 5280
+  - - 1712
+    - 6752
+  - - 1600
+    - 5136
   - - 0
-    - 12688
-  normalize_max: 207
-  normalize_min: 147
-  normalize_clip: false
+    - 12528
+  normalize_max: 211
+  normalize_min: 135
 - name: em-mouse-CellMap-jrc-mus-liver-5/full
   path: /nrs/cellmap/data/jrc_mus-liver-5/jrc_mus-liver-5.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
-  normalize_max: 191
-  normalize_min: 101
-  normalize_clip: false
+  normalize_max: 194
+  normalize_min: 76
 - name: em-mouse-CellMap-jrc-mus-skin-2a/full
   path: /nrs/cellmap/data/jrc_mus-skin-2a/jrc_mus-skin-2a.zarr/recon-1/em/fibsem-uint16
   image_key: ''
@@ -2749,9 +2866,8 @@ volumes:
     - 6272
   - - 0
     - 6448
-  normalize_max: 38488
-  normalize_min: 37516
-  normalize_clip: false
+  normalize_max: 38557
+  normalize_min: 37384
 - name: em-mouse-CellMap-jrc-mus-cortex-2/full
   path: /nrs/cellmap/data/jrc_mus-cortex-2/jrc_mus-cortex-2.zarr/recon-1/em/fibsem-uint16
   image_key: ''
@@ -2763,23 +2879,20 @@ volumes:
     - 5760
   - - 160
     - 7440
-  normalize_max: 35896
-  normalize_min: 34708
-  normalize_clip: false
+  normalize_max: 36003
+  normalize_min: 34353
 - name: em-mouse-CellMap-jrc-mus-liver-6/full
   path: /nrs/cellmap/data/jrc_mus-liver-6/jrc_mus-liver-6.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
-  normalize_max: 148
-  normalize_min: 60
-  normalize_clip: false
+  normalize_max: 155
+  normalize_min: 31
 - name: em-mouse-CellMap-jrc-mus-liver-4/full
   path: /nrs/cellmap/data/jrc_mus-liver-4/jrc_mus-liver-4.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
-  normalize_max: 164
-  normalize_min: 78
-  normalize_clip: false
+  normalize_max: 169
+  normalize_min: 35
 - name: em-mouse-CellMap-jrc-mus-duodenum-1a/full
   path: /nrs/cellmap/data/jrc_mus-duodenum-1a/jrc_mus-duodenum-1a.zarr/recon-1/em/fibsem-uint16
   image_key: ''
@@ -2791,93 +2904,129 @@ volumes:
     - 7520
   - - 0
     - 5104
-  normalize_max: 36259
-  normalize_min: 35156
-  normalize_clip: false
+  normalize_max: 36346
+  normalize_min: 34869
 - name: em-mouse-CellMap-jrc-mus-liver-zon-2/full
   path: /nrs/cellmap/data/jrc_mus-liver-zon-2/jrc_mus-liver-zon-2.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 2752
-    - 23616
-  - - 704
-    - 18688
-  - - 0
-    - 53312
-  normalize_max: 194
-  normalize_min: 44
-  normalize_clip: false
+  - - 2304
+    - 23680
+  - - 832
+    - 18368
+  - - 8064
+    - 48384
+  normalize_max: 201
+  normalize_min: 4
 - name: em-mouse-CellMap-jrc-mus-liver-zon-1/full
   path: /nrs/cellmap/data/jrc_mus-liver-zon-1/jrc_mus-liver-zon-1.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 512
+  - - 960
     - 22592
-  - - 2688
-    - 19712
-  - - 0
-    - 49600
-  normalize_max: 187
-  normalize_min: 33
-  normalize_clip: false
-- name: em-zebrafish-CellMap-jrc-zf-cardiac-1/full
+  - - 3072
+    - 18432
+  - - 4224
+    - 42496
+  normalize_max: 199
+  normalize_min: 10
+- name: em-zebrafish-CellMap-jrc-zf-cardiac-1/full_box1
   path: /nrs/cellmap/data/jrc_zf-cardiac-1/jrc_zf-cardiac-1.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 3264
-    - 16512
-  - - 3520
-    - 16192
-  - - 0
+  - - 5760
+    - 13504
+  - - 3456
+    - 16640
+  - - 20608
     - 40128
-  normalize_max: 172
-  normalize_min: 26
-  normalize_clip: false
+  normalize_max: 189
+  normalize_min: 6
+  weight: 0.701945
+- name: em-zebrafish-CellMap-jrc-zf-cardiac-1/full_box2
+  path: /nrs/cellmap/data/jrc_zf-cardiac-1/jrc_zf-cardiac-1.zarr/recon-1/em/fibsem-uint8
+  image_key: ''
+  zarr_version: zarr2
+  bounding_box:
+  - - 3072
+    - 8576
+  - - 1344
+    - 8960
+  - - 0
+    - 16128
+  normalize_max: 189
+  normalize_min: 6
+  weight: 0.366944
+- name: em-zebrafish-CellMap-jrc-zf-cardiac-1/full_box3
+  path: /nrs/cellmap/data/jrc_zf-cardiac-1/jrc_zf-cardiac-1.zarr/recon-1/em/fibsem-uint8
+  image_key: ''
+  zarr_version: zarr2
+  bounding_box:
+  - - 13504
+    - 17984
+  - - 3520
+    - 18432
+  - - 31360
+    - 40128
+  normalize_max: 189
+  normalize_min: 6
+  weight: 0.336695
+- name: em-zebrafish-CellMap-jrc-zf-cardiac-1/full_box4
+  path: /nrs/cellmap/data/jrc_zf-cardiac-1/jrc_zf-cardiac-1.zarr/recon-1/em/fibsem-uint8
+  image_key: ''
+  zarr_version: zarr2
+  bounding_box:
+  - - 4032
+    - 10304
+  - - 3136
+    - 15232
+  - - 16128
+    - 20608
+  normalize_max: 189
+  normalize_min: 6
+  weight: 0.242886
 - name: em-mouse-CellMap-jrc-mus-heart-1/full
   path: /nrs/cellmap/data/jrc_mus-heart-1/jrc_mus-heart-1.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 2208
-    - 18368
-  - - 4160
-    - 15808
-  - - 0
+  - - 2656
+    - 17952
+  - - 4544
+    - 14560
+  - - 352
     - 16960
-  normalize_max: 197
-  normalize_min: 65
-  normalize_clip: false
+  normalize_max: 211
+  normalize_min: 46
 - name: em-mouse-CellMap-jrc-mus-kidney-3/full
   path: /nrs/cellmap/data/jrc_mus-kidney-3/jrc_mus-kidney-3.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 320
-    - 17696
-  - - 608
-    - 14112
+  - - 384
+    - 17472
+  - - 1280
+    - 13760
   - - 0
     - 20384
-  normalize_max: 188
-  normalize_min: 60
-  normalize_clip: false
+  normalize_max: 203
+  normalize_min: 14
 - name: em-mouse-CellMap-jrc-mus-liver-3/full
   path: /nrs/cellmap/data/jrc_mus-liver-3/jrc_mus-liver-3.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 704
-    - 16960
-  - - 256
-    - 14144
+  - - 1472
+    - 16544
+  - - 320
+    - 13952
   - - 0
     - 18016
-  normalize_max: 193
-  normalize_min: 59
-  normalize_clip: false
+  normalize_max: 207
+  normalize_min: 32
 - name: em-human-CellMap-jrc-ut21-1413-003/full
   path: /nrs/cellmap/data/jrc_ut21-1413-003/jrc_ut21-1413-003.zarr/recon-1/em/fibsem-uint8
   image_key: ''
@@ -2889,23 +3038,21 @@ volumes:
     - 10304
   - - 0
     - 16288
-  normalize_max: 169
-  normalize_min: 41
-  normalize_clip: false
+  normalize_max: 175
+  normalize_min: 9
 - name: em-mouse-CellMap-jrc-mus-kidney/full
   path: /nrs/cellmap/data/jrc_mus-kidney/jrc_mus-kidney.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 512
-    - 12032
-  - - 192
-    - 7680
+  - - 928
+    - 11552
+  - - 352
+    - 7712
   - - 0
     - 22176
-  normalize_max: 184
-  normalize_min: 58
-  normalize_clip: false
+  normalize_max: 190
+  normalize_min: 22
 - name: em-mouse-CellMap-jrc-mus-liver/full
   path: /nrs/cellmap/data/jrc_mus-liver/jrc_mus-liver.zarr/recon-1/em/fibsem-uint8
   image_key: ''
@@ -2917,23 +3064,21 @@ volumes:
     - 11840
   - - 0
     - 8928
-  normalize_max: 183
-  normalize_min: 46
-  normalize_clip: false
+  normalize_max: 188
+  normalize_min: 7
 - name: em-drosophila-CellMap-jrc-fly-mb-1a/full
   path: /nrs/cellmap/data/jrc_fly-mb-1a/jrc_fly-mb-1a.zarr/recon-1/em/fibsem-uint8
   image_key: ''
   zarr_version: zarr2
   bounding_box:
-  - - 1440
-    - 7680
-  - - 1456
-    - 7072
+  - - 1664
+    - 7216
+  - - 2080
+    - 6656
   - - 0
-    - 9504
-  normalize_max: 179
-  normalize_min: 52
-  normalize_clip: false
+    - 9360
+  normalize_max: 186
+  normalize_min: 21
 - name: em-drosophila-flyem-abg/full
   path: /groups/miaai/miaai/lmd-external-wrappers/abg.zarr
   image_key: ''
@@ -2945,9 +3090,8 @@ volumes:
     - 17920
   - - 4608
     - 34048
-  normalize_max: 251
+  normalize_max: 254
   normalize_min: 0
-  normalize_clip: false
 - name: em-zebrafinch-FFN-j0126-areaX/full
   path: /groups/miaai/miaai/lmd-external-wrappers/zebrafinch_j0126.zarr
   image_key: ''
@@ -2959,6 +3103,5 @@ volumes:
     - 10240
   - - 0
     - 5700
-  normalize_max: 237
-  normalize_min: 55
-  normalize_clip: false
+  normalize_max: 250
+  normalize_min: 23

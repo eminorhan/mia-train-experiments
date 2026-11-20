@@ -32,14 +32,14 @@ norm_pix_loss = false
 
 [data]
 name = "miao_volumes"
-config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lmd_ssl_v3/data_configs/ext_sel-exm_8nm_p256_swe0.4_min1e8_up8_win1-99_noclip_census20261116.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lmd_ssl_v3/data_configs/ext_sel-exm_8nm_p256_swe0.4_min1e8_up8_census20261116.yaml"
 samples_per_epoch = 1000000
 defer_image_ops = true
 
 [val_data]
 # Fresh random crops from the same corpus: a progress readout, not a held-out set.
 name = "miao_volumes"
-config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lmd_ssl_v3/data_configs/ext_sel-exm_8nm_p256_swe0.4_min1e8_up8_win1-99_noclip_census20261116.yaml"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/lmd_ssl_v3/data_configs/ext_sel-exm_8nm_p256_swe0.4_min1e8_up8_census20261116.yaml"
 samples_per_epoch = 128
 defer_image_ops = true
 

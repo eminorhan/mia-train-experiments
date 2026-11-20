@@ -22,9 +22,9 @@
 #
 # WHAT TO READ
 #   train/loss, val/loss   Masked L1. Not comparable between arms (each draws its own crops) or with lmd_ssl_v2
-#                          (other intensity windows). A single spike is a crop of fill, not a problem.
+#                          (v2 divided 8-bit volumes by 255; v3 windows every volume at p0.1-p99.9, clipped).
 #   grad_norm              About 1 at step 1k, under 0.3 from 2k, under 0.1 after 5k in lmd_ssl_v2's 1a_b32.
-#   samples_per_s          About 16 for the one-node arms (2.0 s per step), about 6.6 for 1f (4.84 s per step).
+#   samples_per_s          About 16 for the one-node arms (2.0 s per step), about 6.4 for 1f (4.98 s per step).
 #   data_wait_frac         Near 0, with a short spike every 31,250 steps: the loader restarts at an epoch's end.
 #   lr                     3e-4 at step 5k, then linear to 3e-7 at 250k. Validation every 10k steps.
 set -euo pipefail
