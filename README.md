@@ -26,6 +26,7 @@ is in that repo.
 
 ## Experiments
 
+- [`attention_variants/`](attention_variants/): windowed and sliding-window attention in place of global attention: how much faster is a large-crop training step?
 - [`b300_capability_run/`](b300_capability_run/): how large a volume can a 7B DINOv3 fine-tune on, on 8 B300 nodes?
 - [`banis_parity/`](banis_parity/): can a DINOv3 ViT reach the published BANIS baselines on NISB `base`?
 - [`data_scaling/`](data_scaling/): how much of NISB `base` does a model actually need?
