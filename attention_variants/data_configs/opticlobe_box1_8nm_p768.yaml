@@ -1,0 +1,33 @@
+# attention_variants data config for the 768^3 test (2026-11-21): ONE volume that serves 768^3 crops at its
+# native 8 nm, the FlyEM optic lobe, box 1 (21,504 x 28,800 x 13,312 voxels). 1f's data config is built for
+# 384^3 crops and holds volumes too small for 768^3. The volume entry is copied unchanged from
+#   data_configs/ext_8nm_p384_swe0.4_min1e8_up8_census20261116.yaml, entry em-drosophila-flyem-optic-lobe/full_box1;
+# the other keys are that file's, with patch_size 768. For throughput and memory tests only.
+
+size_weighting_exponent: 0.4
+resolutions:
+- - 8.0
+  - 8.0
+  - 8.0
+patch_size:
+- 768
+- 768
+- 768
+output_axes: lcxyz
+samples_per_epoch: 1000
+
+volumes:
+- name: em-drosophila-flyem-optic-lobe/full_box1
+  path: /nrs/flyem/optic-lobe/optic-lobe-grayscale
+  image_key: ''
+  format: precomputed
+  bounding_box:
+  - - 6912
+    - 28416
+  - - 19584
+    - 48384
+  - - 27648
+    - 40960
+  normalize_max: 255
+  normalize_min: 0
+  weight: 0.799454

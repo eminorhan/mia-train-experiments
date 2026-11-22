@@ -1,0 +1,77 @@
+# attention_variants arm p384_slide24: arm p384_block24 with sliding instead of block windows, as a throughput
+# benchmark: 100 steps, no validation, no checkpoint. Differs from p384_block24 in: attn_window_mode, measure_mfu,
+# and the experiment's name.
+experiment_name = "attnvar__p384_slide24"
+
+[model]
+name = "dinov3_vit3d"
+img_size = 384            # 48^3 = 110,592 tokens at patch 8
+patch_size = 8            # 64 nm tokens at 8 nm
+in_chans = 1
+embed_dim = 1024          # ViT-L
+depth = 24
+num_heads = 16
+n_storage_tokens = 4
+layerscale_init = 1.0e-05
+mask_k_bias = true
+pos_embed_rope_dtype = "fp32"
+pos_embed_rope_type = "vanilla"
+drop_path_rate = 0.0
+use_fa4 = false           # `[trainer].compile` needs torch SDPA
+attn_max_score = 1e5
+attn_window = 24          # each token sees at least the 24^3-token window centred on it, in every block; no global blocks
+attn_window_mode = "sliding"   # the window moves in tiles of 8x8x4 tokens (FlexAttention)
+
+[init]
+path = "/groups/miaai/miaai/pretrained_models/dinov3/dinov3_vitl16_pretrain_lvd1689m-8aa4cbdd.pth"
+inflate_2d_to_3d = true
+skip = ["rope_embed."]    # the 3D RoPE tables are rebuilt
+strict = true
+
+[algorithm]
+name = "simmim"
+mask_ratio = 0.9
+mask_granularity = 4      # in patches: 32-voxel masked blocks
+norm_pix_loss = false
+
+[data]
+name = "miao_volumes"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/attention_variants/data_configs/ext_8nm_p384_swe0.4_min1e8_up8_census20261116.yaml"
+samples_per_epoch = 1000000
+defer_image_ops = true
+
+[val_data]
+# Fresh random crops from the same corpus: a progress readout, not a held-out set.
+name = "miao_volumes"
+config_path = "/groups/scicompsoft/home/orhane/projects/mia-train-experiments/attention_variants/data_configs/ext_8nm_p384_swe0.4_min1e8_up8_census20261116.yaml"
+samples_per_epoch = 128
+defer_image_ops = true
+
+[trainer]
+max_steps = 100           # benchmark (1f: 250000)
+batch_size = 1            # per rank
+lr = 0.0003
+warmup_steps = 2          # benchmark (1f: 5000)
+min_lr_ratio = 0.001
+weight_decay = 0.05
+grad_clip_norm = 1.0
+layerwise_lr_decay = 1.0
+patch_embed_lr_mult = 1.0
+lr_schedule = "linear"
+precision = "bf16"
+compile = true            # needs TORCHINDUCTOR_LAYOUT_OPTIMIZATION=0 in the job
+measure_mfu = false       # the start-up FLOP probe is untested with FlexAttention; no MFU here
+activation_checkpointing = false
+log_every = 20            # benchmark (1f: 1000)
+val_every = 0             # benchmark: no validation (1f: 10000)
+checkpoint_every = 0      # benchmark: no checkpoint (1f: 25000)
+num_workers = 8
+seed = 0
+
+[parallelism]
+dp_replicate = 1          # benchmark: one node (1f: 4)
+dp_shard = 3              # benchmark: throughput.sh sets this to the GPUs of its job (1f: 8)
+tp = 1
+
+[augment]
+rotate = "inplane"        # geometric only: SimMIM's target is its input

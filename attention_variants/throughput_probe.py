@@ -10,6 +10,7 @@ import argparse
 import json
 import os
 import sys
+import time
 import tomllib
 import traceback
 from pathlib import Path
@@ -25,7 +26,7 @@ _original_log = MetricLogger.log
 
 
 def recording_log(self, step, metrics, prefix="train"):
-    LOGGED.append({"step": step, "prefix": prefix, **metrics})
+    LOGGED.append({"step": step, "prefix": prefix, "time": time.time(), **metrics})
     return _original_log(self, step, metrics, prefix)
 
 
@@ -44,6 +45,7 @@ def main() -> None:
         run(args.config, args.output_root, None)
     except torch.OutOfMemoryError as exc:
         status, error = "oom", str(exc).splitlines()[0] if str(exc) else ""
+        traceback.print_exc()  # shows which step ran out of memory
     except Exception as exc:  # recorded, then the rank exits non-zero
         status, error = "error", f"{type(exc).__name__}: {str(exc).splitlines()[0] if str(exc) else ''}"
         traceback.print_exc()
