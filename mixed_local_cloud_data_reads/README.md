@@ -32,14 +32,15 @@ for 1a against 1b the loss curves.
     bash mixed_local_cloud_data_reads/submit.sh <arm>              # a 20-step smoke, then the real run after it
     bash mixed_local_cloud_data_reads/submit.sh --no-smoke <arm>   # the real run only
     bash mixed_local_cloud_data_reads/submit.sh --dry-run <arm>    # write the job script, print the bsub line
-    bash mixed_local_cloud_data_reads/make_data.sh [optic|buckets] # rewrite the data configs
+    SRC_FILE=<copy> bash mixed_local_cloud_data_reads/make_data.sh [optic|buckets] # rewrite the data configs (the script says how to get the copy)
 
 Runs, job logs and probes land in `/nrs/scicompsoft/orhane/mia-train-experiments/mixed_local_cloud_data_reads/`.
 
 ## Data
 
 - **The data configs** are written by `make_data.sh`. Each is lmd-configs' lmd_ssl_v3 default corpus config
-  (8 nm, p1-99 windows, commit 1009c6d) with two changes:
+  (8 nm, p1-99 windows, commit 1009c6d) with three changes:
+  - since 2026-11-23, `tensorstore_context` sets how long a bucket read is retried ("Retry budget" below);
   - one lmd volume is left out, `exm-mouse-liconn-RID16-retina-spinningdisk/crop-001_RID16_18x`. Its
     store was renamed on 2026-11-13, after that config's census, so its path no longer exists;
   - volumes are appended: the optic lobe in `data/v3_plus_optic_lobe_local.yaml` (1a) and
@@ -69,14 +70,29 @@ Runs, job logs and probes land in `/nrs/scicompsoft/orhane/mia-train-experiments
   The male CNS box overlaps the optic lobe's, which is a corner of the same tissue, and test regions of
   our tasks lie inside the hemibrain and the male CNS. This arm tests the data path; it is not a corpus
   proposal.
-- **miao**: branch `feature/remote-paths` of our fork, commit e962737, put first on `PYTHONPATH` by
-  `submit.sh` from the read-only copy `/nrs/scicompsoft/orhane/probes/miao-pinned/e962737`. The branch is
-  `feature/n5-precomputed` plus two commits: a volume's `path` may be a URL (c2eadd5), and a volume with
-  `format` loads from its own dump (e962737). mia-train expands every `[data]` section by dumping the
-  config and loading the dump, which `feature/n5-precomputed` refused for an N5 or precomputed volume.
-  mia-train itself is unchanged.
+- **miao**: branch `feature/remote-paths` of our fork, commit 44cfd4b, put first on `PYTHONPATH` by
+  `submit.sh` from the read-only copy `/nrs/scicompsoft/orhane/probes/miao-pinned/44cfd4b`. The branch is
+  `feature/n5-precomputed` plus four commits:
+  - a volume's `path` may be a URL (c2eadd5);
+  - a volume with `format` loads from its own dump (e962737). mia-train expands every `[data]` section by
+    dumping the config and loading the dump, which `feature/n5-precomputed` refused for an N5 or
+    precomputed volume;
+  - a config can pass settings to tensorstore's context with `tensorstore_context` (d13baf6);
+  - that key replaces `cache_bytes` and `file_io_concurrency`, which are no longer config keys (44cfd4b).
+
+  The runs under "Results" used e962737. Training needs no change in mia-train. Prediction does:
+  `src/prediction/grid.py` still reads `config.cache_bytes`, so `predict.py` does not run with this
+  commit. Predict with a copy of our fork's master until mia-train reads the new key.
 - **Bucket check at the start of every job**: `check_buckets.py` reads the metadata of each bucket volume
   in the run's config, so a node that cannot reach a bucket fails at once.
+- **Stalled bucket requests**: since 2026-11-23 every job sets `TENSORSTORE_CURL_LOW_SPEED_TIME_SECONDS=60`
+  (`submit.sh`). tensorstore then gives up on a bucket request that received nothing for 60 s and sends it
+  again. Without the setting such a request waits forever. The runs under "Results" ran without it.
+- **Retry budget**: since 2026-11-23 the data configs set `tensorstore_context` so that tensorstore retries
+  a failed bucket request 680 times before the read fails and ends the run. That is about 6 hours for a
+  bucket that refuses connections (31 s + 675 x 32 s), and longer for one that goes silent, because each
+  attempt then first waits the 60 s above. tensorstore's default is 32 retries, about 15 minutes, which
+  the runs under "Results" had.
 
 ## Measured before the runs (2026-11-15)
 

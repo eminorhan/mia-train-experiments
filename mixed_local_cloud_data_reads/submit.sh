@@ -30,13 +30,16 @@ SMOKE_GPUS=${SMOKE_GPUS:-1}         # the smoke's GPUs; its derived config gets 
 # tolerates a 5x slower step. `-r` plus `--resume` turns a node failure into a requeue from the last checkpoint.
 WALL=${WALL:-4:00}
 # The miao the job imports: a read-only copy of one commit of our fork (github.com/eminorhan/miao), first on
-# PYTHONPATH; the job stops unless it is the miao imported. e962737 = branch feature/remote-paths: N5 and
-# precomputed stores (feature/n5-precomputed) plus URL paths, which the bucket arm's data config needs.
-MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/e962737/src}
+# PYTHONPATH; the job stops unless it is the miao imported. 44cfd4b = branch feature/remote-paths: N5 and
+# precomputed stores (feature/n5-precomputed), URL paths, and `tensorstore_context`, which the data configs set.
+MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/44cfd4b/src}
 THREADS="export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4"
 # inductor's layout optimisation can hand cuDNN SDPA a query with a non-unit last stride under compile, killing the
 # run at step 1; lmd_ssl_v2 and gary_comparison set this for every compiled run.
 COMPILE_ENV="export TORCHINDUCTOR_LAYOUT_OPTIMIZATION=0"
+# tensorstore gives up on a bucket request that received nothing for 60 s and sends it again. Without this, such a
+# request waits forever and the job idles until its wall limit (probes/fault_injection on /nrs).
+STALL_ENV="export TENSORSTORE_CURL_LOW_SPEED_TIME_SECONDS=60"
 
 DRY=0 SMOKE=1 REAL=1
 while [[ $# -gt 0 ]]; do
@@ -64,6 +67,7 @@ write_cmd () {
     echo "set -euo pipefail"
     echo "$THREADS"
     echo "$COMPILE_ENV"
+    echo "$STALL_ENV"
     echo "export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
     echo "export PYTHONPATH=$MIAO_SRC\${PYTHONPATH:+:\$PYTHONPATH}"
     echo "$VENV/bin/python -c \"import miao; assert miao.__file__.startswith('$MIAO_SRC'), miao.__file__; print('[miao]', miao.__file__)\""

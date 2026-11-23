@@ -6,7 +6,7 @@
 #   bash mixed_local_cloud_data_reads/make_data.sh buckets    # data/v3_plus_buckets.yaml (arm 1c)
 #
 # Each file is lmd-configs' lmd_ssl_v3 default corpus config (247 lmd volumes) under a header, minus one volume
-# whose store is gone, plus volumes appended at the end:
+# whose store is gone, plus the retry budget for bucket reads (`tensorstore_context`) and volumes appended at the end:
 # - arms 1a and 1b: the FlyEM optic-lobe EM, read from /nrs (local) or from gs://flyem-optic-lobe (bucket). The two
 #   files differ only in where that volume is read from.
 # - arm 1c: six public EM volumes, each read from its bucket.
@@ -15,10 +15,15 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SRC=/groups/miaai/miaai/lmd-v0.0.1/configs/configs/lmd_ssl_v3/unlabeled/8nm_p256_swe0.4_min1e8_up8_win1-99_census20261101.yaml
 SRC_COMMIT=1009c6d   # lmd-configs commit of SRC
+# lmd-configs has since removed SRC from its folder. Its history still has it, so read a copy:
+#   git -C /groups/miaai/miaai/lmd-v0.0.1/configs show $SRC_COMMIT:configs/lmd_ssl_v3/unlabeled/<name of SRC> > copy.yaml
+#   SRC_FILE=copy.yaml bash make_data.sh
+SRC_FILE=${SRC_FILE:-$SRC}
+[[ -f $SRC_FILE ]] || { echo "make_data.sh: no such file: $SRC_FILE (see the comment above SRC_FILE)" >&2; exit 1; }
 # Left out: this store was renamed to crop-001.zarr on 2026-11-13, after the census SRC was built on, so its path
 # no longer exists and miao cannot open it.
 GONE='exm-mouse-liconn-RID16-retina-spinningdisk/crop-001_RID16_18x'
-corpus () { awk -v gone="- name: $GONE" '$0 == gone {skip = 1; next} /^- name: / {skip = 0} !skip' "$SRC"; }
+corpus () { awk -v gone="- name: $GONE" '$0 == gone {skip = 1; next} /^- name: / {skip = 0} !skip' "$SRC_FILE"; }
 BOX='[[6784, 29952], [18432, 49536], [25600, 43008]]'   # the optic lobe's 5% tissue box, x y z in level-0 voxels
 WINDOW_MIN=${WINDOW_MIN:-0}      # p1 and p99 of the optic-lobe EM inside the box (probes/config_check on /nrs)
 WINDOW_MAX=${WINDOW_MAX:-253}
@@ -29,12 +34,24 @@ header () {  # header <first line> <what was appended> <volume count sentence>
 # $1
 # Written by make_data.sh. Everything below this header is lmd-configs' file (commit $SRC_COMMIT),
 #   $SRC
-# with two changes:
+# with three changes:
 # - one volume left out, $GONE:
 #   its store was renamed on 2026-11-13, after that file's census, and its path no longer exists;
-# - $2 appended at the end (see the comment there).
+# - $2 appended at the end (see the comment there);
+# - \`tensorstore_context\` added right below this header.
 # $3
 # That header is lmd-configs' own.
+EOF
+}
+
+context () {  # the retry budget for bucket reads (README.md, "Data"); it changes nothing for local volumes
+  cat <<EOF
+# Added by make_data.sh: tensorstore retries a failed bucket request 680 times, about 6 hours, before the read
+# fails and ends the run. Its default is 32 retries, about 15 minutes.
+tensorstore_context:
+  gcs_request_retries: {max_retries: 680}     # gs:// volumes
+  http_request_retries: {max_retries: 680}    # https:// volumes
+#
 EOF
 }
 
@@ -49,6 +66,7 @@ write () {  # write <local|bucket> <path> <image_key> <one line saying where it 
 # The local and bucket files differ only in the appended volume's \`path\` and \`image_key\`.
 #
 EOF
+    context
     corpus
     cat <<EOF
 # Appended by make_data.sh, not by lmd-configs: the FlyEM optic-lobe EM (Neuroglancer precomputed, uint8, 8 nm,
@@ -88,6 +106,7 @@ write_buckets () {
            "six volumes" \
            "The corpus is therefore 252 volumes: 246 of the 247 that lmd-configs' header below counts, plus the six."
     echo "#"
+    context
     corpus
     cat <<EOF
 # Appended by make_data.sh, not by lmd-configs: six public EM volumes, each read straight from its bucket. All are

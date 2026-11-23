@@ -1,13 +1,20 @@
 # mixed_local_cloud_data_reads, arm "local": the lmd_ssl_v3 corpus plus the FlyEM optic-lobe EM, read from /nrs.
 # Written by make_data.sh. Everything below this header is lmd-configs' file (commit 1009c6d),
 #   /groups/miaai/miaai/lmd-v0.0.1/configs/configs/lmd_ssl_v3/unlabeled/8nm_p256_swe0.4_min1e8_up8_win1-99_census20261101.yaml
-# with two changes:
+# with three changes:
 # - one volume left out, exm-mouse-liconn-RID16-retina-spinningdisk/crop-001_RID16_18x:
 #   its store was renamed on 2026-11-13, after that file's census, and its path no longer exists;
-# - one volume appended at the end (see the comment there).
+# - one volume appended at the end (see the comment there);
+# - `tensorstore_context` added right below this header.
 # The corpus is therefore 247 volumes: 246 of the 247 that lmd-configs' header below counts, plus the optic lobe.
 # That header is lmd-configs' own.
 # The local and bucket files differ only in the appended volume's `path` and `image_key`.
+#
+# Added by make_data.sh: tensorstore retries a failed bucket request 680 times, about 6 hours, before the read
+# fails and ends the run. Its default is 32 retries, about 15 minutes.
+tensorstore_context:
+  gcs_request_retries: {max_retries: 680}     # gs:// volumes
+  http_request_retries: {max_retries: 680}    # https:// volumes
 #
 # lmd-v0.0.1 pretraining — lmd_ssl_v3 default — all data, single scale (8 nm) — p1-99 windows
 #
