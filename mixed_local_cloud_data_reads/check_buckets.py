@@ -21,7 +21,7 @@ for path in sorted({run[s]["config_path"] for s in ("data", "val_data") if "conf
         volumes = yaml.safe_load(f)["volumes"]
     for v in volumes:
         if is_url(v["path"]):
-            meta = read_metadata(v["path"], v["image_key"], v.get("format") or v.get("zarr_version", "zarr2"))
+            meta = read_metadata(v["path"], v["image_key"], v["format"])
             print(f"[buckets] {v['name']}: {v['path']}/{v['image_key']} reached, {len(meta.scales)} levels",
                   flush=True)
             found += 1

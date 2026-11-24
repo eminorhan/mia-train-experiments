@@ -3,7 +3,7 @@
     python zf_convert.py <prediction.zarr> <out.zarr>
 
 The prediction is predict.py's artifact on its own lattice -- the arms' 8 nm one, or the store's 20 x 9 x 9 nm grid --
-covering mia-evals' zebrafinch_neurite_tracing_11um cube with context. An affinity prediction is segmented by exact
+covering mia-evals' zebrafinch_neurite_tracing_11um_v1 cube with context. An affinity prediction is segmented by exact
 mutex watershed with mia-evals' own code, as the task's mws_blockwise route segments a native prediction:
 `segment_block`, one block over the lattice voxels the cube's voxels fall in, repulsive stride 1, the FFN neuropil mask
 placed on the lattice by `lattice_mask` and every edge with an end outside it dropped. A promptable arm's
@@ -13,7 +13,7 @@ takes the lattice voxel its centre falls in, by the OME scale and translation bo
 `lattice_mask` uses -- and is restricted to the neuropil mask on the store's grid. It is not relabelled again there:
 a store grid coarser than the lattice (20 nm sections against 8 nm) would cut a connected segment into pieces that no
 longer touch face to face, and score the cuts as splits (the user's choice, 2026-10-27). On a lattice that is the
-store's grid this is exactly the relabel configs/zebrafinch_neurite_tracing_11um/identity.toml asks for.
+store's grid this is exactly the relabel configs/zebrafinch_neurite_tracing_11um_v1/identity.toml asks for.
 
 The output is a single-level OME-Zarr (zarr v2) group laid out like FFN's reference artifact, with the prediction's
 `run` and `step`, so mia-evals names the record after the run. It is built at <out.zarr>.partial and renamed when
@@ -49,7 +49,7 @@ from postprocess.mws_blockwise import (  # noqa: E402
     segment_block,
 )
 
-TASK = EVALS / "configs" / "zebrafinch_neurite_tracing_11um"
+TASK = EVALS / "configs" / "zebrafinch_neurite_tracing_11um_v1"
 MASK_KEY = "labels/neuropil_mask"   # the task's mws_blockwise.toml `mask`, relative to the store
 CONTEXT = 0.75                      # of a patch per side: the context the task's docs ask a prediction to have
 

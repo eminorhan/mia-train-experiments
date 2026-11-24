@@ -7,14 +7,14 @@
 #   bash gary_comparison/score.sh 1a_dinov3_axial_subpixel 500000 --routes mws
 #
 # Data configs and scoring configs live in mia-evals under the task's own directory
-# (configs/gary_comparison_neuron_instance/{mws_size_filter,mws_size_filter_fill,cc_threshold_size_filter}.toml
+# (configs/hemibrain_eb_neuron_instance_v1/{mws_size_filter,mws_size_filter_fill,cc_threshold_size_filter}.toml
 # and .../data/{fit,test}.yaml; named mws, mws_fill and cc_threshold before 2026-10-10), so
 # prediction and scoring read the same volume definitions. Predictions run on gpu_b300 like the training: the same code gives different
 # instance counts on a different GPU generation, so every arm is predicted on one architecture.
 #
 # Where things land (layout of 2026-09-16):
 #   predictions   $EXP/eval/<arm>/step<N>/{fit,test}/<volume>.zarr (+ .gt.zarr)
-#   scored labellings and scratch   /nrs/scicompsoft/orhane/mia-evals/gary_comparison_neuron_instance/{scored,scorescratch}/<record>
+#   scored labellings and scratch   /nrs/scicompsoft/orhane/mia-evals/hemibrain_eb_neuron_instance_v1/{scored,scorescratch}/<record>
 #   LSF logs      $EXP/jobs/
 # The record is named <run>.step<N>.<route> by mia-evals; nothing here chooses a label.
 set -euo pipefail
@@ -27,7 +27,7 @@ PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/gary_comparison
 RUNS=$EXP/runs
 LOGS=$EXP/jobs
-TASK=gary_comparison_neuron_instance
+TASK=hemibrain_eb_neuron_instance_v1
 TASK_DIR=/nrs/scicompsoft/orhane/mia-evals/$TASK
 QUEUE=${QUEUE:-gpu_b300}
 # LEADERBOARD=<dir> scores OFF the mia-evals leaderboard: the record, its table, the scored labellings and the

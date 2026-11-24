@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Score one lmd_ssl_v2 arm's step-100000 checkpoint on mia-evals' zebrafinch_neurite_tracing_11um, on one grid:
+# Score one lmd_ssl_v2 arm's step-100000 checkpoint on mia-evals' zebrafinch_neurite_tracing_11um_v1, on one grid:
 #
 #   bash lmd_ssl_v2/score_zebrafinch.sh <arm> native|8nm [--stages predict,convert,score] [--after <job id>]... [--dry-run]
 #
@@ -16,7 +16,7 @@
 #
 #   predictions   $EXP/eval/<arm>/step100000/zebrafinch_11um/<grid>/{pred,test}/zebrafinch_11um_test.zarr
 #                 (test/ is what the scorer reads: predict.py's artifact for a native affinity arm, else zf_convert.py's)
-#   scored labellings and scratch   /nrs/scicompsoft/orhane/mia-evals/zebrafinch_neurite_tracing_11um/{scored,scorescratch}/<record>
+#   scored labellings and scratch   /nrs/scicompsoft/orhane/mia-evals/zebrafinch_neurite_tracing_11um_v1/{scored,scorescratch}/<record>
 #   LSF logs      $EXP/jobs/lmd2zf_*
 # Records: <run>.step100000.mws_blockwise (native, affinity), .identity (native, promptable), .identity_8nm (8 nm).
 set -euo pipefail
@@ -30,7 +30,7 @@ EXP=/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v2
 RUNS=$EXP/runs
 LOGS=$EXP/jobs
 MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/62b3746/src}
-TASK=zebrafinch_neurite_tracing_11um
+TASK=zebrafinch_neurite_tracing_11um_v1
 TASK_DIR=/nrs/scicompsoft/orhane/mia-evals/$TASK
 VOLUME=zebrafinch_11um_test
 STEP=100000

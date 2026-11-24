@@ -6,7 +6,8 @@
 #   bash mixed_local_cloud_data_reads/make_data.sh buckets    # data/v3_plus_buckets.yaml (arm 1c)
 #
 # Each file is lmd-configs' lmd_ssl_v3 default corpus config (247 lmd volumes) under a header, minus one volume
-# whose store is gone, plus the retry budget for bucket reads (`tensorstore_context`) and volumes appended at the end:
+# whose store is gone, with `zarr_version` written as `format`, plus the retry budget for bucket reads
+# (`tensorstore_context`) and volumes appended at the end:
 # - arms 1a and 1b: the FlyEM optic-lobe EM, read from /nrs (local) or from gs://flyem-optic-lobe (bucket). The two
 #   files differ only in where that volume is read from.
 # - arm 1c: six public EM volumes, each read from its bucket.
@@ -23,7 +24,11 @@ SRC_FILE=${SRC_FILE:-$SRC}
 # Left out: this store was renamed to crop-001.zarr on 2026-11-13, after the census SRC was built on, so its path
 # no longer exists and miao cannot open it.
 GONE='exm-mouse-liconn-RID16-retina-spinningdisk/crop-001_RID16_18x'
-corpus () { awk -v gone="- name: $GONE" '$0 == gone {skip = 1; next} /^- name: / {skip = 0} !skip' "$SRC_FILE"; }
+# lmd-configs' file names each store's format with `zarr_version`. miao calls that key `format` since v0.5.0.
+corpus () {
+  awk -v gone="- name: $GONE" '$0 == gone {skip = 1; next} /^- name: / {skip = 0} !skip' "$SRC_FILE" |
+    sed 's/^  zarr_version: /  format: /'
+}
 BOX='[[6784, 29952], [18432, 49536], [25600, 43008]]'   # the optic lobe's 5% tissue box, x y z in level-0 voxels
 WINDOW_MIN=${WINDOW_MIN:-0}      # p1 and p99 of the optic-lobe EM inside the box (probes/config_check on /nrs)
 WINDOW_MAX=${WINDOW_MAX:-253}
@@ -34,11 +39,12 @@ header () {  # header <first line> <what was appended> <volume count sentence>
 # $1
 # Written by make_data.sh. Everything below this header is lmd-configs' file (commit $SRC_COMMIT),
 #   $SRC
-# with three changes:
+# with four changes:
 # - one volume left out, $GONE:
 #   its store was renamed on 2026-11-13, after that file's census, and its path no longer exists;
 # - $2 appended at the end (see the comment there);
-# - \`tensorstore_context\` added right below this header.
+# - \`tensorstore_context\` added right below this header;
+# - every volume's \`zarr_version\` key written as \`format\`, the key's name in miao since v0.5.0.
 # $3
 # That header is lmd-configs' own.
 EOF

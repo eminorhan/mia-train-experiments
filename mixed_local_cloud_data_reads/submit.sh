@@ -30,9 +30,9 @@ SMOKE_GPUS=${SMOKE_GPUS:-1}         # the smoke's GPUs; its derived config gets 
 # tolerates a 5x slower step. `-r` plus `--resume` turns a node failure into a requeue from the last checkpoint.
 WALL=${WALL:-4:00}
 # The miao the job imports: a read-only copy of one commit of our fork (github.com/eminorhan/miao), first on
-# PYTHONPATH; the job stops unless it is the miao imported. 44cfd4b = branch feature/remote-paths: N5 and
-# precomputed stores (feature/n5-precomputed), URL paths, and `tensorstore_context`, which the data configs set.
-MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/44cfd4b/src}
+# PYTHONPATH; the job stops unless it is the miao imported. 156fa79 = branch feature/remote-paths: upstream
+# miao v0.5.0 plus URL paths, `tensorstore_context` (which the data configs set) and the wait notice.
+MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/156fa79/src}
 THREADS="export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4"
 # inductor's layout optimisation can hand cuDNN SDPA a query with a non-unit last stride under compile, killing the
 # run at step 1; lmd_ssl_v2 and gary_comparison set this for every compiled run.

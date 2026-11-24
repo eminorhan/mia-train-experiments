@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Score one large_inputs_nisb arm at one checkpoint on mia-evals' nisb_base_neurite_tracing task: predict NISB's
+# Score one large_inputs_nisb arm at one checkpoint on mia-evals' nisb_base_neurite_tracing_v1 task: predict NISB's
 # base val (fit) and test cubes, then a blockwise mutex watershed route, each step its own LSF job chained on the last.
 #
 #   bash large_inputs_nisb/score.sh w256_1cube 100000
@@ -26,7 +26,7 @@
 #
 # Where things land (layout of 2026-09-16):
 #   predictions   $EXP/eval/<arm>/step<N>/{fit,test}/<volume>.zarr, their data configs in .../data/{fit,test}.yaml
-#   scored labellings and scratch   /nrs/scicompsoft/orhane/mia-evals/nisb_base_neurite_tracing/{scored,scorescratch}/<record>
+#   scored labellings and scratch   /nrs/scicompsoft/orhane/mia-evals/nisb_base_neurite_tracing_v1/{scored,scorescratch}/<record>
 #   LSF logs      $EXP/jobs/
 # The record is named <run>.step<N>.<route> by mia-evals; nothing here chooses a label.
 set -euo pipefail
@@ -40,7 +40,7 @@ PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/large_inputs_nisb
 RUNS=$EXP/runs
 LOGS=$EXP/jobs
-TASK=nisb_base_neurite_tracing
+TASK=nisb_base_neurite_tracing_v1
 TASK_DIR=/nrs/scicompsoft/orhane/mia-evals/$TASK
 BLOCK=1536
 BLOCKS=4   # ceil(3000 / 1536)^2 x ceil(1350 / 1536)

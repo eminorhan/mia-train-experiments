@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Score one lmd_ssl_v2 arm on mia-evals' lmd_ssl_v2_neuron_instance, or with --fast on its 512^3-crop sibling
-# lmd_ssl_v2_neuron_instance_crop512: predict every volume of both halves, one job per volume, then score them in
+# Score one lmd_ssl_v2 arm on mia-evals' lmd_neuron_instance_v2, or with --fast on its 512^3-crop sibling
+# lmd_neuron_instance_crop512_v2: predict every volume of both halves, one job per volume, then score them in
 # jobs chained on the predictions. An affinity arm is scored through mws_size_filter (exact mutex watershed) on
 # either task; a promptable (SAM) arm through identity_size_filter, from predict_sam.sh's segment-everything
 # labellings.
@@ -21,7 +21,7 @@
 # candidate) pair that ranks first is chosen, and only that checkpoint is scored on the test half, into the one
 # record. The choice and every checkpoint's fit scores: $EXP/eval/<arm>/best_step[.crop512].<route>.json.
 #
-# Data and scoring configs live in mia-evals under configs/lmd_ssl_v2_neuron_instance/, so prediction and scoring
+# Data and scoring configs live in mia-evals under configs/lmd_neuron_instance_v2/, so prediction and scoring
 # read the same volumes. `queue_for` only spreads the load: predictions agree across GPU types to bf16 noise
 # (pq 0.0503 vs 0.0486 for one checkpoint, H100 vs B300, 2026-09-10), so no comparison depends on where they ran.
 # The training miao pin; one job per volume, because the volumes differ ~2,700x in tiles (the zebrafish doublecube
@@ -91,9 +91,9 @@ algorithm=$(awk '/^\[algorithm\]/ {f = 1; next} /^\[/ {f = 0} f && $1 == "name" 
   echo "$run is $algorithm; this script scores affinity_seg and promptable_seg arms" >&2; exit 2; }
 RUN_NAME=$(basename "$run")
 if [[ $FAST -eq 1 ]]; then
-  TASK=lmd_ssl_v2_neuron_instance_crop512 ROUTE=mws_size_filter SUB=/crop512
+  TASK=lmd_neuron_instance_crop512_v2 ROUTE=mws_size_filter SUB=/crop512
 else
-  TASK=lmd_ssl_v2_neuron_instance ROUTE=mws_size_filter SUB=""
+  TASK=lmd_neuron_instance_v2 ROUTE=mws_size_filter SUB=""
 fi
 [[ $algorithm == promptable_seg ]] && ROUTE=identity_size_filter
 WHOLE_NODE=0; [[ $FAST -eq 0 && $algorithm == affinity_seg ]] && WHOLE_NODE=1

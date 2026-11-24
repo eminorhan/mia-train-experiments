@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Score one SAM arm's round on the lmd_ssl_v1_neuron_instance leaderboard, beside the MWS rows.
+# Score one SAM arm's round on the lmd_neuron_instance_v1 leaderboard, beside the MWS rows.
 #
 #   bash sam_lmd_v1/score.sh base 2 [--step N]
 #
 # The artifacts are `instances`, so they go through mia-evals' `identity_size_filter` route
-# (`configs/lmd_ssl_v1_neuron_instance/identity_size_filter.toml`): the same size filter, and the
+# (`configs/lmd_neuron_instance_v1/identity_size_filter.toml`): the same size filter, and the
 # same config, as the mutex-watershed rows, swept over [0, 500, 5000, 50000] on the finetune half
 # and applied once to the reported half, panoptic quality ranking, same region. That is the whole of
 # the comparison: the SAM row and the MWS row differ only in what wrote the labelling. mia-evals
@@ -42,9 +42,9 @@ SCRATCH="${SCRATCH_DIR:-$STAGE/score/${ARM}_r${ROUND}}"
 mkdir -p "$SCRATCH" "$LOGS"
 
 cmd="export OMP_NUM_THREADS=16 NUMBA_NUM_THREADS=16 MKL_NUM_THREADS=16 PYTHONPATH=$EVALS/src; cd $EVALS && \
-$PY -m evaluate score configs/lmd_ssl_v1_neuron_instance/identity_size_filter.toml \
+$PY -m evaluate score configs/lmd_neuron_instance_v1/identity_size_filter.toml \
   --test '$ART/test' --val '$ART/finetune' \
   --run-dir '$run' --scratch '$SCRATCH'"
 id=$(bsub -P miaai -q local -n 20 -W 12:00 -J "sc_$LABEL" -o "$LOGS/sc_${LABEL}_%J.log" -e "$LOGS/sc_${LABEL}_%J.err" "$cmd" \
      | sed -n 's/^Job <\([0-9]*\)>.*/\1/p')
-echo "  $LABEL  job=$id  -> $EVALS/leaderboard/lmd_ssl_v1_neuron_instance/records/$(basename "$run").step${STEP}.identity_size_filter.json"
+echo "  $LABEL  job=$id  -> $EVALS/leaderboard/lmd_neuron_instance_v1/records/$(basename "$run").step${STEP}.identity_size_filter.json"

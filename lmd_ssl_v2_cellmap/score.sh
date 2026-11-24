@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Predict and score lmd_ssl_v2_cellmap arms on mia-evals' cellmap_organelle_semantic, or with --fewshot on
-# cellmap_organelle_semantic_fewshot: one prediction job per checkpoint, covering every test crop (the checkpoint loads
+# Predict and score lmd_ssl_v2_cellmap arms on mia-evals' cellmap_organelle_semantic_v1, or with --fewshot on
+# cellmap_organelle_semantic_fewshot_v1: one prediction job per checkpoint, covering every test crop (the checkpoint loads
 # once), then a CPU scoring job chained on it. The route is identity: predict.py --argmax writes uint8 CellMap ids,
 # which mia-evals scores as written. Nothing is fitted, so the fit split is not predicted.
 #
@@ -52,8 +52,8 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
-if [[ $FEWSHOT -eq 1 ]]; then SIZE=fewshot TASK=cellmap_organelle_semantic_fewshot SUFFIX=_fewshot
-else SIZE=large TASK=cellmap_organelle_semantic SUFFIX=""; fi
+if [[ $FEWSHOT -eq 1 ]]; then SIZE=fewshot TASK=cellmap_organelle_semantic_fewshot_v1 SUFFIX=_fewshot
+else SIZE=large TASK=cellmap_organelle_semantic_v1 SUFFIX=""; fi
 STAMP=$(date +%Y%m%d_%H%M%S)
 
 submit () {      # submit <name> <script> <bsub args...>   -> job id, or DRYRUN

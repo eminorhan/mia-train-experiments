@@ -39,8 +39,10 @@ Runs, job logs and probes land in `/nrs/scicompsoft/orhane/mia-train-experiments
 ## Data
 
 - **The data configs** are written by `make_data.sh`. Each is lmd-configs' lmd_ssl_v3 default corpus config
-  (8 nm, p1-99 windows, commit 1009c6d) with three changes:
+  (8 nm, p1-99 windows, commit 1009c6d) with four changes:
   - since 2026-11-23, `tensorstore_context` sets how long a bucket read is retried ("Retry budget" below);
+  - since 2026-11-24, every volume's `zarr_version` key is written as `format`, the key's name in miao
+    since v0.5.0;
   - one lmd volume is left out, `exm-mouse-liconn-RID16-retina-spinningdisk/crop-001_RID16_18x`. Its
     store was renamed on 2026-11-13, after that config's census, so its path no longer exists;
   - volumes are appended: the optic lobe in `data/v3_plus_optic_lobe_local.yaml` (1a) and
@@ -70,19 +72,18 @@ Runs, job logs and probes land in `/nrs/scicompsoft/orhane/mia-train-experiments
   The male CNS box overlaps the optic lobe's, which is a corner of the same tissue, and test regions of
   our tasks lie inside the hemibrain and the male CNS. This arm tests the data path; it is not a corpus
   proposal.
-- **miao**: branch `feature/remote-paths` of our fork, commit 44cfd4b, put first on `PYTHONPATH` by
-  `submit.sh` from the read-only copy `/nrs/scicompsoft/orhane/probes/miao-pinned/44cfd4b`. The branch is
-  `feature/n5-precomputed` plus four commits:
-  - a volume's `path` may be a URL (c2eadd5);
-  - a volume with `format` loads from its own dump (e962737). mia-train expands every `[data]` section by
-    dumping the config and loading the dump, which `feature/n5-precomputed` refused for an N5 or
-    precomputed volume;
-  - a config can pass settings to tensorstore's context with `tensorstore_context` (d13baf6);
-  - that key replaces `cache_bytes` and `file_io_concurrency`, which are no longer config keys (44cfd4b).
+- **miao**: branch `feature/remote-paths` of our fork, commit 156fa79, put first on `PYTHONPATH` by
+  `submit.sh` from the read-only copy `/nrs/scicompsoft/orhane/probes/miao-pinned/156fa79`. Since
+  2026-11-24 the branch is upstream miao v0.5.0 plus three commits:
+  - a volume's `path` may be a URL (082226e);
+  - `tensorstore_context` is the one config key for tensorstore's context, in place of `cache_bytes` and
+    `file_io_concurrency` (b1c6b88);
+  - a loader worker says so when a read takes long (156fa79, "Waiting for a bucket" below).
 
-  The runs under "Results" used e962737. Training needs no change in mia-train. Prediction does:
-  `src/prediction/grid.py` still reads `config.cache_bytes`, so `predict.py` does not run with this
-  commit. Predict with a copy of our fork's master until mia-train reads the new key.
+  The runs under "Results" used e962737, the same branch on an older base. Training needs no change in
+  mia-train. Prediction does: `src/prediction/grid.py` still reads `config.cache_bytes` and each volume's
+  `zarr_version`, so `predict.py` does not run with this commit. Predict with the copy of commit 28229ac
+  (`miao-pinned/28229ac`) until mia-train moves to the new keys.
 - **Bucket check at the start of every job**: `check_buckets.py` reads the metadata of each bucket volume
   in the run's config, so a node that cannot reach a bucket fails at once.
 - **Stalled bucket requests**: since 2026-11-23 every job sets `TENSORSTORE_CURL_LOW_SPEED_TIME_SECONDS=60`
@@ -93,6 +94,10 @@ Runs, job logs and probes land in `/nrs/scicompsoft/orhane/mia-train-experiments
   bucket that refuses connections (31 s + 675 x 32 s), and longer for one that goes silent, because each
   attempt then first waits the 60 s above. tensorstore's default is 32 retries, about 15 minutes, which
   the runs under "Results" had.
+- **Waiting for a bucket**: tensorstore prints nothing while it retries, and the trainer logs only when a
+  step finishes. So since 2026-11-23 a loader worker that has waited 30 s for a read prints one line to
+  the job's error log, and again each time the wait has doubled (60 s, 120 s, ...):
+  `[miao] still waiting for a read from volume <name> (<path>) after 30 s`.
 
 ## Measured before the runs (2026-11-15)
 

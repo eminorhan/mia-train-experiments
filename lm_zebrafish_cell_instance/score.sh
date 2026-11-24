@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Score one lm_zebrafish_cell_instance arm at one checkpoint on mia-evals' lm_zebrafish_cell_instance task: predict the
+# Score one lm_zebrafish_cell_instance arm at one checkpoint on mia-evals' lm_zebrafish_cell_instance_v1 task: predict the
 # fit frames (1 and 25) and the test frame (10), then the task's scoring route, each step its own LSF job chained on
 # the last.
 #
@@ -28,7 +28,7 @@
 #
 # Where things land (layout of 2026-09-16):
 #   predictions   $EXP/eval/<arm>/step<N>/{fit,test}/<volume>.zarr, their data configs in .../data/{fit,test}.yaml
-#   scored labellings and scratch   /nrs/scicompsoft/orhane/mia-evals/lm_zebrafish_cell_instance/{scored,scorescratch}/<record>
+#   scored labellings and scratch   /nrs/scicompsoft/orhane/mia-evals/lm_zebrafish_cell_instance_v1/{scored,scorescratch}/<record>
 #   LSF logs      $EXP/jobs/
 # The record is named <run>.step<N>.<route> by mia-evals; nothing here chooses a label.
 set -euo pipefail
@@ -43,7 +43,7 @@ EXP=/nrs/scicompsoft/orhane/mia-train-experiments/lm_zebrafish_cell_instance
 RUNS=$EXP/runs
 LOGS=$EXP/jobs
 MIAO_SRC=$EXP/jobs/miao-6b0533a/src   # submit.sh says how it was made
-TASK=lm_zebrafish_cell_instance
+TASK=lm_zebrafish_cell_instance_v1     # the mia-evals task; the experiment keeps its own name
 TASK_DIR=/nrs/scicompsoft/orhane/mia-evals/$TASK
 
 DRY=0 PREDICT=1 ROUTE=mws_size_filter BOARD=""
