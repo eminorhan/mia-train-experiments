@@ -31,7 +31,7 @@ scale, the batch and the prompting recipe (below).
 scoring on hold because its 352-voxel lattice does not cover the task region on two volumes).** Nine arms on the encoder's scale, the batch size and the training
 recipe (below); version 3's single arm is superseded and its round-0 checkpoints remain for
 reference. **Arm 8 (128 objects per crop, click pairs, mask feedback) leads the
-`lmd_ssl_v1_neuron_instance` leaderboard at pq 0.2786, arm 7 (64 objects) is second at 0.2591, both
+`lmd_neuron_instance_v1` leaderboard at pq 0.2786, arm 7 (64 objects) is second at 0.2591, both
 above the affinity rows 1c 0.2369 and 2c 0.2287**; arm 6 0.2244, arm 4 0.2094, arm 5 0.2038. Objects
 per training crop is the lever: assembled block recall 0.343 -> 0.407 -> 0.450 -> 0.542 (arms 4, 6,
 7, 8) at a flat precision of 0.57-0.60, and pq followed. Arm 3 (patch 8, mask stride 2) is the worst
@@ -254,10 +254,10 @@ this directory.
 
 `predict.py` already writes an `instances` artifact plus the co-registered ground truth for a
 promptable run, on the lattice the affinity artifacts were predicted on (same YAMLs, same patch).
-The MWS leaderboard rows are scored from stored labellings through
-`lmd_ssl_v1_neuron_instance_mws_{fit,test}.toml` -- a `size_filter` swept over
+The MWS leaderboard rows are scored from stored labellings through mia-evals'
+`configs/lmd_neuron_instance_v1/identity_size_filter.toml` -- a size filter swept over
 [0, 500, 5000, 50000] on the finetune half, applied once to the reported half -- so a SAM row goes
-through exactly those files with no watershed. Same region, same metric, same fitted parameter:
+through exactly that file with no watershed. Same region, same metric, same fitted parameter:
 **the SAM row and the MWS row differ only in what wrote the labelling.**
 
 Mask-generator settings at eval are the labeller's, fixed (`predict_eval.sh` reads

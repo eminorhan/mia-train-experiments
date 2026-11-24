@@ -34,7 +34,7 @@ is in that repo.
 - [`init_comparison/`](init_comparison/): does pretraining help on NISB, and do EM augmentations?
 - [`large_inputs/`](large_inputs/): how large an input can a model train on per B300 node, and at what throughput?
 - [`large_inputs_nisb/`](large_inputs_nisb/): does labelled-data scaling on NISB pay off at a larger window?
-- [`lm_zebrafish_cell_instance/`](lm_zebrafish_cell_instance/): an affinity model for mia-evals' `lm_zebrafish_cell_instance` task.
+- [`lm_zebrafish_cell_instance/`](lm_zebrafish_cell_instance/): an affinity model for mia-evals' `lm_zebrafish_cell_instance_v1` task.
 - [`lmd_ssl_v1/`](lmd_ssl_v1/): does SSL on the lmd corpus beat a pretrained checkpoint?
 - [`lmd_ssl_v2/`](lmd_ssl_v2/): does SimMIM on the 2026-10-15 lmd corpus beat the LVD checkpoint for affinity prediction, and do LSDs or a SAM model help?
 - [`lmd_ssl_v2_cellmap/`](lmd_ssl_v2_cellmap/): which lmd_ssl_v2 encoder transfers best to CellMap organelle semantic segmentation?

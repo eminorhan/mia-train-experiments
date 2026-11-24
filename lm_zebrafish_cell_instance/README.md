@@ -1,6 +1,6 @@
-# An affinity model for lm_zebrafish_cell_instance
+# An affinity model for lm_zebrafish_cell_instance_v1
 
-mia-evals' `lm_zebrafish_cell_instance` task is cell instance segmentation in one frame of a light-sheet
+mia-evals' `lm_zebrafish_cell_instance_v1` task is cell instance segmentation in one frame of a light-sheet
 zebrafish time series (Betzig lab, crop-001: 48 frames of 152 × 508 × 1466 voxels, z, y, x, at
 200 × 108 × 108 nm). Frame 10 is reported (293 proofread cells). Frames 1 and 25 (317 and 296 cells)
 fit the task's size filter, and here they are also the training data. No frame is held out for
@@ -46,8 +46,9 @@ shows exactly those lines.
 ## Data
 
 `data/train.yaml` is mia-evals' fit split (`configs/lm_zebrafish_cell_instance/data/fit.yaml` at
-mia-evals 3e6cd5a), rewritten in x, y, z order. `affinity_seg` defines its targets in that order, and
-miao reads `resolutions` and `bounding_box` in `output_axes` order, so both are rewritten too.
+mia-evals 3e6cd5a, now `configs/lm_zebrafish_cell_instance_v1/data/fit.yaml`), rewritten in x, y, z
+order. `affinity_seg` defines its targets in that order, and miao reads `resolutions` and
+`bounding_box` in `output_axes` order, so both are rewritten too.
 
 Frame 1's box starts past the strip that its label's re-registration left unlabelled (z = 0, y < 5,
 x < 5). About a fifth of each frame, chiefly the lower left, was left unannotated on purpose and is
@@ -77,7 +78,7 @@ smoke runs under `*/smoke/`).
 
 ## Scoring
 
-Arms are scored on request only, through mia-evals' `lm_zebrafish_cell_instance` task, route
+Arms are scored on request only, through mia-evals' `lm_zebrafish_cell_instance_v1` task, route
 `mws_size_filter`: mutex watershed, then a size filter fitted on frames 1 and 25 and applied to
 frame 10. The size filter is therefore fitted on the frames the models trained on, as it was for the
 task's Cellpose-SAM and LSD rows.

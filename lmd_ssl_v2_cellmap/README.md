@@ -2,7 +2,7 @@
 
 Each arm fine-tunes one encoder starting point with `semantic_seg` on the fit crops of mia-evals' two CellMap
 organelle tasks and is scored on their test crops (mean IoU over 48 classes):
-`cellmap_organelle_semantic` (228 fit crops, 43 test) and `cellmap_organelle_semantic_fewshot` (17 fit crops, one
+`cellmap_organelle_semantic_v1` (228 fit crops, 43 test) and `cellmap_organelle_semantic_fewshot_v1` (17 fit crops, one
 per dataset; 193 test). Series 1 varies the starting point; series 2 changes one thing each about 1e, the encoder
 lmd_ssl_v2 found best for affinities; series 3 changes 1c, the best 8 nm CellMap arm: 3a its resolution, 3b its
 loss as well, 3c the encoder's learning rates on top of 3b.

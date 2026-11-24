@@ -95,7 +95,7 @@ under `*/smoke/`).
 
 ## Scoring
 
-Scoring uses mia-evals' `nisb_base_neurite_tracing` task (test `seed101`, route `mws_blockwise`),
+Scoring uses mia-evals' `nisb_base_neurite_tracing_v1` task (test `seed101`, route `mws_blockwise`),
 and runs only on request. Every arm predicts with `predict.py --cover-box`, which covers the whole
 cube at either window, so all six rows share one region. Every arm predicts at its own window:
 `score.sh` writes the task's data configs with `patch_size` set to it, and `predict.py` checks that

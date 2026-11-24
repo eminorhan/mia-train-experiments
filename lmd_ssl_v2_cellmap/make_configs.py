@@ -19,8 +19,8 @@ Writes, next to this file:
   <arm>_b32.toml                  series b32: the large task again, 15k steps at a global batch of 32 (B32)
   <arm>_25k.toml                  series 25k: the first round's large-task runs, 25k steps instead of 100k (S25K)
 
-<task> is `large` (cellmap_organelle_semantic) or `fewshot` (cellmap_organelle_semantic_fewshot), <res> `8nm` or
-`native` (each dataset's raw voxel size). It prints what each filter removed and every test crop's coverage.
+<task> is `large` (cellmap_organelle_semantic_v1) or `fewshot` (cellmap_organelle_semantic_fewshot_v1), <res> `8nm`
+or `native` (each dataset's raw voxel size). It prints what each filter removed and every test crop's coverage.
 """
 
 from __future__ import annotations
@@ -38,7 +38,7 @@ import yaml
 HERE = Path(__file__).resolve().parent
 EXPERIMENT = HERE.name
 MIA_EVALS = Path("/groups/scicompsoft/home/orhane/projects/mia-evals")
-TASKS = {"large": "cellmap_organelle_semantic", "fewshot": "cellmap_organelle_semantic_fewshot"}
+TASKS = {"large": "cellmap_organelle_semantic_v1", "fewshot": "cellmap_organelle_semantic_fewshot_v1"}
 WINDOW = 256
 COMPOSITE_WEIGHT = 0.25
 # classes.csv as mia-evals' task builder read it (the hash in its data YAML headers).

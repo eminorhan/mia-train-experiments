@@ -376,10 +376,10 @@ the first few thousand steps (lmd 1a had 48 at step 300 and recovered).
     bash gary_comparison/score.sh 1a_dinov3_axial_subpixel 500000          # predict fit + test, then MWS and CC routes
     bash gary_comparison/score.sh 1a_dinov3_axial_subpixel 500000 --dry-run
 
-The task in mia-evals is `gary_comparison_neuron_instance`: the test corner from
-`configs/gary_comparison_neuron_instance/data/test.yaml` (a copy of `data/hemibrain_eb_test.yaml`), scored on its
+The task in mia-evals is `hemibrain_eb_neuron_instance_v1`: the test corner from
+`configs/hemibrain_eb_neuron_instance_v1/data/test.yaml` (a copy of `data/hemibrain_eb_test.yaml`), scored on its
 lattice-aligned 896^3 centre, ranked by panoptic quality with VOI, SQ, RQ and adapted Rand error
-reported. Post-processing is fitted on `configs/gary_comparison_neuron_instance/data/fit.yaml`, a 1000^3 block of the
+reported. Post-processing is fitted on `configs/hemibrain_eb_neuron_instance_v1/data/fit.yaml`, a 1000^3 block of the
 validation slab directly beneath the test corner (`[4000, 5000) x [4000, 5000) x [3000, 4000)`): the
 same lateral tissue, inside the split the protocol reserves for selection, disjoint from the test box.
 Two routes, in two scoring configs sharing the task: `mws` (mutex watershed at repulsive stride 1,
@@ -399,7 +399,7 @@ are numbered differently and VOI sums in label order. The committed records were
 Records are named `<run>.step<N>.<route>`, e.g.
 `gary__1a_dinov3_axial_subpixel_20260916_215544.step500000.mws`, so a row names its checkpoint
 directory outright. Predictions live in `eval/<arm>/step<N>/{fit,test}/` under the experiment's /nrs
-directory; scored labellings and scratch under `/nrs/scicompsoft/orhane/mia-evals/gary_comparison_neuron_instance/`.
+directory; scored labellings and scratch under `/nrs/scicompsoft/orhane/mia-evals/hemibrain_eb_neuron_instance_v1/`.
 
 Checkpoints scored for arms 1a and 1b: steps 100k, 300k and 500k each. Arm 1b (from scratch) finished on
 2026-09-18 (run `runs/gary__1b_scratch_axial_subpixel_20260917_093923`); it too left the trivial predictor by
@@ -495,8 +495,8 @@ scored.
 - 4a, 4b and 5b were stopped by decision of 2026-09-26. The UNETR decoder (`decoder = "unetr"` in
   `affinity_seg`) is on master since the same day.
 
-Records: `leaderboard/gary_comparison_neuron_instance/` in mia-evals; scored labellings under
-`/nrs/scicompsoft/orhane/mia-evals/gary_comparison_neuron_instance/scored/<record>/`.
+Records: `leaderboard/hemibrain_eb_neuron_instance_v1/` in mia-evals; scored labellings under
+`/nrs/scicompsoft/orhane/mia-evals/hemibrain_eb_neuron_instance_v1/scored/<record>/`.
 
 ## Next
 

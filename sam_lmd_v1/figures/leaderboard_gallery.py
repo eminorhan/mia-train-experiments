@@ -7,7 +7,7 @@
         --volumes kasthuri15_ac4 liconn_mouse_hippocampus liconn_expid82
 
 Every artifact is what `predict.py` (SAM) or the mutex-watershed pipeline (affinities) wrote for the
-`lmd_ssl_v1_neuron_instance` task: the same lattice, the same region, ids per voxel. Each is shown
+`lmd_neuron_instance_v1` task: the same lattice, the same region, ids per voxel. Each is shown
 AFTER its own size filter, the one the leaderboard scored it with (`NAME=DIR:MIN_SIZE`; ids with
 fewer voxels than MIN_SIZE become background, exactly mia-evals' `size_filter`), so the panels
 show what the panoptic-quality numbers were computed on. The ground truth is the `.gt.zarr` beside
@@ -40,7 +40,7 @@ sys.path.insert(0, str(HERE))
 import labelling_gallery as gallery  # noqa: E402
 
 RECORDS = Path("/groups/scicompsoft/home/orhane/projects/mia-evals/leaderboard/"
-               "lmd_ssl_v1_neuron_instance/records")
+               "lmd_neuron_instance_v1/records")
 RECORD_LABELS = {"1c": "1c_step50000_mws", "2c": "2c_step50000_mws"}
 SHORT = {"kasthuri15_ac4": "kasthuri ac4", "liconn_mouse_hippocampus": "liconn hippocampus",
          "liconn_expid82": "liconn expid82", "zebrafish_fish2_doublecube1": "zebrafish doublecube1"}
