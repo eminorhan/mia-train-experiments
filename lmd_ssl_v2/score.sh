@@ -21,8 +21,9 @@
 # candidate) pair that ranks first is chosen, and only that checkpoint is scored on the test half, into the one
 # record. The choice and every checkpoint's fit scores: $EXP/eval/<arm>/best_step[.crop512].<route>.json.
 #
-# Data and scoring configs live in mia-evals under configs/lmd_neuron_instance_v2/, so prediction and scoring
-# read the same volumes. `queue_for` only spreads the load: predictions agree across GPU types to bf16 noise
+# Scoring configs and task data live in mia-evals under configs/lmd_neuron_instance_v2/. Prediction reads the task
+# data from TASK_DATA, a read-only copy of mia-evals fb08d48: the same volumes and boxes, in the config format this
+# experiment's miao reads. `queue_for` only spreads the load: predictions agree across GPU types to bf16 noise
 # (pq 0.0503 vs 0.0486 for one checkpoint, H100 vs B300, 2026-09-10), so no comparison depends on where they ran.
 # The training miao pin; one job per volume, because the volumes differ ~2,700x in tiles (the zebrafish doublecube
 # 2,744, FlyID49 one); each writes its <volume>.gt.zarr beside it, last, and a volume with one is not predicted again.
@@ -33,7 +34,13 @@
 # The record is named <run>.step<N>.<route> by mia-evals; nothing here chooses a label.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
+# Prediction stays on the code from before the move to miao 0.5.0 (2026-11-26), as read-only copies: this
+# experiment's miao (62b3746), the last mia-train before the move (5b3aac1) and mia-evals' task data of that time
+# (fb08d48). The checkouts now need miao 0.5.0, which reads CREMI at another pyramid level. Scoring uses the
+# mia-evals checkout.
+MIA_TRAIN=${MIA_TRAIN:-/nrs/scicompsoft/orhane/probes/mia-train-pinned/5b3aac1}
+MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/62b3746/src}
+TASK_DATA=${TASK_DATA:-/nrs/scicompsoft/orhane/probes/mia-evals-pinned/fb08d48/configs}
 EVALS=/groups/scicompsoft/home/orhane/projects/mia-evals
 VENV=/groups/scicompsoft/home/orhane/myvenv
 MIA_EVALS=$VENV/bin/mia-evals
@@ -41,7 +48,6 @@ PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v2
 RUNS=$EXP/runs
 LOGS=$EXP/jobs
-MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/62b3746/src}
 # The scorer's memory is its slots x 15 GB on `local`. Exact mws on the full task peaks at an estimated 2.5-3.7 TB, at
 # the zebrafish doublecube (7.1 G voxels, ~4-5 mutex insertions per voxel), more than any CPU node holds: that scorer
 # takes a whole B300 node instead, 96 x 40 GB with all 8 GPUs reserved and left idle (the esub wants 12 slots per
@@ -147,7 +153,7 @@ if [[ $PREDICT -eq 1 ]]; then
   for step in $STEPS; do
     art=$(art_for "$step"); mkdir -p "$art"
     for split in fit test; do
-      config=$EVALS/configs/$TASK/data/$split.yaml
+      config=$TASK_DATA/$TASK/data/$split.yaml
       for volume in $(sed -n 's/^- name: //p' "$config"); do
         if grep -qs '"background_id"' "$art/$split/$volume.gt.zarr/s0/zarr.json"; then
           printf '  predict %-6s %-5s %-36s exists\n' "$step" "$split" "$volume"; continue
@@ -159,7 +165,7 @@ if [[ $PREDICT -eq 1 ]]; then
 --volume $volume --out '$art/$split'"; wall=$(wall_for "$volume")
         fi
         cmd="export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
-PYTHONPATH=$MIAO_SRC:$MIA_TRAIN/src; $VENV/bin/python -c \"import miao; assert miao.__file__.startswith('$MIAO_SRC'), miao.__file__\" \
+MIA_TRAIN=$MIA_TRAIN PYTHONPATH=$MIAO_SRC:$MIA_TRAIN/src; $VENV/bin/python -c \"import miao; assert miao.__file__.startswith('$MIAO_SRC'), miao.__file__\" \
 && $predict"
         args=(-q "${PREDICT_QUEUE:-$(queue_for "$volume" "$split")}" -gpu "num=1" -n 12 -W "$wall")
         [[ -n "$AFTER" && ! -d "$run/checkpoints/step_$step" ]] && args+=(-w "done($AFTER)")   # not saved yet

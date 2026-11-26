@@ -33,7 +33,11 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
+# Prediction stays on the last stack before the move to miao 0.5.0 (2026-11-26), as read-only copies: mia-train
+# 5b3aac1 and miao 0.4.2+fork.5 (28229ac, what myvenv held until then). They read this folder's data YAMLs as
+# they are.
+MIA_TRAIN=${MIA_TRAIN:-/nrs/scicompsoft/orhane/probes/mia-train-pinned/5b3aac1}
+MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/28229ac/src}
 VENV=/groups/scicompsoft/home/orhane/myvenv
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v1   # this experiment's home on /nrs: runs/ jobs/ eval/ probes/ (layout of 2026-09-16)
 RUNS=$EXP/runs
@@ -116,7 +120,7 @@ for half in "${HALVES[@]}"; do
   out="$OUT_ROOT/$half"
   mkdir -p "$out" "$LOGS"
 
-  volumes=$("$VENV/bin/python" - "$config" <<'PY'
+  volumes=$(PYTHONPATH=$MIAO_SRC "$VENV/bin/python" - "$config" <<'PY'
 import sys
 from miao.config import load_config
 print(" ".join(v.name for v in load_config(sys.argv[1]).volumes))
@@ -127,7 +131,7 @@ PY
     n=$(slots_for "$volume"); w=$(wall_for "$volume"); q=$(queue_for "$volume")
     tag="${ARM}_${half}_${volume}"
     cmd="export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 \
-PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$MIA_TRAIN/src; \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$MIAO_SRC:$MIA_TRAIN/src; \
 $VENV/bin/python $MIA_TRAIN/src/predict.py '$run' --data-config '$config' \
 --volume '$volume' --step $STEP --out '$out'"
     if (( DRY )); then

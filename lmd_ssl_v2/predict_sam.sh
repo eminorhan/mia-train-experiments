@@ -8,7 +8,7 @@
 set -euo pipefail
 RUN=$1 STEP=$2 CONFIG=$3 VOLUME=$4 OUT=$5
 shift 5
-MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
+MIA_TRAIN=${MIA_TRAIN:-/nrs/scicompsoft/orhane/probes/mia-train-pinned/5b3aac1}   # score.sh exports its own
 SAM=/groups/scicompsoft/home/orhane/projects/mia-train-experiments/sam_lmd_v1
 PY=/groups/scicompsoft/home/orhane/myvenv/bin/python
 

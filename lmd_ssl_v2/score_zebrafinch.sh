@@ -21,7 +21,11 @@
 # Records: <run>.step100000.mws_blockwise (native, affinity), .identity (native, promptable), .identity_8nm (8 nm).
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
+# Prediction stays on the code from before the move to miao 0.5.0 (2026-11-26), as read-only copies: this
+# experiment's miao (62b3746) and the last mia-train before the move (5b3aac1). They read
+# data/zebrafinch_11um_*.yaml as they are. The conversion and the scoring use the mia-evals checkout.
+MIA_TRAIN=${MIA_TRAIN:-/nrs/scicompsoft/orhane/probes/mia-train-pinned/5b3aac1}
+MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/62b3746/src}
 EVALS=/groups/scicompsoft/home/orhane/projects/mia-evals
 VENV=/groups/scicompsoft/home/orhane/myvenv
 MIA_EVALS=$VENV/bin/mia-evals
@@ -29,7 +33,6 @@ PROJECT=miaai
 EXP=/nrs/scicompsoft/orhane/mia-train-experiments/lmd_ssl_v2
 RUNS=$EXP/runs
 LOGS=$EXP/jobs
-MIAO_SRC=${MIAO_SRC:-/nrs/scicompsoft/orhane/probes/miao-pinned/62b3746/src}
 TASK=zebrafinch_neurite_tracing_11um_v1
 TASK_DIR=/nrs/scicompsoft/orhane/mia-evals/$TASK
 VOLUME=zebrafinch_11um_test
@@ -97,8 +100,8 @@ if [[ ,$STAGES, == *,predict,* ]]; then
 --volume $VOLUME --out '$PRED' $flags"
     wall=3:00; [[ $GRID == 8nm ]] && wall=6:00              # 1.4-2.1 h at 8 nm; 2f hit 3:00 on a shared node
   fi
-  cmd="$PYENV export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$MIAO_SRC:$MIA_TRAIN/src; \
-echo \"[mia-train] \$(git -C '$MIA_TRAIN' rev-parse HEAD)\"; \
+  cmd="$PYENV export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True MIA_TRAIN=$MIA_TRAIN PYTHONPATH=$MIAO_SRC:$MIA_TRAIN/src; \
+echo '[mia-train] $MIA_TRAIN'; \
 $VENV/bin/python -c \"import miao; assert miao.__file__.startswith('$MIAO_SRC'), miao.__file__\" && $predict"
   readarray -t w < <(chain)
   id=$(submit "lmd2zf_p_${ARM}_$GRID" -q "$PREDICT_QUEUE" -gpu "num=1" -n 12 -W "$wall" "${w[@]}" -- "$cmd")

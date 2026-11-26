@@ -66,6 +66,10 @@ loader workers re-import miao at every epoch boundary. Each job prints the miao 
 stops if it is not the export. Prediction needs the same `PYTHONPATH`, because `predict.py` reads
 the frame through miao.
 
+Since 2026-11-26 `score.sh` predicts with a read-only copy of mia-train (5b3aac1, the last commit
+before mia-train moved to miao 0.5.0) and the task's data configs as mia-evals had them then (a copy
+of fb08d48). The scorer runs on myvenv's miao 0.5.0. See "miao 0.5.0" in the repository README.
+
 ## Running it
 
     bash lm_zebrafish_cell_instance/submit.sh w496_em w496_noem w288_em w288_noem

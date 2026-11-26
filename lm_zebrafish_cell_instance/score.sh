@@ -15,9 +15,10 @@
 # predictions cover each frame whole (--cover-box), the region the task's first record fixed. They run on gpu_b300
 # like the training, because another GPU generation predicts slightly differently.
 #
-# Both steps import miao from the pinned 0.4.2 export that the training used (submit.sh): predict.py and the scorer
-# read one frame of the store through miao's fixed_axes, which myvenv's miao 0.4.1 does not have. Each job prints
-# the miao it imported and stops if it is not the export.
+# Prediction stays on the code from before the move to miao 0.5.0 (2026-11-26): the pinned miao 0.4.2 export that
+# the training used (submit.sh), the last mia-train before the move (a read-only copy of 5b3aac1) and the task's
+# data configs as mia-evals had them then (TASK_DATA, a copy of fb08d48). The prediction job prints the miao it
+# imported and stops if it is not the export. The scorer runs on myvenv's miao, which mia-evals needs since then.
 #
 # Routes (--route, default mws_size_filter) are the task's scoring configs of that name.
 #
@@ -33,7 +34,8 @@
 # The record is named <run>.step<N>.<route> by mia-evals; nothing here chooses a label.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
+MIA_TRAIN=${MIA_TRAIN:-/nrs/scicompsoft/orhane/probes/mia-train-pinned/5b3aac1}
+TASK_DATA=${TASK_DATA:-/nrs/scicompsoft/orhane/probes/mia-evals-pinned/fb08d48/configs}
 EVALS=/groups/scicompsoft/home/orhane/projects/mia-evals
 VENV=/groups/scicompsoft/home/orhane/myvenv
 MIA_EVALS=$VENV/bin/mia-evals
@@ -93,8 +95,8 @@ if (( PREDICT )); then
   for split in fit test; do
     data=$ART/data/$split.yaml
     { echo "# Written by mia-train-experiments/lm_zebrafish_cell_instance/score.sh: mia-evals configs/$TASK/data/$split.yaml"
-      echo "# with patch_size set to $RUN_NAME's window (img_size [$X, $Y, $Z], x, y, z)."
-      sed "s/^patch_size: .*/patch_size: [$Z, $Y, $X]   # z, y, x: the run's window/" "$EVALS/configs/$TASK/data/$split.yaml"; } > "$data"
+      echo "# (as of fb08d48) with patch_size set to $RUN_NAME's window (img_size [$X, $Y, $Z], x, y, z)."
+      sed "s/^patch_size: .*/patch_size: [$Z, $Y, $X]   # z, y, x: the run's window/" "$TASK_DATA/$TASK/data/$split.yaml"; } > "$data"
     cmd="export OMP_NUM_THREADS=12 MKL_NUM_THREADS=12 OPENBLAS_NUM_THREADS=12 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHONPATH=$MIAO_SRC:$MIA_TRAIN/src; \
 cd '$MIA_TRAIN' && $CHECK_MIAO && '$VENV/bin/python' src/predict.py '$run' --step $STEP \
 --data-config '$data' --out '$ART/$split' --cover-box"
@@ -108,8 +110,8 @@ fi
 # 2. the route: one CPU job chained on everything before it. Scratch and scored labellings are filed under the
 #    record's name.
 rec="${RUN_NAME}.step${STEP}.${ROUTE}"
-cmd="export OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 PYTHONPATH=$MIAO_SRC; \
-cd '$EVALS' && $CHECK_MIAO && '$VENV/bin/python' '$NUMA_LOCAL' '$MIA_EVALS' score configs/$TASK/$ROUTE.toml \
+cmd="export OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8; \
+cd '$EVALS' && '$VENV/bin/python' '$NUMA_LOCAL' '$MIA_EVALS' score configs/$TASK/$ROUTE.toml \
 --test '$ART/test' --val '$ART/fit' --run-dir '$run' \
 --scored-out '$TASK_DIR/scored/$rec' --scratch '$TASK_DIR/scorescratch/$rec'${BOARD:+ --leaderboard '$BOARD'}"
 args=(-q local -n 32 -W 8:00)

@@ -81,9 +81,10 @@ Runs, job logs and probes land in `/nrs/scicompsoft/orhane/mia-train-experiments
   - a loader worker says so when a read takes long (156fa79, "Waiting for a bucket" below).
 
   The runs under "Results" used e962737, the same branch on an older base. Training needs no change in
-  mia-train. Prediction does: `src/prediction/grid.py` still reads `config.cache_bytes` and each volume's
-  `zarr_version`, so `predict.py` does not run with this commit. Predict with the copy of commit 28229ac
-  (`miao-pinned/28229ac`) until mia-train moves to the new keys.
+  mia-train. Prediction does: `src/prediction/grid.py` still reads `config.cache_bytes`, which this branch
+  replaced, so `predict.py` does not run with this commit. Since 2026-11-26 mia-train (4b8dcca) reads each
+  volume's `format`, so a local volume can be predicted with miao v0.5.0 (`miao-pinned/c53052d`; not run
+  yet). A bucket volume needs this branch, and so waits for mia-train to move to `tensorstore_context`.
 - **Bucket check at the start of every job**: `check_buckets.py` reads the metadata of each bucket volume
   in the run's config, so a node that cannot reach a bucket fails at once.
 - **Stalled bucket requests**: since 2026-11-23 every job sets `TENSORSTORE_CURL_LOW_SPEED_TIME_SECONDS=60`

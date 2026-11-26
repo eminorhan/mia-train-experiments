@@ -54,6 +54,8 @@ Runs, job logs, predictions and probes land in `/nrs/scicompsoft/orhane/mia-trai
   faces, so the lattice covers every crop voxel. At 8 nm, 2-5 nm stores are read at pyramid level 1 or 2
   (mia-train's VolumeGrid). Scored with mia-evals `configs/<task>/identity.toml`.
 - **miao**: our fork pinned at 62b3746 (`label_fill`), first on `PYTHONPATH` in every job.
+  Since 2026-11-26 `score.sh` also predicts from a read-only copy of mia-train (5b3aac1, the last commit before
+  mia-train moved to miao 0.5.0). See "miao 0.5.0" in the repository README.
 
 ## Files
 

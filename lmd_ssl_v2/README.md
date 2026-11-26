@@ -59,6 +59,9 @@ Runs, job logs and probes land in `/nrs/scicompsoft/orhane/mia-train-experiments
 - **miao**: our fork (github.com/eminorhan/miao), pinned at commit 62b3746 and put first on
   `PYTHONPATH` by `submit.sh`. The labelled arms need three of its changes: `label_fill`, labels
   resampled at voxel centres (nearest-exact), and `label_margin`.
+  Since 2026-11-26 `score.sh` and `score_zebrafinch.sh` also predict from a read-only copy of mia-train
+  (5b3aac1, the last commit before mia-train moved to miao 0.5.0), and `score.sh` reads the task data from a
+  copy of mia-evals fb08d48. See "miao 0.5.0" in the repository README.
 
 ## Notes
 

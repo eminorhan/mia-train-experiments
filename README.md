@@ -24,6 +24,34 @@ is in that repo.
 - Each run directory records the mia-train commit it ran (`git_commit.txt`). It also keeps copies of the TOML and
   the data YAML.
 
+## miao 0.5.0 (since 2026-11-26)
+
+miao 0.5.0 names how a volume is stored with `format` (`zarr2`, `zarr3`, `n5`, `precomputed`) and refuses the
+earlier `zarr_version` key; an older miao refuses `format: zarr3`. A data config therefore loads on one side
+only. Since 2026-11-26 lmd-configs (46fe95a), mia-train (4b8dcca), mia-evals (9d6c9dc) and myvenv are on miao
+0.5.0.
+
+- **Experiments from before that date are records.** Their data configs keep the old format and were not
+  converted. The one exception is `mixed_local_cloud_data_reads`, whose data configs have said `format` since
+  2026-11-24.
+- **New work** uses read-only copies of the new code under `/nrs/scicompsoft/orhane/probes/`: miao
+  `miao-pinned/c53052d` and mia-train `mia-train-pinned/4b8dcca`.
+- **To run something from an older experiment**, use the code from before the change: the miao pin the
+  experiment names (else `miao-pinned/28229ac`, which myvenv held until then) and mia-train
+  `mia-train-pinned/5b3aac1`. Put `<miao>/src:<mia-train>/src` first on `PYTHONPATH` and `cd <mia-train>`
+  before `src/train.py` or `src/predict.py`. mia-evals' task data in the old format are in
+  `mia-evals-pinned/fb08d48/configs/`.
+- **Five scoring drivers predict that way** and score with the mia-evals checkout: `lmd_ssl_v1/predict_eval.sh`,
+  `lmd_ssl_v2/score.sh`, `lmd_ssl_v2/score_zebrafinch.sh`, `lmd_ssl_v2_cellmap/score.sh` and
+  `lm_zebrafish_cell_instance/score.sh`. They keep their miao and their data configs, so what they read does not
+  change: miao 0.5.0 would read the three CREMI volumes of `lmd_neuron_instance_v2` at another pyramid level.
+- **`gary_comparison/score.sh` and `large_inputs_nisb/score.sh`** name no pin and predict from mia-evals' task
+  data, so they run on the checkouts as they are.
+- **Any other script** that runs `src/train.py` or `src/predict.py` from the checkouts on an old-format data
+  config, with no miao pin, is refused by myvenv's miao. Run it as described above.
+- **`lmd_ssl_v3`** keeps its pins (mia-train 8af6a8f, miao 28229ac) and its data configs as they are until its
+  arms have finished.
+
 ## Experiments
 
 - [`attention_variants/`](attention_variants/): windowed and sliding-window attention in place of global attention: how much faster is a large-crop training step?

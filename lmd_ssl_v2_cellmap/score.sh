@@ -27,7 +27,10 @@
 #   job scripts   $EXP/jobs/eval/<time>_<arm>/, their logs beside them
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-MIA_TRAIN=/groups/scicompsoft/home/orhane/projects/mia-train
+# Prediction stays on the code from before the move to miao 0.5.0 (2026-11-26), as read-only copies: this
+# experiment's miao (4ef0d8c, below) and the last mia-train before the move (5b3aac1). They read
+# data/predict_*.yaml as they are. Scoring uses the mia-evals checkout.
+MIA_TRAIN=${MIA_TRAIN:-/nrs/scicompsoft/orhane/probes/mia-train-pinned/5b3aac1}
 EVALS=/groups/scicompsoft/home/orhane/projects/mia-evals
 VENV=/groups/scicompsoft/home/orhane/myvenv
 PROJECT=miaai
@@ -116,7 +119,7 @@ mkdir -p "\$TMPDIR"
 trap 'rm -rf "\$TMPDIR"' EXIT
 $VENV/bin/python -c "import miao; assert miao.__file__.startswith('$MIAO_SRC'), miao.__file__; print('[miao]', miao.__file__)"
 cd $MIA_TRAIN
-echo "[mia-train] \$(git rev-parse --short HEAD), uncommitted: \$(git status --short --untracked-files=no | tr '\n' ' ')"
+echo "[mia-train] $MIA_TRAIN"
 RUN=\$(ls -dt $PATTERN*/ | head -1); RUN=\${RUN%/}
 test -n "\$RUN"
 mkdir -p $art
